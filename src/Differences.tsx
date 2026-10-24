@@ -41,7 +41,15 @@ export const differences = [
     hint: "Where is Hermione sitting?",
     ru: "Гермиона сидит на полу / на диване: is sitting on the floor / on the sofa.",
   },
+  {
+    title: "Day or night?",
+    skill: "Time of day + comparison",
+    example: "In picture A, it is daytime, but in picture B, it is night.",
+    hint: "Look through the window. What time of day is it?",
+    ru: "В A день, в B ночь: daytime / night. За окном видны луна и звёзды.",
+  },
 ];
+export const differenceCount = differences.length;
 export const differenceSkills = [
   ["comparison", "Comparing pictures", "Сравнение с but, in picture A / B"],
   [
@@ -76,6 +84,7 @@ function Scene({
     isA
       ? { left: 75, top: 37, width: 24, height: 24 }
       : { left: 65, top: 21, width: 28, height: 25 },
+    { left: 10, top: 2, width: 32, height: 33 },
   ];
   return (
     <figure className="difference-figure">
@@ -85,7 +94,7 @@ function Scene({
       </figcaption>
       <div
         className="difference-scene"
-        aria-label={`Picture ${variant}: a school common room. Find five differences.`}
+        aria-label={`Picture ${variant}: a school common room. Find ${differenceCount} differences.`}
         style={{ backgroundPosition: isA ? "left center" : "right center" }}
       >
         {areas.map((area, i) => (
@@ -128,7 +137,7 @@ export default function Differences({
         (n): n is number =>
           Number.isInteger(n) &&
           n >= 0 &&
-          n < 5 &&
+          n < differenceCount &&
           (answers.differencesSceneVersion === 2 || n !== 4),
       )
     : [];
@@ -150,14 +159,16 @@ export default function Differences({
     <>
       <section className="panel difference-intro">
         <span className="eyebrow">BONUS CHALLENGE · A2–B1 · 5–7 MINUTES</span>
-        <h2>Find the Differences — Spot 5 Differences</h2>
+        <h2>Find the Differences — Spot {differenceCount} Differences</h2>
         <p>
-          Look at pictures A and B. Find five differences. Tap each one, then
-          tell your teacher!
+          Look at pictures A and B. Find {differenceCount} differences. Tap each
+          one, then tell your teacher!
         </p>
         <div className="difference-counter" role="status">
-          {found.length} / 5 differences found
-          {found.length === 5 ? " · Fantastic detective work!" : ""}
+          {found.length} / {differenceCount} differences found
+          {found.length === differenceCount
+            ? " · Fantastic detective work!"
+            : ""}
         </div>
         <p className="micro">
           Use “but” to compare. Tap the matching area in either picture. You can
@@ -175,7 +186,7 @@ export default function Differences({
           <summary>Help me with words</summary>
           <p>
             eating · drinking · apple · water · books · a cup of tea · ball ·
-            Hermione · floor · sofa
+            Hermione · floor · sofa · daytime · night · moon · stars
           </p>
           <p>
             on · under · sitting on the floor · sitting on the sofa · there is ·
@@ -190,7 +201,7 @@ export default function Differences({
               onAnswer(`differenceAttempt${i}`, false);
               onAnswer(`differenceExample${i}`, false);
             });
-            setMessage("Look again! Can you find all five?");
+            setMessage(`Look again! Can you find all ${differenceCount}?`);
           }}
         >
           Find them again

@@ -400,17 +400,17 @@ test("teacher sees transcripts for every audio and each round", async ({
   await expect(page.getByTestId("audio-transcript")).toHaveCount(0);
 });
 
-test("spot five differences, oral examples, teacher grades and persistence", async ({
+test("spot six differences, oral examples, teacher grades and persistence", async ({
   page,
 }) => {
   await page.goto("/");
   await stage(page, 11);
   await expect(
     page.getByRole("heading", {
-      name: "Find the Differences — Spot 5 Differences",
+      name: "Find the Differences — Spot 6 Differences",
     }),
   ).toBeVisible();
-  await expect(page.locator(".difference-counter")).toContainText("0 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("0 / 6");
   await expect(page.locator(".difference-scene").first()).toHaveCSS(
     "opacity",
     "1",
@@ -427,14 +427,14 @@ test("spot five differences, oral examples, teacher grades and persistence", asy
     "background-position",
     "100% 50%",
   );
-  await expect(page.locator(".difference-hotspot")).toHaveCount(10);
+  await expect(page.locator(".difference-hotspot")).toHaveCount(12);
   await page
     .getByRole("button", { name: "Compare area 1 in picture A", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Compare area 1 in picture B", exact: true })
     .click();
-  await expect(page.locator(".difference-counter")).toContainText("1 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("1 / 6");
   const card = page.locator(".difference-answer").first();
   await expect(
     card.getByRole("button", { name: "Show example" }),
@@ -444,32 +444,32 @@ test("spot five differences, oral examples, teacher grades and persistence", asy
   await expect(card.locator(".quote")).toContainText(
     "Ron is eating an apple, but in picture B, he is drinking water.",
   );
-  for (let i = 2; i <= 5; i++)
+  for (let i = 2; i <= 6; i++)
     await page
       .getByRole("button", {
         name: `Compare area ${i} in picture A`,
         exact: true,
       })
       .click();
-  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
-  await expect(page.locator(".difference-hotspot.found")).toHaveCount(10);
+  await expect(page.locator(".difference-counter")).toContainText("6 / 6");
+  await expect(page.locator(".difference-hotspot.found")).toHaveCount(12);
   await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
   for (const r of await page.locator(".rating").all())
     await r
       .getByRole("button", { name: "Answered independently", exact: true })
       .click();
   await page.reload();
-  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("6 / 6");
   await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
   await expect(page.locator(".rating button.chosen")).toHaveCount(4);
   await page.getByRole("button", { name: "Next", exact: true }).click();
-  await expect(page.getByText("Найдено: 5/5.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Найдено: 6/6.", { exact: false })).toBeVisible();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download results (PDF)" }).click();
   expect(await (await download).failure()).toBeNull();
   await stage(page, 11);
   await page.getByRole("button", { name: "Find them again" }).click();
-  await expect(page.locator(".difference-counter")).toContainText("0 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("0 / 6");
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
@@ -546,7 +546,7 @@ test("revised fifth difference preserves four discoveries and teaches floor vers
     );
   });
   await page.goto("/");
-  await expect(page.locator(".difference-counter")).toContainText("4 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("4 / 6");
   const card = page.locator(".difference-answer").nth(4);
   await expect(card.getByRole("button", { name: "Show example" })).toHaveCount(
     0,
@@ -554,7 +554,7 @@ test("revised fifth difference preserves four discoveries and teaches floor vers
   await page
     .getByRole("button", { name: "Compare area 5 in picture B", exact: true })
     .click();
-  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
+  await expect(page.locator(".difference-counter")).toContainText("5 / 6");
   await expect(
     card.getByRole("button", { name: "Show example" }),
   ).toBeDisabled();
@@ -566,5 +566,53 @@ test("revised fifth difference preserves four discoveries and teaches floor vers
   await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
   await expect(card.locator(".teacher-note")).toContainText(
     "Гермиона сидит на полу / на диване",
+  );
+});
+
+test("day and night is a sixth difference and preserves earlier finds", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("hogwarts-english-v1"))
+      localStorage.setItem(
+        "hogwarts-english-v1",
+        JSON.stringify({
+          version: 2,
+          data: {
+            step: 11,
+            name: "Alice",
+            answers: {
+              differencesFound: [0, 1, 2, 3, 4],
+              differencesSceneVersion: 2,
+            },
+            scores: {},
+            ratings: {},
+          },
+        }),
+      );
+  });
+  await page.goto("/");
+  await expect(page.locator(".difference-counter")).toContainText("5 / 6");
+  await page
+    .getByRole("button", { name: "Compare area 6 in picture B", exact: true })
+    .click();
+  await expect(page.locator(".difference-counter")).toContainText("6 / 6");
+  const card = page.locator(".difference-answer").nth(5);
+  await expect(
+    card.getByRole("heading", { name: "6. Day or night?" }),
+  ).toBeVisible();
+  await expect(
+    card.getByRole("button", { name: "Show example" }),
+  ).toBeDisabled();
+  await card.getByRole("button", { name: "I have tried!" }).click();
+  await card.getByRole("button", { name: "Show example" }).click();
+  await expect(card.locator(".quote")).toHaveText(
+    "In picture A, it is daytime, but in picture B, it is night.",
+  );
+  await page.reload();
+  await expect(page.locator(".difference-counter")).toContainText("6 / 6");
+  await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
+  await expect(card.locator(".teacher-note")).toContainText(
+    "В A день, в B ночь",
   );
 });

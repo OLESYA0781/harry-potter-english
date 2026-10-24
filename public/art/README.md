@@ -8,4 +8,4 @@ Original generated artwork for this educational project, in a consistent warm ci
 
 CSS displays individual cells using background positions, preserving aspect ratio. Emoji in lesson data are stable internal tokens for saved answers; `ArtIcon` and `IllustratedText` render them as illustrations, not platform-dependent emoji glyphs. Rendering changes must preserve existing localStorage identifiers and scoring logic.
 
-- `differences.webp`: two side-by-side finished square common-room illustrations with fully opaque RGB backgrounds. Five differences: Ron’s action, book count, ball location, cup presence, and Hermione sitting on the floor / on the sofa. Notebook and pencil are identical distractors. Interactive regions are mapped in `src/Differences.tsx`.
+- `differences.webp`: two side-by-side finished square common-room illustrations with fully opaque RGB backgrounds. Six differences: Ron’s action, book count, ball location, cup presence, Hermione sitting on the floor / on the sofa, and daytime / nighttime through the window. Notebook and pencil are identical distractors. Interactive regions are mapped in `src/Differences.tsx`.

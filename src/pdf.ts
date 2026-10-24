@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import { diagnose } from "./data";
-import { differenceSkills } from "./Differences";
+import { differenceSkills, differenceCount } from "./Differences";
 import type { LessonState } from "./data";
 function safeName(name: string) {
   return name.replace(/[^\x20-\x7E]/g, "").trim() || "Young wizard";
@@ -119,7 +119,7 @@ export async function downloadPDF(state: LessonState, certificate = false) {
     doc.text("Find the Differences - A2-B1 bonus", 22, 30);
     doc.setFontSize(12);
     doc.text(
-      `Differences spotted: ${Array.isArray(state.answers.differencesFound) ? state.answers.differencesFound.length : 0}/5`,
+      `Differences spotted: ${Array.isArray(state.answers.differencesFound) ? state.answers.differencesFound.length : 0}/${differenceCount}`,
       22,
       48,
     );

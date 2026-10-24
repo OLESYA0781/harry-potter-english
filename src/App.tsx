@@ -30,7 +30,7 @@ import {
 import type { LessonState, Skill } from "./data";
 import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "./Art";
 import { Choice, Match, Order } from "./components";
-import Differences, { differenceSkills } from "./Differences";
+import Differences, { differenceSkills, differenceCount } from "./Differences";
 
 const storageKey = "hogwarts-english-v1";
 function load(): LessonState {
@@ -69,7 +69,7 @@ const notes = [
   "Аудирование · 3 минуты. Дайте прослушать запись 1–2 раза. Не открывайте текст до попытки. Ответы: Ron, Harry, Hermione, Hagrid, Dumbledore. Если синтеза речи нет, прочитайте текст сами.",
   "Лексика · 3 минуты. Попросите назвать предметы и сформулировать There is / There are. Оцениваются три набора и два предложения.",
   "Связный рассказ · 3 минуты. Дайте ребёнку время составить 4–5 предложений. Оцените самостоятельность и связь предложений.",
-  "Дополнительное задание A2–B1 · 5–7 минут. Найдите пять отличий: яблоко/вода у Рона; три/две книги; мяч под/на столе; чашка есть/нет; Гермиона сидит на полу/на диване. Оценивайте устное сравнение и грамматику отдельно от основной диагностики.",
+  "Дополнительное задание A2–B1 · 5–7 минут. Найдите шесть отличий: яблоко/вода у Рона; три/две книги; мяч под/на столе; чашка есть/нет; Гермиона сидит на полу/на диване; в A день, в B ночь. Оценивайте устное сравнение и грамматику отдельно от основной диагностики.",
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
 export default function App() {
@@ -1305,7 +1305,8 @@ export default function App() {
                           {Array.isArray(state.answers.differencesFound)
                             ? state.answers.differencesFound.length
                             : 0}
-                          /5. Оценки не входят в основной уровень A1–A2.
+                          /{differenceCount}. Оценки не входят в основной
+                          уровень A1–A2.
                         </p>
                         {differenceSkills.map(([id, title]) => (
                           <p key={id}>

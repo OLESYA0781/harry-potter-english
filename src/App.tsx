@@ -207,6 +207,10 @@ export default function App() {
   };
   const stars = Object.values(state.scores).filter((s) => s.correct).length;
   const diagnosis = diagnose(state);
+  const bagAudioText = `Put ${bags[bagRound]
+    .map((item) => `${item === "apple" ? "an" : "a"} ${item}`)
+    .join(", ")
+    .replace(/, ([^,]+)$/, " and $1")} in my school bag!`;
   async function pdf(cert = false) {
     setExporting(true);
     try {
@@ -765,6 +769,17 @@ export default function App() {
                       Stop
                     </button>
                   </div>
+                  {teacher && (
+                    <section
+                      className="teacher-note audio-transcript"
+                      data-testid="audio-transcript"
+                    >
+                      <strong>
+                        Текст аудио для преподавателя · Hermione’s School Day
+                      </strong>
+                      <p style={{ whiteSpace: "pre-line" }}>{diary}</p>
+                    </section>
+                  )}
                   <p className="micro">
                     Read aloud to your teacher. Tap a sentence when you finish
                     it.
@@ -989,11 +1004,14 @@ export default function App() {
                     </p>
                   )}
                   {teacher && (
-                    <details className="teacher-note">
-                      <summary>Текст и ответ для преподавателя</summary>
+                    <section
+                      className="teacher-note audio-transcript"
+                      data-testid="audio-transcript"
+                    >
+                      <strong>Текст и ответ для преподавателя</strong>
                       <p>{listening[round].text}</p>
-                      <strong>{listening[round].answer}</strong>
-                    </details>
+                      <span>Ответ: {listening[round].answer}</span>
+                    </section>
                   )}
                   <div className="round-controls">
                     <button
@@ -1020,27 +1038,21 @@ export default function App() {
                     PACKING CHALLENGE {bagRound + 1} OF 3
                   </span>
                   <h2>What’s in my school bag?</h2>
-                  <p className="quote">
-                    Put{" "}
-                    {bags[bagRound]
-                      .map(
-                        (item, i) =>
-                          `${i === 2 ? "and " : ""}a${item === "apple" ? "n" : ""} ${item}`,
-                      )
-                      .join(", ")
-                      .replace(", and", " and")}{" "}
-                    in my school bag!
-                  </p>
-                  <button
-                    className="pill"
-                    onClick={() =>
-                      speak(
-                        `Put ${bags[bagRound].join(", ")} in my school bag.`,
-                      )
-                    }
-                  >
+                  <p className="quote">{bagAudioText}</p>
+                  <button className="pill" onClick={() => speak(bagAudioText)}>
                     Listen to Hermione
                   </button>
+                  {teacher && (
+                    <section
+                      className="teacher-note audio-transcript"
+                      data-testid="audio-transcript"
+                    >
+                      <strong>
+                        Текст аудио для преподавателя · Bag {bagRound + 1}
+                      </strong>
+                      <p>{bagAudioText}</p>
+                    </section>
+                  )}
                   <Match
                     bag
                     sources={items.map(([id, emoji]) => ({

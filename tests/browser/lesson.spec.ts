@@ -352,3 +352,45 @@ test("all illustrated chapters load local artwork without system emoji", async (
     fullPage: true,
   });
 });
+
+test("teacher sees transcripts for every audio and each round", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await stage(page, 8);
+  await expect(page.getByTestId("audio-transcript")).toHaveCount(0);
+  await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
+  const clues = [
+    "I have got red hair. I like eating sandwiches.",
+    "I have got glasses and a scar. I am brave.",
+    "I am a girl. I like Maths and reading.",
+    "I am big and friendly. I like animals.",
+    "I have got a long white beard. I am the head teacher.",
+  ];
+  for (const [i, text] of clues.entries()) {
+    await expect(page.getByTestId("audio-transcript")).toContainText(text);
+    await expect(page.getByTestId("audio-transcript")).toBeVisible();
+    if (i < 4) await page.getByRole("button", { name: "Next clue" }).click();
+  }
+  await stage(page, 4);
+  await expect(page.getByTestId("audio-transcript")).toContainText(
+    "Hello! My name is Hermione.",
+  );
+  await expect(page.getByTestId("audio-transcript")).toContainText(
+    "I love my school days because I can learn and see my friends!",
+  );
+  await stage(page, 9);
+  for (const [i, text] of [
+    "Put a book, a pencil and an apple in my school bag!",
+    "Put a pen, a ruler and a notebook in my school bag!",
+    "Put a sandwich, a phone and a ball in my school bag!",
+  ].entries()) {
+    await page
+      .getByRole("button", { name: `Bag ${i + 1}`, exact: true })
+      .click();
+    await expect(page.getByTestId("audio-transcript")).toContainText(text);
+    await expect(page.locator(".quote")).toHaveText(text);
+  }
+  await page.getByRole("button", { name: "Exit teacher mode" }).click();
+  await expect(page.getByTestId("audio-transcript")).toHaveCount(0);
+});

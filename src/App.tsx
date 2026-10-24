@@ -34,6 +34,8 @@ import Differences, { differenceSkills, differenceCount } from "./Differences";
 
 import GrammarChallenge, { GrammarReport } from "./GrammarChallenge";
 
+import CommonRoomScene from "./CommonRoomScene";
+
 const storageKey = "hogwarts-english-v1";
 function load(): LessonState {
   try {
@@ -663,34 +665,14 @@ export default function App() {
               )}
               {state.step === 3 && (
                 <>
-                  <section className="common-room">
-                    <div className="room-decor">
-                      <span>✧ THE COMMON ROOM ✧</span>
-                      <span className="room-books">
-                        <ArtIcon name="books" />
-                      </span>
-                    </div>
-                    <div className="room-people">
-                      {people.map((p, i) => (
-                        <button
-                          key={p}
-                          className={
-                            activePerson === i
-                              ? "person active-person"
-                              : "person"
-                          }
-                          onClick={() => {
-                            setActivePerson(i);
-                            setAttempt(false);
-                            setShowAnswer(false);
-                          }}
-                        >
-                          <Character name={p} action />
-                          <span>{p}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </section>
+                  <CommonRoomScene
+                    activePerson={activePerson}
+                    onSelect={(i) => {
+                      setActivePerson(i);
+                      setAttempt(false);
+                      setShowAnswer(false);
+                    }}
+                  />
                   <section className="panel">
                     <h2>What is {people[activePerson]} doing?</h2>
                     <p>Look at the picture. Tell your teacher.</p>

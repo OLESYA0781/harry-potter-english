@@ -2650,3 +2650,120 @@ footer > div {
     max-width: 90%;
   }
 }
+/* One opaque common-room illustration, with six interactive character regions. */
+.room-illustration {
+  padding: 17px;
+  background: #fffbf1;
+  border: 1px solid #d7c39d;
+  border-radius: 15px;
+  margin-bottom: 24px;
+  box-shadow: 0 5px 20px #4d331412;
+  min-width: 0;
+}
+.room-illustration-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.room-illustration > .micro {
+  margin: 6px 0 13px;
+}
+.room-panorama {
+  overflow: auto;
+  max-width: 100%;
+  border: 3px solid #967044;
+  border-radius: 11px;
+  background: #6b4229;
+  scrollbar-color: #b6975f #eee4ce;
+}
+.room-scene {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  isolation: isolate;
+}
+.room-scene.zoomed {
+  width: 160%;
+  min-width: 1000px;
+}
+.room-scene > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3/2;
+  opacity: 1;
+  mix-blend-mode: normal;
+  user-select: none;
+}
+.room-character-hotspot {
+  position: absolute;
+  border: 2px solid transparent;
+  background: transparent;
+  border-radius: 18px;
+  z-index: 2;
+  padding: 0;
+  touch-action: manipulation;
+  min-width: 0;
+  min-height: 0;
+}
+.room-character-hotspot:hover,
+.room-character-hotspot:focus-visible {
+  border-color: #f4d887;
+  background: #e2be5f12;
+  outline-offset: -3px;
+}
+.room-character-hotspot.selected {
+  border-color: #f4dc92;
+  box-shadow:
+    0 0 0 2px #8b631e55,
+    inset 0 0 12px #f4d88722;
+}
+.room-character-hotspot > span {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff5dce8;
+  box-shadow: 0 2px 6px #251a1240;
+  border: 1px solid #bb9b5d;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #664c2d;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.room-character-hotspot:not(.selected) > span {
+  opacity: 0;
+}
+.room-character-hotspot:hover > span,
+.room-character-hotspot:focus-visible > span {
+  opacity: 1;
+}
+@media (max-width: 600px) {
+  .room-illustration {
+    padding: 10px;
+  }
+  .room-panorama {
+    border-width: 2px;
+    border-radius: 8px;
+  }
+  .room-illustration-heading .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .room-illustration-heading .pill {
+    padding: 9px 11px;
+  }
+  .room-character-hotspot {
+    border-radius: 10px;
+  }
+  .room-character-hotspot > span {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+  .room-scene.zoomed {
+    min-width: 900px;
+  }
+}

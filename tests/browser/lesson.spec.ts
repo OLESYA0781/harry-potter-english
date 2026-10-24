@@ -616,3 +616,92 @@ test("day and night is a sixth difference and preserves earlier finds", async ({
     "В A день, в B ночь",
   );
 });
+
+test("common room is one opaque group picture and all six characters remain interactive", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await stage(page, 3);
+  const image = page.locator(".room-scene>img");
+  await expect(image).toHaveCount(1);
+  await expect(image).toBeVisible();
+  await expect(image).toHaveCSS("opacity", "1");
+  await expect(image).toHaveCSS("mix-blend-mode", "normal");
+  expect(
+    await image.evaluate(
+      (img: HTMLImageElement) => img.complete && img.naturalWidth > 1000,
+    ),
+  ).toBe(true);
+  await expect(page.locator(".room-illustration .character-art")).toHaveCount(
+    0,
+  );
+  const names = ["Harry", "Hermione", "Ron", "Draco", "Hagrid", "Dumbledore"];
+  const actions = [
+    "drinking tea",
+    "reading a book",
+    "eating a sandwich",
+    "playing with a ball",
+    "sleeping on a sofa",
+    "writing a letter",
+  ];
+  for (const [i, name] of names.entries()) {
+    const button = page.getByRole("button", {
+      name: `Choose ${name} in the common room`,
+      exact: true,
+    });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      page.getByRole("heading", {
+        name: `What is ${name} doing?`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Show answer", exact: true }),
+    ).toBeDisabled();
+    await page
+      .getByRole("button", { name: "I have tried!", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Show answer", exact: true })
+      .click();
+    await expect(page.locator(".panel > .quote")).toHaveText(
+      `${name} is ${actions[i]}.`,
+    );
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await expect(page.locator(".room-scene")).toHaveClass("room-scene zoomed");
+  expect(
+    await page
+      .locator(".room-panorama")
+      .evaluate((e) => e.scrollWidth > e.clientWidth),
+  ).toBe(true);
+  await page
+    .getByRole("button", {
+      name: "Choose Dumbledore in the common room",
+      exact: true,
+    })
+    .click();
+  await page.getByRole("button", { name: "Zoom out", exact: true }).click();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "/tmp/common-room-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1080 });
+  await page.screenshot({
+    path: "/tmp/common-room-desktop.png",
+    fullPage: true,
+  });
+});

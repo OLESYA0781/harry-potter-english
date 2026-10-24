@@ -170,6 +170,7 @@ export const stages = [
   ["Mystery voices", "Listen. Think. Discover.", "🎧"],
   ["The school bag", "Pack a little knowledge", "🎒"],
   ["My magic day", "Your very own story", "🌤️"],
+  ["Find the differences", "Spot 5 Differences · A2–B1", "🔎"],
   ["Congratulations!", "Every little step is magic", "🏆"],
 ];
 export type Skill =

@@ -2263,3 +2263,241 @@ footer > div {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
+/* Two coordinated pictures: the same scene and only five changed regions. */
+.difference-intro h2 {
+  font-size: 32px;
+  margin-top: 16px;
+}
+.difference-counter {
+  display: inline-flex;
+  background: #e8eddb;
+  border: 1px solid #c9d4b3;
+  color: #547043;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin: 3px 0 12px;
+}
+.differences-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 22px 0;
+}
+.difference-figure {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid #d6c29e;
+  border-radius: 13px;
+  overflow: hidden;
+  box-shadow: 0 5px 14px #4c3b1710;
+}
+.difference-figure figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 15px;
+  background: #ede3cb;
+  color: #664e2e;
+}
+.difference-figure figcaption strong {
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: normal;
+}
+.difference-figure figcaption > span {
+  font-size: 10px;
+}
+.difference-scene {
+  position: relative;
+  aspect-ratio: 1;
+  background: #faf4e7;
+  isolation: isolate;
+  overflow: hidden;
+}
+.difference-scene:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/art/environments.webp");
+  background-size: 200% 100%;
+  background-position: right center;
+  opacity: 0.16;
+  z-index: -1;
+}
+.difference-sprite {
+  position: absolute;
+  display: block;
+  background-image: url("/art/differences.webp");
+  background-size: 200% 200%;
+  aspect-ratio: 1;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.difference-ron {
+  left: 0;
+  top: 26%;
+  width: 39%;
+  z-index: 2;
+}
+.difference-table {
+  left: 34%;
+  top: 32%;
+  width: 65%;
+  z-index: 3;
+}
+.difference-scene > .character-art {
+  position: absolute;
+  left: 57%;
+  top: 22%;
+  width: 30%;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+.difference-scene .difference-prop {
+  position: absolute;
+  z-index: 4;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  width: 11%;
+  height: auto;
+}
+.difference-book {
+  top: 43%;
+  transform: rotate(-8deg);
+}
+.book-0 {
+  left: 51%;
+}
+.book-1 {
+  left: 61%;
+}
+.book-2 {
+  left: 71%;
+}
+.difference-scene .difference-ball {
+  width: 14%;
+}
+.ball-under {
+  left: 74%;
+  top: 77%;
+}
+.ball-on {
+  left: 83%;
+  top: 42%;
+}
+.difference-scene .difference-tea {
+  left: 38%;
+  top: 38%;
+  width: 13%;
+}
+.difference-scene .difference-notebook {
+  left: 12%;
+  top: 77%;
+  width: 17%;
+}
+.difference-scene .difference-pencil {
+  top: 79%;
+  width: 8%;
+}
+.pencil-left {
+  left: 3%;
+}
+.pencil-right {
+  left: 30%;
+}
+.difference-hotspot {
+  position: absolute;
+  z-index: 6;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: none;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  touch-action: manipulation;
+}
+.difference-hotspot:hover,
+.difference-hotspot:focus-visible {
+  border-color: #bea04a;
+  background: #cbae4e18;
+}
+.difference-hotspot.found {
+  border-color: #789a5b;
+  background: #8dad5812;
+}
+.difference-hotspot > span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0 0 7px 0;
+  background: #648448;
+  color: #fffce9;
+  font-size: 11px;
+  padding: 3px 6px;
+  box-shadow: 0 2px 7px #0002;
+}
+.difference-language {
+  padding: 15px 18px;
+  border: 1px solid #ded8bf;
+  border-radius: 8px;
+  color: #60714e;
+  margin: 15px 0;
+}
+.difference-language summary {
+  cursor: pointer;
+  font-size: 13px;
+}
+.difference-language p {
+  font-size: 13px;
+  margin: 12px 0 0;
+}
+.difference-answer {
+  padding: 24px 0;
+  border-bottom: 1px solid #e8dfca;
+}
+.difference-answer h3 {
+  color: #8d9079;
+}
+.difference-answer.discovered h3 {
+  color: #456441;
+}
+.difference-answer > p {
+  font-size: 14px;
+}
+.difference-intro .feedback {
+  min-height: 22px;
+}
+@media (max-width: 1150px) {
+  .differences-pair {
+    grid-template-columns: 1fr;
+  }
+  .difference-scene {
+    max-height: none;
+  }
+  .difference-intro h2 {
+    font-size: 29px;
+  }
+}
+@media (max-width: 600px) {
+  .difference-intro h2 {
+    font-size: 27px;
+  }
+  .difference-figure figcaption {
+    padding: 10px 12px;
+  }
+  .difference-figure figcaption strong {
+    font-size: 20px;
+  }
+  .differences-pair {
+    gap: 16px;
+  }
+  .difference-hotspot > span {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  .difference-counter {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}

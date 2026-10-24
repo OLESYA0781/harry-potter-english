@@ -30,6 +30,7 @@ import {
 import type { LessonState, Skill } from "./data";
 import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "./Art";
 import { Choice, Match, Order } from "./components";
+import Differences, { differenceSkills } from "./Differences";
 
 const storageKey = "hogwarts-english-v1";
 function load(): LessonState {
@@ -37,16 +38,20 @@ function load(): LessonState {
     const s = JSON.parse(localStorage.getItem(storageKey) || "null");
     if (
       s &&
-      s.version === 1 &&
+      (s.version === 1 || s.version === 2) &&
       Number.isInteger(s.data?.step) &&
       s.data.step >= 0 &&
-      s.data.step < 12 &&
+      s.data.step < (s.version === 1 ? stages.length - 1 : stages.length) &&
       typeof s.data.name === "string" &&
       s.data.answers &&
       s.data.scores &&
       s.data.ratings
     )
-      return s.data;
+      return {
+        ...s.data,
+        step:
+          s.version === 1 && s.data.step >= 11 ? s.data.step + 1 : s.data.step,
+      };
   } catch {
     /* A new session is safe if storage is unavailable. */
   }
@@ -64,6 +69,7 @@ const notes = [
   "Аудирование · 3 минуты. Дайте прослушать запись 1–2 раза. Не открывайте текст до попытки. Ответы: Ron, Harry, Hermione, Hagrid, Dumbledore. Если синтеза речи нет, прочитайте текст сами.",
   "Лексика · 3 минуты. Попросите назвать предметы и сформулировать There is / There are. Оцениваются три набора и два предложения.",
   "Связный рассказ · 3 минуты. Дайте ребёнку время составить 4–5 предложений. Оцените самостоятельность и связь предложений.",
+  "Дополнительное задание A2–B1 · 5–7 минут. Найдите пять отличий: яблоко/вода у Рона; три/две книги; мяч под/на столе; чашка есть/нет; карандаш слева/справа от тетради. Оценивайте устное сравнение и грамматику отдельно от основной диагностики.",
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
 export default function App() {
@@ -86,7 +92,7 @@ export default function App() {
     try {
       localStorage.setItem(
         storageKey,
-        JSON.stringify({ version: 1, data: state }),
+        JSON.stringify({ version: 2, data: state }),
       );
       setStorageError(false);
     } catch {
@@ -161,7 +167,10 @@ export default function App() {
     window.speechSynthesis.speak(u);
   }
   function navigate(step: number) {
-    setState((s) => ({ ...s, step: Math.max(0, Math.min(11, step)) }));
+    setState((s) => ({
+      ...s,
+      step: Math.max(0, Math.min(stages.length - 1, step)),
+    }));
   }
   function rating(id: string) {
     return teacher ? (
@@ -317,7 +326,9 @@ export default function App() {
         <div className="progress-top">
           <div>
             <span>YOUR ADVENTURE</span>
-            <span>{state.step + 1} of 12 chapters</span>
+            <span>
+              {state.step + 1} of {stages.length} chapters
+            </span>
           </div>
           <div
             className="progress-track"
@@ -325,9 +336,11 @@ export default function App() {
             aria-label="Lesson chapter"
             aria-valuenow={state.step + 1}
             aria-valuemin={1}
-            aria-valuemax={12}
+            aria-valuemax={stages.length}
           >
-            <i style={{ width: `${((state.step + 1) / 12) * 100}%` }} />
+            <i
+              style={{ width: `${((state.step + 1) / stages.length) * 100}%` }}
+            />
           </div>
         </div>
         <main key={state.step}>
@@ -339,9 +352,10 @@ export default function App() {
               </strong>
               <p>{notes[state.step]}</p>
               <small>
-                Первый ответ используется в диагностике; повторные попытки
-                приносят звёзды. Режим предназначен для совместного урока, без
-                пароля.
+                {state.step === 11
+                  ? "Дополнительное задание оценивается отдельно от основной диагностики A1–A2."
+                  : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
+                Режим предназначен для совместного урока, без пароля.
               </small>
             </aside>
           )}
@@ -1162,6 +1176,15 @@ export default function App() {
                 </section>
               )}
               {state.step === 11 && (
+                <Differences
+                  teacher={teacher}
+                  answers={state.answers}
+                  ratings={state.ratings}
+                  onAnswer={save}
+                  onRate={rate}
+                />
+              )}
+              {state.step === 12 && (
                 <>
                   <section className="panel congratulations">
                     <div className="trophy">
@@ -1273,6 +1296,30 @@ export default function App() {
                           ответы и короткие самостоятельные истории.
                         </p>
                       )}
+                      <aside className="teacher-note">
+                        <strong>
+                          Дополнительное задание · Find the Differences · A2–B1
+                        </strong>
+                        <p>
+                          Найдено:{" "}
+                          {Array.isArray(state.answers.differencesFound)
+                            ? state.answers.differencesFound.length
+                            : 0}
+                          /5. Оценки не входят в основной уровень A1–A2.
+                        </p>
+                        {differenceSkills.map(([id, title]) => (
+                          <p key={id}>
+                            {title}:{" "}
+                            {state.ratings[`difference-${id}`] === undefined
+                              ? "Не оценено"
+                              : [
+                                  "Не смог ответить",
+                                  "С помощью",
+                                  "Самостоятельно",
+                                ][state.ratings[`difference-${id}`]]}
+                          </p>
+                        ))}
+                      </aside>
                       <button
                         className="btn"
                         disabled={exporting}
@@ -1316,7 +1363,7 @@ export default function App() {
             >
               <RotateCcw size={14} /> Restart
             </button>
-            {state.step < 11 && (
+            {state.step < stages.length - 1 && (
               <button
                 className="btn small"
                 onClick={() => navigate(state.step + 1)}

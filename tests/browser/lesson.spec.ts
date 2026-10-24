@@ -109,7 +109,7 @@ test("listening hides scripts, teacher ratings and both PDF downloads", async ({
     .first()
     .getByRole("button", { name: "Answered independently" })
     .click();
-  await stage(page, 11);
+  await stage(page, 12);
   await expect(page.getByText("Недостаточно данных")).toBeVisible();
   await page.getByPlaceholder("Your name", { exact: true }).fill("Алиса");
   for (const label of ["Download certificate", "Download results (PDF)"]) {
@@ -145,13 +145,13 @@ test("all chapters render without browser errors; responsive layout", async ({
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 13; i++) {
     await stage(page, i);
     await expect(page.locator("main")).not.toBeEmpty();
   }
   expect(errors).toEqual([]);
   await page.setViewportSize({ width: 390, height: 844 });
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 13; i++) {
     await page.getByRole("combobox").selectOption(String(i));
     expect(
       await page.evaluate(
@@ -303,7 +303,7 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
   await page
     .getByRole("button", { name: "Answered independently", exact: true })
     .click();
-  await stage(page, 11);
+  await stage(page, 12);
   await expect(page.getByText("Предварительный уровень:")).toContainText("A2");
   await expect(page.locator(".final-stars strong")).toHaveText("37");
 });
@@ -312,13 +312,18 @@ test("all illustrated chapters load local artwork without system emoji", async (
   page,
 }) => {
   await page.goto("/");
-  for (const asset of ["characters", "objects", "environments"]) {
+  for (const asset of [
+    "characters",
+    "objects",
+    "environments",
+    "differences",
+  ]) {
     const response = await page.request.get(`/art/${asset}.webp`);
     expect(response.ok()).toBe(true);
     expect(response.headers()["content-type"]).toContain("image/webp");
     expect((await response.body()).length).toBeGreaterThan(10000);
   }
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 13; i++) {
     await stage(page, i);
     const visibleText = await page.locator("main").innerText();
     expect(visibleText).not.toMatch(/\p{Extended_Pictographic}/u);
@@ -393,4 +398,122 @@ test("teacher sees transcripts for every audio and each round", async ({
   }
   await page.getByRole("button", { name: "Exit teacher mode" }).click();
   await expect(page.getByTestId("audio-transcript")).toHaveCount(0);
+});
+
+test("spot five differences, oral examples, teacher grades and persistence", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await stage(page, 11);
+  await expect(
+    page.getByRole("heading", {
+      name: "Find the Differences — Spot 5 Differences",
+    }),
+  ).toBeVisible();
+  await expect(page.locator(".difference-counter")).toContainText("0 / 5");
+  await expect(
+    page.locator(".difference-figure").first().locator(".difference-book"),
+  ).toHaveCount(3);
+  await expect(
+    page.locator(".difference-figure").nth(1).locator(".difference-book"),
+  ).toHaveCount(2);
+  await expect(
+    page.locator(".difference-figure").first().locator(".difference-tea"),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(".difference-figure").nth(1).locator(".difference-tea"),
+  ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Compare area 1 in picture A", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Compare area 1 in picture B", exact: true })
+    .click();
+  await expect(page.locator(".difference-counter")).toContainText("1 / 5");
+  const card = page.locator(".difference-answer").first();
+  await expect(
+    card.getByRole("button", { name: "Show example" }),
+  ).toBeDisabled();
+  await card.getByRole("button", { name: "I have tried!" }).click();
+  await card.getByRole("button", { name: "Show example" }).click();
+  await expect(card.locator(".quote")).toContainText(
+    "Ron is eating an apple, but in picture B, he is drinking water.",
+  );
+  for (let i = 2; i <= 5; i++)
+    await page
+      .getByRole("button", {
+        name: `Compare area ${i} in picture A`,
+        exact: true,
+      })
+      .click();
+  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
+  await expect(page.locator(".difference-hotspot.found")).toHaveCount(10);
+  await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
+  for (const r of await page.locator(".rating").all())
+    await r
+      .getByRole("button", { name: "Answered independently", exact: true })
+      .click();
+  await page.reload();
+  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
+  await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
+  await expect(page.locator(".rating button.chosen")).toHaveCount(4);
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("Найдено: 5/5.", { exact: false })).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download results (PDF)" }).click();
+  expect(await (await download).failure()).toBeNull();
+  await stage(page, 11);
+  await page.getByRole("button", { name: "Find them again" }).click();
+  await expect(page.locator(".difference-counter")).toContainText("0 / 5");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "/tmp/english-differences-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1080 });
+  await page.screenshot({
+    path: "/tmp/english-differences-desktop.png",
+    fullPage: true,
+  });
+});
+test("existing saved lesson results migrate to the new final chapter", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("hogwarts-english-v1"))
+      localStorage.setItem(
+        "hogwarts-english-v1",
+        JSON.stringify({
+          version: 1,
+          data: {
+            step: 11,
+            name: "Alice",
+            answers: { mood: "Happy!" },
+            scores: {
+              grammar0: { correct: true, first: true, skill: "Grammar" },
+            },
+            ratings: { reading: 2 },
+          },
+        }),
+      );
+  });
+  await page.goto("/");
+  await expect(page.locator(".congratulations")).toBeVisible();
+  await expect(page.getByPlaceholder("Your name", { exact: true })).toHaveValue(
+    "Alice",
+  );
+  const stored = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("hogwarts-english-v1")!),
+  );
+  expect(stored.version).toBe(2);
+  expect(stored.data.step).toBe(12);
+  expect(stored.data.scores.grammar0.correct).toBe(true);
+  expect(stored.data.ratings.reading).toBe(2);
+  await page.reload();
+  await expect(page.locator(".congratulations")).toBeVisible();
 });

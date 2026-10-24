@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { diagnose } from "./data";
+import { differenceSkills } from "./Differences";
 import type { LessonState } from "./data";
 function safeName(name: string) {
   return name.replace(/[^\x20-\x7E]/g, "").trim() || "Young wizard";
@@ -104,6 +105,39 @@ export async function downloadPDF(state: LessonState, certificate = false) {
       `Date: ${new Date().toLocaleDateString("en-GB")} | Student: ${safeName(state.name)}`,
       22,
       h - 21,
+    );
+  }
+  if (
+    !certificate &&
+    (Array.isArray(state.answers.differencesFound) ||
+      differenceSkills.some(
+        ([id]) => state.ratings[`difference-${id}`] !== undefined,
+      ))
+  ) {
+    doc.addPage();
+    doc.setFontSize(21);
+    doc.text("Find the Differences - A2-B1 bonus", 22, 30);
+    doc.setFontSize(12);
+    doc.text(
+      `Differences spotted: ${Array.isArray(state.answers.differencesFound) ? state.answers.differencesFound.length : 0}/5`,
+      22,
+      48,
+    );
+    differenceSkills.forEach(([id, title], i) =>
+      doc.text(
+        `${title}: ${state.ratings[`difference-${id}`] === undefined ? "not assessed" : ["could not answer", "with help", "independently"][state.ratings[`difference-${id}`]]}`,
+        22,
+        68 + i * 14,
+      ),
+    );
+    doc.setFontSize(10);
+    doc.text(
+      doc.splitTextToSize(
+        "This optional extension assesses oral comparisons, prepositions, there is/are and Present Continuous. It is separate from the main A1-A2 assessment and does not certify a B1 level.",
+        w - 44,
+      ),
+      22,
+      138,
     );
   }
   doc.save(

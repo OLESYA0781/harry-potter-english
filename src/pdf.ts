@@ -2,6 +2,12 @@ import { jsPDF } from "jspdf";
 import { diagnose } from "./data";
 import { differenceSkills, differenceCount } from "./Differences";
 import type { LessonState } from "./data";
+import {
+  grammarChallenges,
+  readGrammarProgress,
+  grammarSummary,
+} from "./grammarChallenges";
+import type { GrammarLevel } from "./grammarChallenges";
 function safeName(name: string) {
   return name.replace(/[^\x20-\x7E]/g, "").trim() || "Young wizard";
 }
@@ -139,6 +145,52 @@ export async function downloadPDF(state: LessonState, certificate = false) {
       22,
       138,
     );
+  }
+  if (!certificate) {
+    for (const level of ["A2", "B1"] as GrammarLevel[]) {
+      const p = readGrammarProgress(state.answers[`grammar${level}`]),
+        s = grammarSummary(level, p);
+      doc.addPage();
+      doc.setTextColor("#273f36");
+      doc.setFontSize(21);
+      doc.text(`${level} Grammar: ${s.firstCorrect}/10`, 22, 30);
+      doc.setFontSize(10);
+      doc.text(
+        `First correct: ${s.firstCorrect} | First correct without Hint: ${s.independent} | Correct now: ${s.correctNow}`,
+        22,
+        45,
+      );
+      doc.text(
+        `Hint used: ${s.hinted} | Correct after Hint: ${s.correctAfterHint} | Incorrect attempts: ${s.wrongAttempts}`,
+        22,
+        54,
+      );
+      doc.text(
+        `Skipped: ${s.skipped} | Not yet checked: ${s.unanswered} | Retry attempts: ${s.retries}`,
+        22,
+        63,
+      );
+      doc.text("Topics and individual results:", 22, 80);
+      grammarChallenges[level].forEach((q, i) => {
+        const e = p.entries[i],
+          first = e.attempts[0];
+        const y = 94 + i * 15;
+        doc.text(`${i + 1}. ${q.topic.replaceAll("—", "-")}`, 22, y);
+        doc.text(
+          `First: ${!first ? "not checked" : first.correct ? "correct" : "incorrect"}; Hint: ${e.hintUsed ? "yes" : "no"}; retries: ${Math.max(0, e.attempts.length - 1)}${level === "B1" ? `; own sentence: ${e.ownRating === undefined ? "not assessed" : ["unable", "with help", "independent"][e.ownRating]}` : ""}`,
+          22,
+          y + 5,
+        );
+      });
+      doc.text(
+        doc.splitTextToSize(
+          "This grammar challenge is one diagnostic indicator. It does not assign or certify an A2 or B1 level. Review unattempted topics, incorrect first answers and topics completed with hints.",
+          w - 44,
+        ),
+        22,
+        257,
+      );
+    }
   }
   doc.save(
     certificate

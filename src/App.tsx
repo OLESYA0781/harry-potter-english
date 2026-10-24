@@ -32,16 +32,19 @@ import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "./Art";
 import { Choice, Match, Order } from "./components";
 import Differences, { differenceSkills, differenceCount } from "./Differences";
 
+import GrammarChallenge, { GrammarReport } from "./GrammarChallenge";
+
 const storageKey = "hogwarts-english-v1";
 function load(): LessonState {
   try {
     const s = JSON.parse(localStorage.getItem(storageKey) || "null");
     if (
       s &&
-      (s.version === 1 || s.version === 2) &&
+      (s.version === 1 || s.version === 2 || s.version === 3) &&
       Number.isInteger(s.data?.step) &&
       s.data.step >= 0 &&
-      s.data.step < (s.version === 1 ? stages.length - 1 : stages.length) &&
+      s.data.step <
+        (s.version === 1 ? 12 : s.version === 2 ? 13 : stages.length) &&
       typeof s.data.name === "string" &&
       s.data.answers &&
       s.data.scores &&
@@ -50,7 +53,10 @@ function load(): LessonState {
       return {
         ...s.data,
         step:
-          s.version === 1 && s.data.step >= 11 ? s.data.step + 1 : s.data.step,
+          (s.version === 1 && s.data.step === 11) ||
+          (s.version === 2 && s.data.step === 12)
+            ? stages.length - 1
+            : s.data.step,
       };
   } catch {
     /* A new session is safe if storage is unavailable. */
@@ -70,6 +76,8 @@ const notes = [
   "Лексика · 3 минуты. Попросите назвать предметы и сформулировать There is / There are. Оцениваются три набора и два предложения.",
   "Связный рассказ · 3 минуты. Дайте ребёнку время составить 4–5 предложений. Оцените самостоятельность и связь предложений.",
   "Дополнительное задание A2–B1 · 5–7 минут. Найдите шесть отличий: яблоко/вода у Рона; три/две книги; мяч под/на столе; чашка есть/нет; Гермиона сидит на полу/на диване; в A день, в B ночь. Оценивайте устное сравнение и грамматику отдельно от основной диагностики.",
+  "Grammar Challenge A2 · 10 заданий с вводом. Отмечайте подсказки, первые ответы и повторы отдельно. Раздел доступен независимо от основной диагностики.",
+  "Advanced Grammar B1 · 10 заданий с вводом. После ответа попросите составить своё предложение и отметьте самостоятельность. Результат не присваивает уровень B1 автоматически.",
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
 export default function App() {
@@ -92,7 +100,7 @@ export default function App() {
     try {
       localStorage.setItem(
         storageKey,
-        JSON.stringify({ version: 2, data: state }),
+        JSON.stringify({ version: 3, data: state }),
       );
       setStorageError(false);
     } catch {
@@ -354,7 +362,9 @@ export default function App() {
               <small>
                 {state.step === 11
                   ? "Дополнительное задание оценивается отдельно от основной диагностики A1–A2."
-                  : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
+                  : state.step === 12 || state.step === 13
+                    ? "Первые ответы и подсказки учитываются отдельно. Повторная попытка не меняет результат первой."
+                    : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
                 Режим предназначен для совместного урока, без пароля.
               </small>
             </aside>
@@ -1185,6 +1195,24 @@ export default function App() {
                 />
               )}
               {state.step === 12 && (
+                <GrammarChallenge
+                  key="A2"
+                  level="A2"
+                  value={state.answers.grammarA2}
+                  onChange={(p) => save("grammarA2", p)}
+                  teacher={teacher}
+                />
+              )}
+              {state.step === 13 && (
+                <GrammarChallenge
+                  key="B1"
+                  level="B1"
+                  value={state.answers.grammarB1}
+                  onChange={(p) => save("grammarB1", p)}
+                  teacher={teacher}
+                />
+              )}
+              {state.step === 14 && (
                 <>
                   <section className="panel congratulations">
                     <div className="trophy">
@@ -1296,6 +1324,14 @@ export default function App() {
                           ответы и короткие самостоятельные истории.
                         </p>
                       )}
+                      <GrammarReport
+                        level="A2"
+                        value={state.answers.grammarA2}
+                      />
+                      <GrammarReport
+                        level="B1"
+                        value={state.answers.grammarB1}
+                      />
                       <aside className="teacher-note">
                         <strong>
                           Дополнительное задание · Find the Differences · A2–B1

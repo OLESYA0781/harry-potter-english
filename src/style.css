@@ -2414,3 +2414,239 @@ footer > div {
     padding: 10px 12px;
   }
 }
+/* Independent written grammar quests share the existing illustration language. */
+.grammar-challenge {
+  position: relative;
+}
+.grammar-hero {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-radius: 15px;
+  padding: 25px 28px;
+  margin-bottom: 22px;
+  background:
+    linear-gradient(100deg, #fff8e9ed, #f6e6bcdd),
+    url("/art/environments.webp") right center/200% 100%;
+  border: 1px solid #dcc99d;
+}
+.grammar-hero > div {
+  flex: 1;
+  min-width: 0;
+}
+.grammar-hero h2 {
+  font-size: 32px;
+  margin: 15px 0 10px;
+}
+.grammar-hero p {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 19px;
+}
+.grammar-hero > .character-art {
+  width: 150px;
+  max-width: 25%;
+}
+.grammar-b1 .grammar-hero {
+  background:
+    linear-gradient(100deg, #182d4cf5, #492937e6),
+    url("/art/differences.webp") right center/200% 100%;
+  border-color: #6a586c;
+  color: #fff0ca;
+}
+.grammar-b1 .grammar-hero h2,
+.grammar-b1 .grammar-hero p {
+  color: #f8edcf;
+}
+.grammar-b1 .grammar-hero .eyebrow {
+  color: #d7c181;
+}
+.grammar-b1 .grammar-input-card {
+  background: #f7f4fc;
+  border-color: #c9bdd2;
+}
+.grammar-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #75835d;
+  margin-bottom: 13px;
+}
+.grammar-progress > span {
+  font-size: 11px;
+}
+.grammar-question-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 20px 0 30px;
+}
+.grammar-question-nav button {
+  border: 1px solid #d5cfb6;
+  background: #f4efde;
+  border-radius: 6px;
+  min-width: 38px;
+  min-height: 38px;
+  color: #697353;
+  font-size: 12px;
+  padding: 5px;
+}
+.grammar-question-nav .solved {
+  border-color: #95ab7e;
+}
+.grammar-sentence {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  line-height: 1.8;
+  color: #354c39;
+  margin: 15px 0 20px;
+}
+.grammar-gap {
+  display: inline-block;
+  border-bottom: 2px dashed #b99753;
+  color: #b99753;
+  min-width: 70px;
+  margin: 0 6px;
+  text-align: center;
+}
+.grammar-input-card input {
+  display: block;
+  width: 100%;
+  max-width: 530px;
+  border: 1px solid #c7cdb4;
+  background: #fffdf7;
+  border-radius: 9px;
+  padding: 16px;
+  color: #35503c;
+  font-size: 21px;
+}
+.grammar-input-card input:disabled {
+  color: #5e6c51;
+  background: #efeddf;
+}
+.grammar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.grammar-hint {
+  border-left: 3px solid #c6a45b;
+  background: #f5eedc;
+  padding: 15px 19px;
+  margin: 20px 0;
+  color: #7e714d;
+  font-size: 13px;
+}
+.grammar-hint p {
+  margin: 8px 0 0;
+  color: inherit;
+}
+.grammar-feedback {
+  padding: 19px;
+  border: 1px solid #d9bc9b;
+  background: #fbefdf;
+  border-radius: 10px;
+  color: #8b6848;
+}
+.grammar-feedback.good {
+  border-color: #c2d4b0;
+  background: #eff5e5;
+  color: #547244;
+}
+.grammar-feedback p {
+  color: inherit;
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+.grammar-own-sentence {
+  padding: 22px 0;
+  border-bottom: 1px solid #ded6c5;
+  margin-top: 15px;
+}
+.grammar-own-sentence h3 {
+  margin-bottom: 6px;
+}
+.grammar-report h3 {
+  font-size: 24px;
+  margin: 5px 0 15px;
+}
+.grammar-report ul {
+  padding-left: 22px;
+  list-style: disc;
+  line-height: 1.8;
+  font-size: 12px;
+}
+.grammar-report p {
+  color: #786181;
+  font-size: 12px;
+}
+.grammar-celebration {
+  position: fixed;
+  bottom: 30px;
+  left: calc(50% + 90px);
+  transform: translateX(-50%);
+  padding: 13px 25px;
+  background: #fff6d7;
+  box-shadow: 0 10px 35px #604a2825;
+  border: 1px solid #dec47c;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #8c793c;
+  pointer-events: none;
+  z-index: 100;
+  animation: celebrate 1.1s both;
+}
+.grammar-celebration .art-icon {
+  width: 50px;
+}
+@media (max-width: 600px) {
+  .grammar-hero {
+    padding: 22px 17px;
+    gap: 8px;
+  }
+  .grammar-hero h2 {
+    font-size: 27px;
+  }
+  .grammar-hero p {
+    font-size: 17px;
+  }
+  .grammar-hero > .character-art {
+    max-width: 22%;
+    width: 100px;
+  }
+  .grammar-hero .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .grammar-sentence {
+    font-size: 24px;
+  }
+  .grammar-question-nav {
+    gap: 6px;
+  }
+  .grammar-question-nav button {
+    min-width: 39px;
+  }
+  .grammar-actions {
+    gap: 5px;
+  }
+  .grammar-actions .pill {
+    margin: 0;
+  }
+  .grammar-input-card input {
+    font-size: 20px;
+  }
+  .grammar-feedback p {
+    font-size: 13px;
+  }
+  .grammar-celebration {
+    left: 50%;
+    width: max-content;
+    max-width: 90%;
+  }
+}

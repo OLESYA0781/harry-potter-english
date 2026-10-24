@@ -171,6 +171,12 @@ export const stages = [
   ["The school bag", "Pack a little knowledge", "🎒"],
   ["My magic day", "Your very own story", "🌤️"],
   ["Find the differences", "Spot 6 Differences · A2–B1", "🔎"],
+  ["Grammar Challenge A2", "Hermione’s Grammar Challenge · Level A2", "📚"],
+  [
+    "Grammar Challenge B1",
+    "The Wizard’s Advanced Grammar Test · Level B1",
+    "🪄",
+  ],
   ["Congratulations!", "Every little step is magic", "🏆"],
 ];
 export type Skill =

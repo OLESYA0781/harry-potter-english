@@ -411,18 +411,23 @@ test("spot five differences, oral examples, teacher grades and persistence", asy
     }),
   ).toBeVisible();
   await expect(page.locator(".difference-counter")).toContainText("0 / 5");
-  await expect(
-    page.locator(".difference-figure").first().locator(".difference-book"),
-  ).toHaveCount(3);
-  await expect(
-    page.locator(".difference-figure").nth(1).locator(".difference-book"),
-  ).toHaveCount(2);
-  await expect(
-    page.locator(".difference-figure").first().locator(".difference-tea"),
-  ).toHaveCount(1);
-  await expect(
-    page.locator(".difference-figure").nth(1).locator(".difference-tea"),
-  ).toHaveCount(0);
+  await expect(page.locator(".difference-scene").first()).toHaveCSS(
+    "opacity",
+    "1",
+  );
+  await expect(page.locator(".difference-scene").first()).toHaveCSS(
+    "mix-blend-mode",
+    "normal",
+  );
+  await expect(page.locator(".difference-scene").first()).toHaveCSS(
+    "background-position",
+    "0% 50%",
+  );
+  await expect(page.locator(".difference-scene").nth(1)).toHaveCSS(
+    "background-position",
+    "100% 50%",
+  );
+  await expect(page.locator(".difference-hotspot")).toHaveCount(10);
   await page
     .getByRole("button", { name: "Compare area 1 in picture A", exact: true })
     .click();
@@ -516,4 +521,50 @@ test("existing saved lesson results migrate to the new final chapter", async ({
   expect(stored.data.ratings.reading).toBe(2);
   await page.reload();
   await expect(page.locator(".congratulations")).toBeVisible();
+});
+
+test("revised fifth difference preserves four discoveries and teaches floor versus sofa", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      "hogwarts-english-v1",
+      JSON.stringify({
+        version: 2,
+        data: {
+          step: 11,
+          name: "Alice",
+          answers: {
+            differencesFound: [0, 1, 2, 3, 4],
+            differenceAttempt4: true,
+            differenceExample4: true,
+          },
+          scores: {},
+          ratings: {},
+        },
+      }),
+    );
+  });
+  await page.goto("/");
+  await expect(page.locator(".difference-counter")).toContainText("4 / 5");
+  const card = page.locator(".difference-answer").nth(4);
+  await expect(card.getByRole("button", { name: "Show example" })).toHaveCount(
+    0,
+  );
+  await page
+    .getByRole("button", { name: "Compare area 5 in picture B", exact: true })
+    .click();
+  await expect(page.locator(".difference-counter")).toContainText("5 / 5");
+  await expect(
+    card.getByRole("button", { name: "Show example" }),
+  ).toBeDisabled();
+  await card.getByRole("button", { name: "I have tried!" }).click();
+  await card.getByRole("button", { name: "Show example" }).click();
+  await expect(card.locator(".quote")).toHaveText(
+    "In picture A, Hermione is sitting on the floor, but in picture B, she is sitting on the sofa.",
+  );
+  await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
+  await expect(card.locator(".teacher-note")).toContainText(
+    "Гермиона сидит на полу / на диване",
+  );
 });

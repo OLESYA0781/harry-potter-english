@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { ArtIcon, Character } from "./Art";
 export const differences = [
   {
     title: "Ron’s snack",
@@ -35,35 +34,28 @@ export const differences = [
     ru: "Чашка есть / отсутствует: there is и there isn’t.",
   },
   {
-    title: "The pencil",
-    skill: "Prepositions + comparison",
+    title: "Where is Hermione?",
+    skill: "Present Continuous + place",
     example:
-      "The pencil is to the left of the notebook in picture A, but it is to the right of the notebook in picture B.",
-    hint: "Where is the pencil?",
-    ru: "Карандаш слева / справа от тетради: to the left/right of.",
+      "In picture A, Hermione is sitting on the floor, but in picture B, she is sitting on the sofa.",
+    hint: "Where is Hermione sitting?",
+    ru: "Гермиона сидит на полу / на диване: is sitting on the floor / on the sofa.",
   },
 ];
 export const differenceSkills = [
   ["comparison", "Comparing pictures", "Сравнение с but, in picture A / B"],
-  ["prepositions", "Prepositions of place", "on, under, to the left/right of"],
+  [
+    "prepositions",
+    "Prepositions of place",
+    "on, under; on the floor / on the sofa",
+  ],
   [
     "there",
     "There is / There are",
     "Единственное/множественное число и отрицание",
   ],
-  ["continuous", "Present Continuous", "is eating / is drinking"],
+  ["continuous", "Present Continuous", "is eating / is drinking / is sitting"],
 ] as const;
-function Sprite({ cell, className }: { cell: number; className: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`difference-sprite ${className}`}
-      style={{
-        backgroundPosition: `${(cell % 2) * 100}% ${Math.floor(cell / 2) * 100}%`,
-      }}
-    />
-  );
-}
 function Scene({
   variant,
   found,
@@ -75,13 +67,15 @@ function Scene({
 }) {
   const isA = variant === "A";
   const areas = [
-    { left: 1, top: 20, width: 37, height: 47 },
-    { left: 49, top: 39, width: 33, height: 20 },
+    { left: 5, top: 37, width: 31, height: 39 },
+    { left: 47, top: 52, width: 31, height: 12 },
     isA
-      ? { left: 72, top: 75, width: 19, height: 22 }
-      : { left: 82, top: 41, width: 16, height: 20 },
-    { left: 36, top: 36, width: 15, height: 23 },
-    { left: 1, top: 73, width: 36, height: 24 },
+      ? { left: 62, top: 76, width: 16, height: 15 }
+      : { left: 76, top: 47, width: 14, height: 15 },
+    { left: 35, top: 48, width: 13, height: 13 },
+    isA
+      ? { left: 75, top: 37, width: 24, height: 24 }
+      : { left: 65, top: 21, width: 28, height: 25 },
   ];
   return (
     <figure className="difference-figure">
@@ -92,32 +86,8 @@ function Scene({
       <div
         className="difference-scene"
         aria-label={`Picture ${variant}: a school common room. Find five differences.`}
+        style={{ backgroundPosition: isA ? "left center" : "right center" }}
       >
-        <Character name="Hermione" action />
-        <Sprite cell={isA ? 0 : 1} className="difference-ron" />
-        <Sprite cell={2} className="difference-table" />
-        {Array.from({ length: isA ? 3 : 2 }, (_, i) => (
-          <ArtIcon
-            key={i}
-            name="book"
-            className={`difference-prop difference-book book-${i}`}
-          />
-        ))}
-        <ArtIcon
-          name="ball"
-          className={`difference-prop difference-ball ${isA ? "ball-under" : "ball-on"}`}
-        />
-        {isA && (
-          <ArtIcon name="tea" className="difference-prop difference-tea" />
-        )}
-        <ArtIcon
-          name="notebook"
-          className="difference-prop difference-notebook"
-        />
-        <ArtIcon
-          name="pencil"
-          className={`difference-prop difference-pencil ${isA ? "pencil-left" : "pencil-right"}`}
-        />
         {areas.map((area, i) => (
           <button
             key={i}
@@ -155,9 +125,21 @@ export default function Differences({
   const [message, setMessage] = useState("");
   const found = Array.isArray(answers.differencesFound)
     ? answers.differencesFound.filter(
-        (n): n is number => Number.isInteger(n) && n >= 0 && n < 5,
+        (n): n is number =>
+          Number.isInteger(n) &&
+          n >= 0 &&
+          n < 5 &&
+          (answers.differencesSceneVersion === 2 || n !== 4),
       )
     : [];
+  useEffect(() => {
+    if (answers.differencesSceneVersion !== 2) {
+      onAnswer("differencesFound", found);
+      onAnswer("differenceAttempt4", false);
+      onAnswer("differenceExample4", false);
+      onAnswer("differencesSceneVersion", 2);
+    }
+  }, [answers.differencesSceneVersion, onAnswer]);
   const find = (i: number) => {
     if (!found.includes(i)) {
       onAnswer("differencesFound", [...found, i]);
@@ -193,11 +175,11 @@ export default function Differences({
           <summary>Help me with words</summary>
           <p>
             eating · drinking · apple · water · books · a cup of tea · ball ·
-            pencil · notebook
+            Hermione · floor · sofa
           </p>
           <p>
-            on · under · to the left of · to the right of · there is · there are
-            · there isn’t · only
+            on · under · sitting on the floor · sitting on the sofa · there is ·
+            there are · there isn’t · only
           </p>
         </details>
         <button

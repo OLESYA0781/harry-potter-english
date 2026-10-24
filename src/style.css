@@ -2311,100 +2311,13 @@ footer > div {
 .difference-scene {
   position: relative;
   aspect-ratio: 1;
-  background: #faf4e7;
-  isolation: isolate;
   overflow: hidden;
-}
-.difference-scene:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("/art/environments.webp");
-  background-size: 200% 100%;
-  background-position: right center;
-  opacity: 0.16;
-  z-index: -1;
-}
-.difference-sprite {
-  position: absolute;
-  display: block;
+  background-color: #6a3b20;
   background-image: url("/art/differences.webp");
-  background-size: 200% 200%;
-  aspect-ratio: 1;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-.difference-ron {
-  left: 0;
-  top: 26%;
-  width: 39%;
-  z-index: 2;
-}
-.difference-table {
-  left: 34%;
-  top: 32%;
-  width: 65%;
-  z-index: 3;
-}
-.difference-scene > .character-art {
-  position: absolute;
-  left: 57%;
-  top: 22%;
-  width: 30%;
-  z-index: 1;
-  mix-blend-mode: multiply;
-}
-.difference-scene .difference-prop {
-  position: absolute;
-  z-index: 4;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  width: 11%;
-  height: auto;
-}
-.difference-book {
-  top: 43%;
-  transform: rotate(-8deg);
-}
-.book-0 {
-  left: 51%;
-}
-.book-1 {
-  left: 61%;
-}
-.book-2 {
-  left: 71%;
-}
-.difference-scene .difference-ball {
-  width: 14%;
-}
-.ball-under {
-  left: 74%;
-  top: 77%;
-}
-.ball-on {
-  left: 83%;
-  top: 42%;
-}
-.difference-scene .difference-tea {
-  left: 38%;
-  top: 38%;
-  width: 13%;
-}
-.difference-scene .difference-notebook {
-  left: 12%;
-  top: 77%;
-  width: 17%;
-}
-.difference-scene .difference-pencil {
-  top: 79%;
-  width: 8%;
-}
-.pencil-left {
-  left: 3%;
-}
-.pencil-right {
-  left: 30%;
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  opacity: 1;
+  mix-blend-mode: normal;
 }
 .difference-hotspot {
   position: absolute;

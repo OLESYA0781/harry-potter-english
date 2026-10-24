@@ -1853,3 +1853,413 @@ footer > div {
     min-height: 80px;
   }
 }
+/* A single cinematic 3D illustration language, including the smallest tokens. */
+.character-art {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 220px;
+  max-width: 100%;
+  aspect-ratio: 4/3;
+  background-image: url("/art/characters.webp");
+  background-size: 300% 400%;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  vertical-align: middle;
+}
+.art-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 48px;
+  height: auto;
+  aspect-ratio: 1;
+  background-image: url("/art/objects.webp");
+  background-size: 600% 600%;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  border-radius: 9px;
+  font-size: 0;
+  line-height: 0;
+}
+.castle-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background-image: url("/art/environments.webp");
+  background-size: 200% 100%;
+  background-position: left center;
+  border-radius: 46% 46% 14px 14px;
+  box-shadow: 0 12px 35px #543c2425;
+  transform: rotate(1deg);
+}
+.hero-art {
+  max-width: 530px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero-art .floating-label {
+  background: #fffaefed;
+  backdrop-filter: blur(5px);
+}
+.portrait {
+  position: relative;
+  background: #faf5e9 !important;
+}
+.portrait .character-art {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 215px;
+  max-width: none;
+  transform: translateX(-50%);
+  border-radius: 0;
+}
+.intro-card > .character-art {
+  width: 260px;
+  margin: 0 auto 15px;
+  display: block;
+}
+.diary-head > .character-art {
+  width: 160px;
+  max-width: 30%;
+}
+.person .character-art {
+  width: 280px;
+}
+.character-options .character-art {
+  width: 230px;
+}
+.drop-target > .character-art {
+  width: 200px;
+}
+.person {
+  background: #fff9eddf;
+  border-color: #dbcbaa;
+  box-shadow: 0 4px 15px #32221618;
+}
+.person.active-person {
+  border-color: #b99144;
+  background: #fff2d6;
+  box-shadow: 0 0 0 3px #d6b86666;
+}
+.person > span:not(.character-art) {
+  background: #f0e5c9;
+  color: #5c482c;
+}
+.common-room {
+  background-image:
+    linear-gradient(#342b1b22, #342b1b55), url("/art/environments.webp");
+  background-size:
+    100% 100%,
+    200% 100%;
+  background-position:
+    center,
+    right center;
+  padding: 20px;
+  border-color: #8b633f;
+}
+.room-decor {
+  color: #fff0cb;
+  text-shadow: 0 1px 5px #2b180b;
+  min-height: 52px;
+}
+.room-books .art-icon {
+  width: 48px;
+}
+.room-people {
+  gap: 16px;
+}
+.nav-icon {
+  width: 28px;
+  height: 28px;
+  filter: none;
+}
+.nav-icon .art-icon {
+  width: 28px;
+  border-radius: 5px;
+}
+.nav-item {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.feature > .art-icon,
+.feature > span > .art-icon {
+  width: 49px;
+}
+.feature > span {
+  align-self: center;
+}
+.picture-choice > .art-icon {
+  width: 132px;
+  max-width: 100%;
+  border-radius: 12px;
+}
+.picture-choice {
+  font-size: 14px;
+  max-width: 160px;
+}
+.choice .choices button:has(.picture-choice) {
+  background: #fff9ec;
+}
+.choice .choices button.chosen:has(.picture-choice) {
+  background: #eef0d9 !important;
+}
+.big-emoji {
+  display: block;
+  line-height: 1;
+}
+.big-emoji > .art-icon {
+  width: 100px;
+}
+.story-prompts .big-emoji > .art-icon {
+  width: 100px;
+  max-width: 100%;
+}
+.item-label {
+  flex-direction: column;
+  gap: 6px;
+  min-width: 70px;
+  font-size: 13px;
+}
+.item-label > .art-icon {
+  width: 78px;
+}
+.word-bank:has(.item-label) {
+  gap: 12px;
+}
+.placed .item-label {
+  min-width: 50px;
+}
+.placed .item-label > .art-icon {
+  width: 52px;
+}
+.school-bag {
+  font-size: 15px;
+  line-height: 1.5;
+  align-items: center;
+}
+.school-bag > .art-icon {
+  width: 220px;
+  max-width: 100%;
+  border-radius: 14px;
+}
+.school-bag strong {
+  font-size: 17px;
+  margin: 8px 0;
+}
+.bag-targets .drop-target {
+  background: #fff7e8;
+  border-style: dashed;
+}
+.bag-targets .drop-target.over {
+  background: #f4e8ca;
+}
+.moods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+.moods button {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 3px;
+}
+.moods button > .art-icon {
+  width: 60px;
+  max-width: 100%;
+}
+.moods button > span:not(.art-icon) {
+  font-size: 10px;
+}
+.preference-match .drop-target > .mood-art {
+  width: 130px;
+  max-width: 100%;
+}
+.preference-match .match-targets {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.magic-star-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.magic-star-card > .art-icon {
+  width: 70px;
+}
+.preference-match .placed .magic-star-card {
+  flex-direction: column;
+  font-size: 10px;
+}
+.preference-match .placed .art-icon {
+  width: 40px;
+}
+.drag-tile:has(.art-icon),
+.placed button:has(.art-icon) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.drag-tile > .art-icon,
+.drop-target > .art-icon {
+  width: 52px;
+}
+.ordered .drop-target:has(.art-icon) {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.ordered .drop-target > .art-icon {
+  width: 52px;
+}
+.there-art {
+  display: flex;
+  gap: 10px;
+}
+.there-art > .art-icon {
+  width: 95px;
+}
+.trophy > .art-icon {
+  width: 150px;
+}
+.speak-prompt > .art-icon {
+  width: 34px;
+  margin-right: 5px;
+}
+@media (max-width: 850px) {
+  .character-art {
+    width: 200px;
+  }
+  .intro-card > .character-art {
+    width: 270px;
+  }
+  .room-people {
+    gap: 10px;
+  }
+  .person .character-art {
+    width: 190px;
+  }
+  .common-room {
+    padding: 12px;
+  }
+  .picture-choice > .art-icon {
+    width: 110px;
+  }
+  .moods {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .moods button {
+    min-width: 75px;
+  }
+  .diary-head > .character-art {
+    width: 125px;
+  }
+  .big-emoji > .art-icon {
+    width: 90px;
+  }
+}
+@media (max-width: 600px) {
+  .hero-art {
+    max-width: 350px;
+  }
+  .person .character-art {
+    width: 180px;
+  }
+  .portrait .character-art {
+    width: 205px;
+  }
+  .character-options .character-art {
+    width: 180px;
+  }
+  .match-targets .drop-target > .character-art {
+    width: 155px;
+  }
+  .picture-choice {
+    max-width: 125px;
+    min-width: 90px;
+    font-size: 12px;
+  }
+  .picture-choice > .art-icon {
+    width: 108px;
+  }
+  .school-bag > .art-icon {
+    width: 185px;
+  }
+  .item-label > .art-icon {
+    width: 60px;
+  }
+  .item-label {
+    min-width: 58px;
+    font-size: 12px;
+  }
+  .drag-tile:has(.item-label) {
+    padding: 9px;
+  }
+  .story-prompts .big-emoji > .art-icon {
+    width: 85px;
+  }
+  .big-emoji > .art-icon {
+    width: 85px;
+  }
+  .preference-match .drop-target {
+    padding: 5px 1px;
+    min-height: 65px;
+  }
+  .preference-match .drop-target > .mood-art {
+    width: 100%;
+    border-radius: 4px;
+  }
+  .preference-match .placed .magic-star-card {
+    font-size: 8px;
+  }
+  .preference-match .placed .art-icon {
+    width: 27px;
+  }
+  .room-people {
+    gap: 9px;
+  }
+  .common-room {
+    border-width: 5px;
+    padding: 9px;
+  }
+  .room-books {
+    display: none;
+  }
+}
+/* Keep generated sprite margins from exposing adjacent illustrations. */
+.art-icon {
+  clip-path: inset(3% 5% 7% 5% round 5px);
+}
+.person > .character-art {
+  background-image: url("/art/characters.webp");
+  background-color: transparent;
+  padding: 0;
+  border-radius: 10px;
+}
+.room-people > *,
+.match-targets > *,
+.character-options > * {
+  min-width: 0;
+}
+.btn > .art-icon,
+.btn > span > .art-icon {
+  width: 25px;
+}
+.btn:has(> .art-icon) {
+  gap: 6px;
+}
+@media (max-width: 600px) {
+  .room-people,
+  .character-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .match-targets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .preference-match .match-targets {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

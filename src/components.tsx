@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IllustratedText } from "./Art";
 import type { ReactNode } from "react";
 import {
   DndContext,
@@ -99,7 +100,7 @@ export function Order({
       <div className="word-bank">
         {available.map((i) => (
           <Tile key={i} id={String(i)} onClick={() => onChange([...value, i])}>
-            {words[i]}
+            <IllustratedText text={words[i]} />
           </Tile>
         ))}
       </div>
@@ -113,7 +114,8 @@ export function Order({
               id={`pos${p}`}
               onClick={() => onChange(value.filter((v) => v !== i))}
             >
-              {words[i]} <span aria-label="remove">×</span>
+              <IllustratedText text={words[i]} />{" "}
+              <span aria-label="remove">×</span>
             </Target>
             <div className="reorder">
               <button
@@ -147,7 +149,7 @@ export function Order({
         disabled={value.length !== words.length}
         onClick={() => onCheck(value.every((v, i) => v === i))}
       >
-        Check my order ✨
+        <IllustratedText text="Check my order ✨" />
       </button>
       <button className="text-btn" onClick={() => onChange([])}>
         Clear cards
@@ -201,7 +203,11 @@ export function Match({
               key={s.id}
             >
               <Tile id={s.id} onClick={() => setSelected(s.id)}>
-                {s.label}
+                {typeof s.label === "string" ? (
+                  <IllustratedText text={s.label} />
+                ) : (
+                  s.label
+                )}
               </Tile>
             </div>
           ))}
@@ -224,7 +230,12 @@ export function Match({
                       onChange(next);
                     }}
                   >
-                    {s.label} ×
+                    {typeof s.label === "string" ? (
+                      <IllustratedText text={s.label} />
+                    ) : (
+                      s.label
+                    )}{" "}
+                    ×
                   </button>
                 ))}
             </div>
@@ -232,7 +243,7 @@ export function Match({
         ))}
       </div>
       <button className="btn small" onClick={onCheck}>
-        {checkLabel}
+        <IllustratedText text={checkLabel} />
       </button>
       <button className="text-btn" onClick={() => onChange({})}>
         Try again

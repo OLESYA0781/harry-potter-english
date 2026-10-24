@@ -28,7 +28,7 @@ import {
   diagnose,
 } from "./data";
 import type { LessonState, Skill } from "./data";
-import { Character, Castle } from "./Art";
+import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "./Art";
 import { Choice, Match, Order } from "./components";
 
 const storageKey = "hogwarts-english-v1";
@@ -244,7 +244,9 @@ export default function App() {
               aria-current={state.step === i ? "step" : undefined}
               className={`nav-item ${state.step === i ? "active" : ""}`}
             >
-              <span className="nav-icon">{stage[2]}</span>
+              <span className="nav-icon">
+                <ArtIcon name={stage[2]} />
+              </span>
               <span>{stage[0]}</span>
               {state.step > i ? (
                 <span className="nav-done">✓</span>
@@ -411,7 +413,9 @@ export default function App() {
                   ["✦", "Learn & collect stars", "Celebrate every little step"],
                 ].map((f) => (
                   <div className="feature" key={f[1]}>
-                    <span>{f[0]}</span>
+                    <span>
+                      <ArtIcon name={f[0]} />
+                    </span>
                     <div>
                       <strong>{f[1]}</strong>
                       <p>{f[2]}</p>
@@ -504,7 +508,18 @@ export default function App() {
                                 }
                                 onClick={() => save("mood", mood)}
                               >
-                                {mood}
+                                <MoodFace
+                                  index={[
+                                    "🤩 Amazing!",
+                                    "😊 Happy!",
+                                    "🙂 Good!",
+                                    "🥱 Tired!",
+                                    "😔 Sad!",
+                                  ].indexOf(mood)}
+                                />
+                                <span>
+                                  {mood.substring(mood.indexOf(" ") + 1)}
+                                </span>
                               </button>
                             ))}
                           </div>
@@ -513,7 +528,8 @@ export default function App() {
                     ))}
                   </div>
                   <p className="speak-prompt">
-                    💬 Say your answers aloud to your teacher.
+                    <ArtIcon name="speaking" /> Say your answers aloud to your
+                    teacher.
                   </p>
                   {rating("speak-intro")}
                 </section>
@@ -527,14 +543,23 @@ export default function App() {
                   <div className="preference-match">
                     <Match
                       checkLabel="I have said it!"
-                      sources={[{ id: "star", label: "⭐ My magic star" }]}
+                      sources={[
+                        {
+                          id: "star",
+                          label: (
+                            <span className="magic-star-card">
+                              <ArtIcon name="star" />
+                              My magic star
+                            </span>
+                          ),
+                        },
+                      ]}
                       targets={["😍", "😁", "😊", "🙂", "😕"].map(
                         (face, i) => ({
                           id: String(i),
                           label: (
                             <>
-                              <Character name="Harry" />
-                              <span className="face">{face}</span>
+                              <MoodFace index={i} />
                             </>
                           ),
                         }),
@@ -613,7 +638,9 @@ export default function App() {
                   <section className="common-room">
                     <div className="room-decor">
                       <span>✧ THE COMMON ROOM ✧</span>
-                      <span>🕯️　📚　🕯️</span>
+                      <span className="room-books">
+                        <ArtIcon name="books" />
+                      </span>
                     </div>
                     <div className="room-people">
                       {people.map((p, i) => (
@@ -784,7 +811,7 @@ export default function App() {
                         value={answer(`read${i}`, null)}
                         options={q.options.map((o) => (
                           <span className="picture-choice">
-                            <span>{o.split(" ")[0]}</span>
+                            <ArtIcon name={o.split(" ")[0]} />
                             {o.substring(o.indexOf(" ") + 1)}
                           </span>
                         ))}
@@ -841,7 +868,9 @@ export default function App() {
                 <section className="speaking-grid">
                   {speaking.map(([emoji, q, example, ru], i) => (
                     <div className="panel speaking-card" key={q}>
-                      <span className="big-emoji">{emoji}</span>
+                      <span className="big-emoji">
+                        <ArtIcon name={emoji} />
+                      </span>
                       <span className="question-number">0{i + 1}</span>
                       <h2>{q}</h2>
                       <button
@@ -1018,7 +1047,7 @@ export default function App() {
                       id,
                       label: (
                         <span className="item-label">
-                          <span>{emoji}</span>
+                          <ArtIcon name={id} />
                           {id}
                         </span>
                       ),
@@ -1028,7 +1057,8 @@ export default function App() {
                         id: "bag",
                         label: (
                           <span className="school-bag">
-                            🎒<strong>My school bag</strong>
+                            <ArtIcon name="bag" />
+                            <strong>My school bag</strong>
                           </span>
                         ),
                       },
@@ -1064,7 +1094,16 @@ export default function App() {
                     ["There", "are", "two pencils", "in the bag"],
                   ].map((words, i) => (
                     <div className="sentence-exercise" key={i}>
-                      <p>{i === 0 ? "📕" : "✏️ ✏️"}</p>
+                      <p className="there-art">
+                        {i === 0 ? (
+                          <ArtIcon name="book" />
+                        ) : (
+                          <>
+                            <ArtIcon name="pencil" />
+                            <ArtIcon name="pencil" />
+                          </>
+                        )}
+                      </p>
                       <Order
                         words={words}
                         value={answer(`there${i}`, [])}
@@ -1091,7 +1130,9 @@ export default function App() {
                       ["🌙", "Evening", "In the evening I prefer…"],
                     ].map(([e, title, text]) => (
                       <div key={title}>
-                        <span className="big-emoji">{e}</span>
+                        <span className="big-emoji">
+                          <ArtIcon name={e} />
+                        </span>
                         <h3>{title}</h3>
                         <p>{text}</p>
                       </div>
@@ -1111,7 +1152,9 @@ export default function App() {
               {state.step === 11 && (
                 <>
                   <section className="panel congratulations">
-                    <div className="trophy">🏆</div>
+                    <div className="trophy">
+                      <ArtIcon name="trophy" />
+                    </div>
                     <span className="eyebrow">YOUR MAGIC IS GROWING</span>
                     <h2>
                       Congratulations{state.name ? `, ${state.name}` : ""}!

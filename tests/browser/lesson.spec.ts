@@ -13,7 +13,7 @@ test("welcome, navigation, persistence and confirmed restart", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "Start our adventure!" }).click();
   await page.getByPlaceholder("Your name", { exact: true }).fill("Алиса");
-  await page.getByRole("button", { name: "😊 Happy!" }).click();
+  await page.getByRole("button", { name: "Happy!" }).click();
   await page.reload();
   await expect(page.getByPlaceholder("Your name", { exact: true })).toHaveValue(
     "Алиса",
@@ -224,7 +224,10 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
     "✏️ Hermione does her homework.",
     "🌙 Hermione goes to bed.",
   ])
-    await page.locator(".drag-tile").filter({ hasText: w }).click();
+    await page
+      .locator(".drag-tile")
+      .filter({ hasText: w.replace(/^[^A-Za-z]+/, "") })
+      .click();
   await page.getByRole("button", { name: "Check my order" }).click();
   await stage(page, 6);
   for (const r of await page.locator(".rating").all())
@@ -303,4 +306,49 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
   await stage(page, 11);
   await expect(page.getByText("Предварительный уровень:")).toContainText("A2");
   await expect(page.locator(".final-stars strong")).toHaveText("37");
+});
+
+test("all illustrated chapters load local artwork without system emoji", async ({
+  page,
+}) => {
+  await page.goto("/");
+  for (const asset of ["characters", "objects", "environments"]) {
+    const response = await page.request.get(`/art/${asset}.webp`);
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/webp");
+    expect((await response.body()).length).toBeGreaterThan(10000);
+  }
+  for (let i = 0; i < 12; i++) {
+    await stage(page, i);
+    const visibleText = await page.locator("main").innerText();
+    expect(visibleText).not.toMatch(/\p{Extended_Pictographic}/u);
+  }
+  await stage(page, 1);
+  await expect(page.locator(".moods .mood-art")).toHaveCount(5);
+  await page.getByRole("button", { name: "Happy!", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Happy!", exact: true }),
+  ).toHaveClass("chosen");
+  await stage(page, 2);
+  await page
+    .getByRole("button", { name: "My magic star", exact: true })
+    .click();
+  await page.locator(".preference-match .drop-target").first().click();
+  await expect(
+    page.getByText("I love Harry Potter!", { exact: true }),
+  ).toBeVisible();
+  await stage(page, 0);
+  await page.setViewportSize({ width: 1440, height: 1080 });
+  await page.screenshot({
+    path: "/tmp/english-3d-desktop.png",
+    fullPage: true,
+  });
+  await stage(page, 3);
+  await page.screenshot({ path: "/tmp/english-3d-room.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("combobox").selectOption("5");
+  await page.screenshot({
+    path: "/tmp/english-3d-food-mobile.png",
+    fullPage: true,
+  });
 });

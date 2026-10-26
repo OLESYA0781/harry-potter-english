@@ -4,6 +4,7 @@ import { useProgress } from './useProgress';
 import { useTeacherAccess } from './useTeacherAccess';
 import CloudProgress from './CloudProgress';
 import LessonHome from './LessonHome';
+import Homework from './lessons/Homework';
 import { lessons } from './lessons/registry';
 import { readLesson, updateLesson } from './lessons/progress';
 import { statusLabels } from './lessons/types';
@@ -17,6 +18,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const progress = useProgress();
   const canTeach = useTeacherAccess();
   const [route, setRoute] = useState(routeLesson);
+  const [trialTab, setTrialTab] = useState<'lesson' | 'homework'>('lesson');
   const [selected, setSelected] = useState(catalog[0].id);
   useEffect(() => {
     const change = () => { setRoute(routeLesson()); window.scrollTo({ top: 0 }); };
@@ -49,7 +51,8 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     <div className="platform-cloud"><CloudProgress progress={progress} /></div>
     {progress.error && <p role="alert" className="platform-error">{progress.error}</p>}
     {route && !active && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
-    {active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
+    {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework</button></div>}
+    {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <Homework state={progress.state} setState={progress.setState} /> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
       : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Главное меню</a></main>
       : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;

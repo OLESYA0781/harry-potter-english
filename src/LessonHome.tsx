@@ -10,21 +10,16 @@ export default function LessonHome({ items, selected, onSelect, onOpen }: {
   const current = items.find(item => item.lesson.id === selected) || items[0];
   const finished = items.filter(item => item.summary.status === 'completed').length;
   return <main className="classroom-home">
-    <section className="classroom-welcome" aria-labelledby="welcome-title">
-      <div className="classroom-welcome-copy">
-        <span className="eyebrow">✧ VIKA ENGLISH · YOUR MAGICAL CLASSROOM</span>
-        <h1 id="welcome-title">Welcome to your <em>English Adventure!</em></h1>
-      </div>
-      <div className="classroom-castle" aria-hidden="true"><Castle /><span className="classroom-caption">Little steps. Big magic.</span></div>
-    </section>
     <section className="classroom-lessons" aria-labelledby="my-lessons-title">
-      <div className="classroom-section-title"><div><h2 id="my-lessons-title">Мои уроки</h2></div><span className="classroom-total">Завершено: {finished} из {items.length}</span></div>
+      <div className="classroom-intro"><div className="classroom-intro-copy">
+      <div className="classroom-section-title"><div><h1 id="my-lessons-title">Мои уроки</h1></div><span className="classroom-total">Завершено: {finished} из {items.length}</span></div>
       <div className="lesson-picker">
         <label htmlFor="dashboard-lesson">Выбери своё приключение</label>
         <div><select id="dashboard-lesson" value={current.lesson.id} onChange={e => onSelect(e.target.value)}>
           {items.map(({ lesson, summary }) => <option key={lesson.id} value={lesson.id}>{lesson.title}{summary.status !== 'in-progress' ? ` · ${statusLabels[summary.status]}` : ''}</option>)}
         </select><button className="btn" disabled={!!current.error} onClick={() => onOpen(current.lesson.id)}>{current.summary.status === 'not-started' ? 'Начать урок' : 'Продолжить урок'} <ArrowRight size={18} /></button></div>
       </div>
+      </div><div className="classroom-intro-art" aria-hidden="true"><Castle /></div></div>
       <div className="lesson-cards">
         {items.map(({ lesson, summary, error }, index) => <article key={lesson.id} className={`lesson-card ${selected === lesson.id ? 'selected' : ''}`}>
           <div className="lesson-card-top"><span className="lesson-number">{String(items.length - index).padStart(2, '0')}</span>{summary.status !== 'in-progress' && <span className={`lesson-status ${summary.status}`}>{statusLabels[summary.status]}</span>}</div>

@@ -5,9 +5,13 @@ test('root opens classroom; trial resumes old answers and all fifteen chapters',
     if (!localStorage.getItem('hogwarts-english-v1')) localStorage.setItem('hogwarts-english-v1', JSON.stringify({ version: 3, data: { step: 7, name: 'Вика', answers: { grammar0: 2 }, scores: { grammar0: { correct: true, first: false, latest: true, skill: 'Grammar' } }, ratings: { reading: 2 } } }));
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Welcome to your English Adventure!' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Мои уроки', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Мои уроки' })).toBeVisible();
   await expect(page.getByText('В процессе', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.classroom-home')).not.toContainText('Welcome to your English Adventure!');
+  await expect(page.locator('.classroom-home')).not.toContainText('YOUR MAGICAL CLASSROOM');
+  await expect(page.locator('.classroom-home .castle-art')).toBeVisible();
+  await expect(page.locator('.classroom-home')).not.toContainText('Little steps. Big magic.');
   await expect(page.locator('.classroom-home')).not.toContainText('Привет');
   await expect(page.locator('.classroom-home')).not.toContainText('Немного смелости');
   await expect(page.locator('.classroom-home')).not.toContainText('Учись в своём темпе');
@@ -61,7 +65,7 @@ test('registry adds new lessons to both menus in newest-first order; drafts and 
 
 for (const width of [390, 768, 1280]) test(`classroom and menu fit ${width}px and stay available inside lessons`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 }); await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Welcome to your English Adventure!' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Мои уроки', level: 1 })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: `work/platform-home-${width}.png`, fullPage: true });
   await page.getByText('Уроки', { exact: true }).click();

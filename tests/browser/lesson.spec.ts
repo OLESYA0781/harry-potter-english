@@ -3,7 +3,7 @@ async function stage(page: any, n: number) {
   if (n === 14) {
     const teacher = page.getByRole("button", { name: "Teacher mode", exact: true });
     if (await teacher.isVisible()) await teacher.click();
-    await page.getByRole("button", { name: "Results & PDF", exact: true }).click();
+    await page.getByRole("button", { name: "Results", exact: true }).click();
     return;
   }
   await page.locator(".nav-item").nth(n).click();
@@ -94,7 +94,7 @@ test("matching and school bag checks reject extra objects", async ({
   await page.getByRole("button", { name: "Check my answers" }).click();
   await expect(page.getByText("✦ Fantastic! You did it!")).toBeVisible();
 });
-test("listening hides scripts, teacher ratings and both PDF downloads", async ({
+test("listening hides scripts, teacher ratings and on-screen results", async ({
   page,
 }) => {
   await page.goto("/#/lessons/trial");
@@ -120,13 +120,9 @@ test("listening hides scripts, teacher ratings and both PDF downloads", async ({
   await stage(page, 14);
   await expect(page.getByText("Недостаточно данных")).toBeVisible();
   await page.getByPlaceholder("Your name", { exact: true }).fill("Алиса");
-  for (const label of ["Download certificate", "Download results (PDF)"]) {
-    const dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: label, exact: true }).click();
-    const download = await dl;
-    expect(await download.failure()).toBeNull();
-    expect(download.suggestedFilename()).toContain(".pdf");
-  }
+  await expect(page.getByRole("heading", { name: "Результаты диагностики" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /PDF|Download certificate/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Results & PDF", exact: true })).toHaveCount(0);
 });
 test("reading highlighting and true-false answers persist", async ({
   page,
@@ -475,9 +471,8 @@ test("spot six differences, oral examples, teacher grades and persistence", asyn
   await expect(page.locator(".rating button.chosen")).toHaveCount(4);
   await stage(page, 14);
   await expect(page.getByText("Найдено: 6/6.", { exact: false })).toBeVisible();
-  const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download results (PDF)" }).click();
-  expect(await (await download).failure()).toBeNull();
+  await expect(page.getByRole("heading", { name: "Результаты диагностики" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /PDF|Download certificate/ })).toHaveCount(0);
   await stage(page, 11);
   await page.getByRole("button", { name: "Find them again" }).click();
   await expect(page.locator(".difference-counter")).toContainText("0 / 6");

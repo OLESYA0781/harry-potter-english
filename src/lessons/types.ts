@@ -3,6 +3,7 @@ import type { LessonState } from '../data';
 
 export type LessonProps = {
   state: LessonState;
+  canTeach?: boolean;
   setState: Dispatch<SetStateAction<LessonState>>;
 };
 export type LessonSummary = {

@@ -54,13 +54,17 @@ const notes = [
   "Advanced Grammar B1 · 10 заданий с вводом. После ответа попросите составить своё предложение и отметьте самостоятельность. Результат не присваивает уровень B1 автоматически.",
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
-export default function TrialLesson({ state, setState }: LessonProps) {
-  const [teacher, setTeacher] = useState(false),
+export default function TrialLesson({ state, setState, canTeach = false }: LessonProps) {
+  const [teacherRequested, setTeacher] = useState(false),
     [muted, setMuted] = useState(false),
     [audioMessage, setAudioMessage] = useState(""),
     [burst, setBurst] = useState(false),
     [confirm, setConfirm] = useState(false),
     [exporting, setExporting] = useState(false);
+  const teacher = canTeach && teacherRequested;
+  useEffect(() => {
+    if (!canTeach) setTeacher(false);
+  }, [canTeach]);
   const [activePerson, setActivePerson] = useState(0),
     [attempt, setAttempt] = useState(false),
     [showAnswer, setShowAnswer] = useState(false),
@@ -270,13 +274,13 @@ export default function TrialLesson({ state, setState }: LessonProps) {
             >
               {muted ? <VolumeX size={19} /> : <Volume2 size={19} />}
             </button>
-            <button
+            {canTeach && <button
               className={`teacher-toggle ${teacher ? "enabled" : ""}`}
               onClick={() => setTeacher(!teacher)}
             >
               <GraduationCap size={18} />
               <span>{teacher ? "Exit teacher mode" : "Teacher mode"}</span>
-            </button>
+            </button>}
           </div>
         </header>
         <div className="mobile-stage">
@@ -326,7 +330,7 @@ export default function TrialLesson({ state, setState }: LessonProps) {
                   : state.step === 12 || state.step === 13
                     ? "Первые ответы и подсказки учитываются отдельно. Повторная попытка не меняет результат первой."
                     : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
-                Режим предназначен для совместного урока, без пароля.
+                Режим предназначен для совместного урока с преподавателем.
               </small>
             </aside>
           )}

@@ -7,7 +7,14 @@ test('root opens classroom; trial resumes old answers and all fifteen chapters',
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Welcome to your English Adventure!' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Мои уроки' })).toBeVisible();
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Пробное занятие · В процессе']);
+  await expect(page.getByText('В процессе', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.classroom-home')).not.toContainText('Привет');
+  await expect(page.locator('.classroom-home')).not.toContainText('Немного смелости');
+  await expect(page.locator('.classroom-home')).not.toContainText('Учись в своём темпе');
+  await expect(page.locator('.classroom-home')).not.toContainText('Каждая попытка');
+  await expect(page.locator('.classroom-home')).not.toContainText('YOUR NEXT CHAPTER');
+  await expect(page.locator('.classroom-home')).not.toContainText('Твоё путешествие продолжается');
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Пробное занятие']);
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
   await expect(page.locator('.nav-item')).toHaveCount(15);

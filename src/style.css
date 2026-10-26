@@ -2767,3 +2767,9 @@ footer > div {
     min-width: 900px;
   }
 }
+
+/* Account controls use existing panel/button styles; lesson layout is unchanged. */
+.cloud-progress summary { cursor: pointer; }
+.cloud-progress label { display: block; margin: 10px 0; }
+.cloud-progress input { max-width: 100%; }
+.cloud-progress code { overflow-wrap: anywhere; white-space: pre-wrap; }

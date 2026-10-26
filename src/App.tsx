@@ -27,7 +27,7 @@ import {
   initial,
   diagnose,
 } from "./data";
-import type { LessonState, Skill } from "./data";
+import type { Skill } from "./data";
 import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "./Art";
 import { Choice, Match, Order } from "./components";
 import Differences, { differenceSkills, differenceCount } from "./Differences";
@@ -35,36 +35,9 @@ import Differences, { differenceSkills, differenceCount } from "./Differences";
 import GrammarChallenge, { GrammarReport } from "./GrammarChallenge";
 
 import CommonRoomScene from "./CommonRoomScene";
+import { useProgress } from "./useProgress";
+import CloudProgress from "./CloudProgress";
 
-const storageKey = "hogwarts-english-v1";
-function load(): LessonState {
-  try {
-    const s = JSON.parse(localStorage.getItem(storageKey) || "null");
-    if (
-      s &&
-      (s.version === 1 || s.version === 2 || s.version === 3) &&
-      Number.isInteger(s.data?.step) &&
-      s.data.step >= 0 &&
-      s.data.step <
-        (s.version === 1 ? 12 : s.version === 2 ? 13 : stages.length) &&
-      typeof s.data.name === "string" &&
-      s.data.answers &&
-      s.data.scores &&
-      s.data.ratings
-    )
-      return {
-        ...s.data,
-        step:
-          (s.version === 1 && s.data.step === 11) ||
-          (s.version === 2 && s.data.step === 12)
-            ? stages.length - 1
-            : s.data.step,
-      };
-  } catch {
-    /* A new session is safe if storage is unavailable. */
-  }
-  return structuredClone(initial);
-}
 const notes = [
   "Урок рассчитан на 40–45 минут. Объясните ребёнку: можно ошибаться и пробовать снова. Ответы в первом приближении сохраняются для диагностики; за исправления ребёнок получает звёзды.",
   "Знакомство · 3 минуты. Попросите ребёнка сначала ответить устно, затем выбрать вариант. Оцените развёрнутость и самостоятельность.",
@@ -83,12 +56,12 @@ const notes = [
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
 export default function App() {
-  const [state, setState] = useState<LessonState>(load),
-    [teacher, setTeacher] = useState(false),
+  const progress = useProgress();
+  const { state, setState } = progress;
+  const [teacher, setTeacher] = useState(false),
     [muted, setMuted] = useState(false),
     [audioMessage, setAudioMessage] = useState(""),
     [burst, setBurst] = useState(false),
-    [storageError, setStorageError] = useState(false),
     [confirm, setConfirm] = useState(false),
     [exporting, setExporting] = useState(false);
   const [activePerson, setActivePerson] = useState(0),
@@ -98,17 +71,6 @@ export default function App() {
     [round, setRound] = useState(0),
     [bagRound, setBagRound] = useState(0),
     [help, setHelp] = useState<Record<string, boolean>>({});
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify({ version: 3, data: state }),
-      );
-      setStorageError(false);
-    } catch {
-      setStorageError(true);
-    }
-  }, [state]);
   useEffect(() => {
     window.speechSynthesis?.cancel();
     setAudioMessage("");
@@ -354,6 +316,7 @@ export default function App() {
           </div>
         </div>
         <main key={state.step}>
+          <CloudProgress progress={progress} />
           {teacher && (
             <aside className="teacher-panel">
               <strong>
@@ -1357,10 +1320,9 @@ export default function App() {
               {audioMessage}
             </p>
           )}
-          {storageError && (
+          {progress.error && (
             <p role="alert">
-              Progress cannot be saved in this browser. Keep this page open
-              during your lesson.
+              {progress.error} Keep this page open during your lesson.
             </p>
           )}
         </main>

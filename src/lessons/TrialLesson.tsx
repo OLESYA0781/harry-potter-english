@@ -32,10 +32,14 @@ import { Character, Castle, ArtIcon, MoodFace, IllustratedText } from "../Art";
 import { Choice, Match, Order } from "../components";
 import Differences, { differenceSkills, differenceCount } from "../Differences";
 
-import GrammarChallenge, { GrammarReport } from "../GrammarChallenge";
+import { GrammarReport } from "../GrammarChallenge";
 
 import CommonRoomScene from "../CommonRoomScene";
 import type { LessonProps } from "./types";
+
+// Keep historical stage IDs in data.ts for existing local/cloud saves.
+const lessonStages = stages.slice(0, 12);
+const reportStep = 14;
 
 const notes = [
   "Урок рассчитан на 40–45 минут. Объясните ребёнку: можно ошибаться и пробовать снова. Ответы в первом приближении сохраняются для диагностики; за исправления ребёнок получает звёзды.",
@@ -54,7 +58,7 @@ const notes = [
   "Advanced Grammar B1 · 10 заданий с вводом. После ответа попросите составить своё предложение и отметьте самостоятельность. Результат не присваивает уровень B1 автоматически.",
   "Итоги · 2 минуты. Сначала обсудите успехи, затем рекомендации. Уровень появляется только после выполнения всех диагностических заданий и ручных оценок. Это предварительная оценка, а не официальный тест.",
 ];
-export default function TrialLesson({ state, setState, canTeach = false }: LessonProps) {
+export default function TrialLesson({ state: savedState, setState, canTeach = false }: LessonProps) {
   const [teacherRequested, setTeacher] = useState(false),
     [muted, setMuted] = useState(false),
     [audioMessage, setAudioMessage] = useState(""),
@@ -62,6 +66,11 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
     [confirm, setConfirm] = useState(false),
     [exporting, setExporting] = useState(false);
   const teacher = canTeach && teacherRequested;
+  const [showResults, setShowResults] = useState(false);
+  const activeStep = Math.min(savedState.step, lessonStages.length - 1);
+  // Removed chapters fall back in the view only; stored answers/positions stay intact.
+  const state = { ...savedState, step: teacher && showResults ? reportStep : activeStep };
+  useEffect(() => { if (!teacher) setShowResults(false); }, [teacher]);
   useEffect(() => {
     if (!canTeach) setTeacher(false);
   }, [canTeach]);
@@ -140,9 +149,10 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
     window.speechSynthesis.speak(u);
   }
   function navigate(step: number) {
+    setShowResults(false);
     setState((s) => ({
       ...s,
-      step: Math.max(0, Math.min(stages.length - 1, step)),
+      step: Math.max(0, Math.min(lessonStages.length - 1, step)),
     }));
   }
   function rating(id: string) {
@@ -223,7 +233,7 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
           YOUR MAGICAL JOURNEY <span>01</span>
         </div>
         <nav aria-label="Lesson stages">
-          {stages.map((stage, i) => (
+          {lessonStages.map((stage, i) => (
             <button
               key={stage[0]}
               onClick={() => navigate(i)}
@@ -234,7 +244,7 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
                 <ArtIcon name={stage[2]} />
               </span>
               <span>{stage[0]}</span>
-              {state.step > i ? (
+              {activeStep > i ? (
                 <span className="nav-done">✓</span>
               ) : (
                 <small>{String(i + 1).padStart(2, "0")}</small>
@@ -286,10 +296,10 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
         <div className="mobile-stage">
           <select
             aria-label="Choose lesson stage"
-            value={state.step}
+            value={activeStep}
             onChange={(e) => navigate(Number(e.target.value))}
           >
-            {stages.map((s, i) => (
+            {lessonStages.map((s, i) => (
               <option value={i} key={s[0]}>
                 {i + 1}. {s[0]}
               </option>
@@ -300,19 +310,19 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
           <div>
             <span>YOUR ADVENTURE</span>
             <span>
-              {state.step + 1} of {stages.length} chapters
+              {activeStep + 1} of {lessonStages.length} chapters
             </span>
           </div>
           <div
             className="progress-track"
             role="progressbar"
             aria-label="Lesson chapter"
-            aria-valuenow={state.step + 1}
+            aria-valuenow={activeStep + 1}
             aria-valuemin={1}
-            aria-valuemax={stages.length}
+            aria-valuemax={lessonStages.length}
           >
             <i
-              style={{ width: `${((state.step + 1) / stages.length) * 100}%` }}
+              style={{ width: `${((activeStep + 1) / lessonStages.length) * 100}%` }}
             />
           </div>
         </div>
@@ -327,11 +337,12 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
               <small>
                 {state.step === 11
                   ? "Дополнительное задание оценивается отдельно от основной диагностики A1–A2."
-                  : state.step === 12 || state.step === 13
-                    ? "Первые ответы и подсказки учитываются отдельно. Повторная попытка не меняет результат первой."
-                    : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
+                  : "Первый ответ используется в диагностике; повторные попытки приносят звёзды."}{" "}
                 Режим предназначен для совместного урока с преподавателем.
               </small>
+              <button className="pill" onClick={() => setShowResults(!showResults)}>
+                {showResults ? "Back to lesson" : "Results & PDF"}
+              </button>
             </aside>
           )}
           {state.step === 0 ? (
@@ -425,8 +436,7 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
             <>
               <div className="section-heading">
                 <span className="eyebrow">
-                  CHAPTER {String(state.step + 1).padStart(2, "0")} · ENGLISH
-                  ADVENTURE
+                  {state.step === reportStep ? "RESULTS" : `CHAPTER ${String(state.step + 1).padStart(2, "0")}`} · ENGLISH ADVENTURE
                 </span>
                 <h1>{stages[state.step][0]}</h1>
                 <p>{stages[state.step][1]}</p>
@@ -1139,24 +1149,6 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
                   onRate={rate}
                 />
               )}
-              {state.step === 12 && (
-                <GrammarChallenge
-                  key="A2"
-                  level="A2"
-                  value={state.answers.grammarA2}
-                  onChange={(p) => save("grammarA2", p)}
-                  teacher={teacher}
-                />
-              )}
-              {state.step === 13 && (
-                <GrammarChallenge
-                  key="B1"
-                  level="B1"
-                  value={state.answers.grammarB1}
-                  onChange={(p) => save("grammarB1", p)}
-                  teacher={teacher}
-                />
-              )}
               {state.step === 14 && (
                 <>
                   <section className="panel congratulations">
@@ -1269,14 +1261,14 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
                           ответы и короткие самостоятельные истории.
                         </p>
                       )}
-                      <GrammarReport
+                      {state.answers.grammarA2 !== undefined && <GrammarReport
                         level="A2"
                         value={state.answers.grammarA2}
-                      />
-                      <GrammarReport
+                      />}
+                      {state.answers.grammarB1 !== undefined && <GrammarReport
                         level="B1"
                         value={state.answers.grammarB1}
-                      />
+                      />}
                       <aside className="teacher-note">
                         <strong>
                           Дополнительное задание · Find the Differences · A2–B1
@@ -1326,7 +1318,7 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
           <button
             className="text-btn"
             disabled={state.step === 0}
-            onClick={() => navigate(state.step - 1)}
+            onClick={() => showResults ? setShowResults(false) : navigate(state.step - 1)}
           >
             <ArrowLeft size={16} /> Back
           </button>
@@ -1340,7 +1332,7 @@ export default function TrialLesson({ state, setState, canTeach = false }: Lesso
             >
               <RotateCcw size={14} /> Restart
             </button>
-            {state.step < stages.length - 1 && (
+            {state.step < lessonStages.length - 1 && (
               <button
                 className="btn small"
                 onClick={() => navigate(state.step + 1)}

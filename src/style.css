@@ -2783,7 +2783,6 @@ footer > div {
   box-shadow: 0 3px 18px #243e3514;
 }
 .platform-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #f0d89e; font: 18px Georgia, serif; letter-spacing: 2px; }
-.platform-brand small { display: block; font: 10px Arial, sans-serif; letter-spacing: 1px; color: #c4d0be; margin-top: 6px; }
 .platform-links { display: flex; align-items: center; gap: 28px; }
 .platform-home-link {
   width: 190px;
@@ -2814,7 +2813,8 @@ footer > div {
 .lesson-menu a { display: block; padding: 16px; color: #314039; text-decoration: none; border-radius: 7px; }
 .lesson-menu a:hover, .lesson-menu a[aria-current] { background: #f0eddf; }
 .lesson-menu strong, .lesson-menu span, .lesson-menu small { display: block; }
-.lesson-menu strong { font: 19px Georgia, serif; margin-bottom: 7px; }
+.lesson-menu strong { font: 19px Georgia, serif; margin-bottom: 4px; }
+.lesson-menu .lesson-translation { font-size: 12px; color: #747b6d; margin-bottom: 10px; }
 .lesson-menu span { font-size: 11px; color: #7b642f; }
 .lesson-menu small { font-size: 12px; line-height: 1.5; color: #747b6d; margin-top: 8px; }
 .platform-shell .sidebar { top: var(--platform-height); }
@@ -2831,9 +2831,10 @@ footer > div {
 .classroom-intro .lesson-picker { margin-bottom: 0; }
 .classroom-intro-art .castle-art { width: 100%; max-width: 260px; margin: auto; }
 .classroom-section-title { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.classroom-section-title h1 { font-size: 33px; margin: 10px 0 22px; }
-.classroom-total { color: #737b65; background: #edf0e6; border-radius: 20px; padding: 10px 15px; font-size: 12px; }
+.classroom-section-title h1 { font-size: 33px; margin: 10px 0 4px; }
+.heading-translation { display: block; margin-bottom: 20px; font-size: 12px; color: #7c846e; }
 .lesson-picker { padding: 22px 26px; border: 1px solid #e2dcc9; background: #fffdf7; border-radius: 13px; margin-bottom: 22px; }
+.lesson-picker-translation { display: block; margin-top: 9px; font-size: 11px; color: #7c846e; }
 .lesson-picker label { display: block; margin-bottom: 11px; font-size: 12px; color: #69765f; }
 .lesson-picker > div { display: flex; gap: 15px; }
 .lesson-picker select { flex: 1; min-width: 0; background: #f6f4eb; color: #314c3b; border: 1px solid #d9d6c4; border-radius: 7px; padding: 13px 16px; font: inherit; font-size: 14px; }
@@ -2844,8 +2845,8 @@ footer > div {
 .lesson-number { display: grid; place-items: center; width: 43px; height: 43px; background: #efe7cd; color: #8c743f; font: 21px Georgia, serif; border-radius: 12px; }
 .lesson-status { font-size: 11px; color: #68745c; padding: 7px 11px; background: #edf0e5; border-radius: 20px; }
 .lesson-status.completed { color: #3d6b4d; background: #e1eddd; }
-.lesson-subtitle { text-transform: uppercase; font-size: 9px; letter-spacing: 2px; color: #99906f; }
-.lesson-card h3 { font-size: 28px; margin: 10px 0 12px; }
+.lesson-subtitle { display: block; margin-bottom: 14px; font-size: 12px; color: #7c846e; }
+.lesson-card h3 { font-size: 28px; margin: 10px 0 4px; }
 .lesson-card > p { font-size: 13px; max-width: 650px; }
 .lesson-completion { display: flex; justify-content: space-between; font-size: 11px; color: #69765f; margin: 23px 0 10px; }
 .lesson-card .progress-track { height: 6px; }
@@ -2865,7 +2866,6 @@ footer > div {
   .platform-shell { --platform-height: 118px; }
   .platform-bar { padding: 10px 16px; gap: 9px; flex-wrap: wrap; align-content: center; }
   .platform-brand { width: 100%; gap: 7px; font-size: 13px; letter-spacing: 1px; }
-  .platform-brand small { font-size: 8px; letter-spacing: 0; }
   .platform-brand svg { width: 20px; }
   .platform-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 10px; }
   .platform-home-link, .lesson-menu { width: 100%; min-width: 0; }
@@ -2877,7 +2877,6 @@ footer > div {
   .classroom-intro { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 22px; }
   .classroom-intro-art .castle-art { max-width: 170px; }
   .classroom-section-title h1 { font-size: 29px; }
-  .classroom-total { font-size: 10px; padding: 8px 10px; }
   .lesson-picker { padding: 18px; }
   .lesson-picker > div { flex-direction: column; gap: 12px; }
   .lesson-picker .btn { justify-content: center; width: 100%; }

@@ -37,7 +37,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   return <div className={`platform-shell ${active ? 'lesson-open' : ''}`}>
     <nav className="platform-bar" aria-label="Навигация по урокам">
       <a href="#/" className="platform-brand"><Sparkles size={25} /><span>VIKA ENGLISH<small>A little magic, every day</small></span></a>
-      <div className="platform-links"><a className="platform-home-link" aria-label="Главное меню" href="#/" aria-current={!active ? 'page' : undefined}><Home size={17} /><span>Главное меню</span></a>
+      <div className="platform-links"><a className="platform-home-link" aria-label="Главное меню" href="#/" aria-current={!active ? 'page' : undefined}><Home size={22} /><span>Главное меню</span></a>
         <details className="lesson-menu" key={route || 'home'}>
           <summary>Уроки <ChevronDown size={16} /></summary>
           <ul>{items.map(({ lesson, summary }) => <li key={lesson.id}><a href={`#/lessons/${lesson.id}`} aria-current={active?.id === lesson.id ? 'page' : undefined}>

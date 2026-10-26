@@ -7,7 +7,7 @@ test("welcome, navigation, persistence and confirmed restart", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await expect(
     page.getByRole("heading", { name: "Welcome to Hogwarts!" }),
   ).toBeVisible();
@@ -20,12 +20,14 @@ test("welcome, navigation, persistence and confirmed restart", async ({
   );
   await stage(page, 7);
   await page
+    .locator(".app-shell main")
     .getByRole("group")
     .first()
     .getByRole("button", { name: "go", exact: true })
     .click();
   await expect(page.getByText("A little more magic… Try again!")).toBeVisible();
   await page
+    .locator(".app-shell main")
     .getByRole("group")
     .first()
     .getByRole("button", { name: "goes", exact: true })
@@ -49,7 +51,7 @@ test("welcome, navigation, persistence and confirmed restart", async ({
 test("sentence order validates real answers and supports tap and reorder", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 7);
   const ex = page.locator(".sentence-exercise").first();
   for (const w of ["I", "usually", "get up", "at seven"])
@@ -71,7 +73,7 @@ test("sentence order validates real answers and supports tap and reorder", async
 test("matching and school bag checks reject extra objects", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 9);
   for (const item of ["book", "pencil", "apple", "phone"]) {
     await page
@@ -89,7 +91,7 @@ test("matching and school bag checks reject extra objects", async ({
 test("listening hides scripts, teacher ratings and both PDF downloads", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 8);
   await expect(
     page.getByText("I have got red hair.", { exact: false }),
@@ -123,19 +125,20 @@ test("listening hides scripts, teacher ratings and both PDF downloads", async ({
 test("reading highlighting and true-false answers persist", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 4);
   await page.getByRole("button", { name: "Hello!", exact: true }).click();
   await expect(page.locator(".diary-text button").first()).toHaveClass(/read/);
   await page.getByRole("button", { name: "I have finished reading" }).click();
   await stage(page, 5);
   await page
+    .locator(".app-shell main")
     .getByRole("group")
     .first()
     .getByRole("button", { name: "Eggs and toast" })
     .click();
   await expect(page.getByText("✦ Well done!")).toBeVisible();
-  const tf = page.getByRole("group").nth(5);
+  const tf = page.locator(".app-shell main").getByRole("group").nth(5);
   await tf.getByRole("button", { name: "False", exact: true }).click();
   await expect(tf.getByText("✦ Well done!")).toBeVisible();
 });
@@ -144,7 +147,7 @@ test("all chapters render without browser errors; responsive layout", async ({
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   for (let i = 0; i < 15; i++) {
     await stage(page, i);
     await expect(page.locator("main")).not.toBeEmpty();
@@ -167,10 +170,12 @@ test("all chapters render without browser errors; responsive layout", async ({
 test("pointer drag moves a vocabulary object into the bag", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 9);
   const source = page.locator(".drag-tile").filter({ hasText: "book" }).first();
   const target = page.locator(".drop-target").first();
+  await source.scrollIntoViewIfNeeded();
+  await target.scrollIntoViewIfNeeded();
   const a = await source.boundingBox(),
     b = await target.boundingBox();
   if (!a || !b) throw Error("Missing drag target");
@@ -187,7 +192,7 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
   page,
 }) => {
   test.setTimeout(60000);
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
   await stage(page, 3);
   for (let i = 0; i < 6; i++) {
@@ -212,7 +217,7 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
   await stage(page, 5);
   for (const [i, n] of [0, 1, 2, 0, 0, 1, 0, 1, 0].entries())
     await page
-      .getByRole("group")
+      .locator(".app-shell main").getByRole("group")
       .nth(i)
       .locator(".choices button")
       .nth(n)
@@ -237,7 +242,7 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
   await stage(page, 7);
   for (const [i, n] of [1, 1, 0, 1, 0, 1].entries())
     await page
-      .getByRole("group")
+      .locator(".app-shell main").getByRole("group")
       .nth(i)
       .locator(".choices button")
       .nth(n)
@@ -311,7 +316,7 @@ test("complete lesson produces balanced A2 diagnosis and 37 stars", async ({
 test("all illustrated chapters load local artwork without system emoji", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   for (const asset of [
     "characters",
     "objects",
@@ -361,7 +366,7 @@ test("all illustrated chapters load local artwork without system emoji", async (
 test("teacher sees transcripts for every audio and each round", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 8);
   await expect(page.getByTestId("audio-transcript")).toHaveCount(0);
   await page.getByRole("button", { name: "Teacher mode", exact: true }).click();
@@ -403,7 +408,7 @@ test("teacher sees transcripts for every audio and each round", async ({
 test("spot six differences, oral examples, teacher grades and persistence", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 11);
   await expect(
     page.getByRole("heading", {
@@ -507,7 +512,7 @@ test("existing saved lesson results migrate to the new final chapter", async ({
         }),
       );
   });
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await expect(page.locator(".congratulations")).toBeVisible();
   await expect(page.getByPlaceholder("Your name", { exact: true })).toHaveValue(
     "Alice",
@@ -545,7 +550,7 @@ test("revised fifth difference preserves four discoveries and teaches floor vers
       }),
     );
   });
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await expect(page.locator(".difference-counter")).toContainText("4 / 6");
   const card = page.locator(".difference-answer").nth(4);
   await expect(card.getByRole("button", { name: "Show example" })).toHaveCount(
@@ -591,7 +596,7 @@ test("day and night is a sixth difference and preserves earlier finds", async ({
         }),
       );
   });
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await expect(page.locator(".difference-counter")).toContainText("5 / 6");
   await page
     .getByRole("button", { name: "Compare area 6 in picture B", exact: true })
@@ -620,7 +625,7 @@ test("day and night is a sixth difference and preserves earlier finds", async ({
 test("common room is one opaque group picture and all six characters remain interactive", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await stage(page, 3);
   const image = page.locator(".room-scene>img");
   await expect(image).toHaveCount(1);

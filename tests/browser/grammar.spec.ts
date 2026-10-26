@@ -27,7 +27,7 @@ const answers = {
 };
 for (const level of ["A2", "B1"] as const)
   test(`${level}: all ten text answers check and persist`, async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/#/lessons/trial");
     await page
       .locator(".nav-item")
       .nth(level === "A2" ? 12 : 13)
@@ -88,7 +88,7 @@ for (const level of ["A2", "B1"] as const)
 test("hints, retries, drafts, skipping, optional speaking and independent access", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await page.locator(".nav-item").nth(12).click();
   const section = page.locator(".grammar-challenge");
   await section.locator("input").fill("visit");
@@ -166,7 +166,7 @@ test("previous version two final results stay on results after two chapters are 
         }),
       );
   });
-  await page.goto("/");
+  await page.goto("/#/lessons/trial");
   await expect(page.locator(".congratulations")).toBeVisible();
   const s = await page.evaluate(() =>
     JSON.parse(localStorage.getItem("hogwarts-english-v1")!),

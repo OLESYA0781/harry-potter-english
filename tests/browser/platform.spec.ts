@@ -1,12 +1,17 @@
 import { test, expect } from '@playwright/test';
 const fixture = '/tests/fixtures/platform.html';
-test('root opens classroom; trial resumes old answers and all fifteen chapters', async ({ page }) => {
+test('root opens classroom; trial resumes old answers and all twelve remaining chapters', async ({ page }) => {
   await page.addInitScript(() => {
     if (!localStorage.getItem('hogwarts-english-v1')) localStorage.setItem('hogwarts-english-v1', JSON.stringify({ version: 3, data: { step: 7, name: 'Вика', answers: { grammar0: 2 }, scores: { grammar0: { correct: true, first: false, latest: true, skill: 'Grammar' } }, ratings: { reading: 2 } } }));
   });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Мои уроки', level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Мои уроки' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Lessons', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Lessons' })).toBeVisible();
+  await expect(page.locator('.heading-translation')).toHaveText('Мои занятия');
+  await expect(page.getByText(/Завершено:/)).toHaveCount(0);
+  await expect(page.locator('.platform-brand small')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Trial Lesson', exact: true })).toBeVisible();
+  await expect(page.locator('.lesson-card .lesson-subtitle')).toHaveText('Пробное занятие');
   await expect(page.getByText('В процессе', { exact: true })).toHaveCount(0);
   await expect(page.locator('.classroom-home')).not.toContainText('Welcome to your English Adventure!');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR MAGICAL CLASSROOM');
@@ -18,12 +23,12 @@ test('root opens classroom; trial resumes old answers and all fifteen chapters',
   await expect(page.locator('.classroom-home')).not.toContainText('Каждая попытка');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR NEXT CHAPTER');
   await expect(page.locator('.classroom-home')).not.toContainText('Твоё путешествие продолжается');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Пробное занятие']);
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Trial Lesson']);
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
-  await expect(page.locator('.nav-item')).toHaveCount(15);
+  await expect(page.locator('.nav-item')).toHaveCount(12);
   await page.getByRole('link', { name: 'Главное меню', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Мои уроки' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Lessons' })).toBeVisible();
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
   const state = await page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-english-v1')!).data);
@@ -34,9 +39,9 @@ test('root opens classroom; trial resumes old answers and all fifteen chapters',
 test('registry adds new lessons to both menus in newest-first order; drafts and resets stay isolated', async ({ page }) => {
   await page.goto(fixture);
   const select = page.getByLabel('Выбери своё приключение');
-  await expect(select.locator('option')).toHaveText(['Волшебное чтение · Ещё не начат', 'Слова и открытия · Ещё не начат', 'Пробное занятие · Ещё не начат']);
+  await expect(select.locator('option')).toHaveText(['Волшебное чтение · Ещё не начат', 'Слова и открытия · Ещё не начат', 'Trial Lesson · Ещё не начат']);
   await page.getByText('Уроки', { exact: true }).click();
-  await expect(page.locator('.lesson-menu li strong')).toHaveText(['Волшебное чтение', 'Слова и открытия', 'Пробное занятие']);
+  await expect(page.locator('.lesson-menu li strong')).toHaveText(['Волшебное чтение', 'Слова и открытия', 'Trial Lesson']);
   await page.locator('.lesson-menu').getByRole('link', { name: /Слова и открытия/ }).click();
   await page.getByLabel('Ответ нового урока').fill('word draft');
   await page.getByRole('button', { name: 'Проверить новый урок' }).click();
@@ -65,7 +70,7 @@ test('registry adds new lessons to both menus in newest-first order; drafts and 
 
 for (const width of [390, 768, 1280]) test(`classroom and menu fit ${width}px and stay available inside lessons`, async ({ page }) => {
   await page.setViewportSize({ width, height: 900 }); await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Мои уроки', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Lessons', level: 1 })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: `work/platform-home-${width}.png`, fullPage: true });
   await page.getByText('Уроки', { exact: true }).click();
@@ -73,6 +78,6 @@ for (const width of [390, 768, 1280]) test(`classroom and menu fit ${width}px an
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await expect(page.getByText('Уроки', { exact: true })).toBeInViewport();
   await page.getByRole('link', { name: 'Главное меню', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Мои уроки' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'My Lessons' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

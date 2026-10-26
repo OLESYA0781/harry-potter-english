@@ -241,11 +241,30 @@ test('Teacher mode is hidden for ddarya.rr, stays hidden after reload and resets
   await expect(page.locator('.teacher-panel')).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
-  await page.locator('.nav-item').nth(12).click();
+  await page.locator('.nav-item').nth(11).click();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
   await expect(page.locator('.teacher-panel')).toHaveCount(0);
   if (!await page.getByRole('button', { name: 'Выйти', exact: true }).isVisible()) await page.getByText(/Облачное сохранение ·/).first().click();
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toBeVisible();
   await expect(page.locator('.teacher-panel')).toHaveCount(0);
+});
+
+test('an old cloud position in a removed chapter keeps its answers and revisions after reload', async ({ page, context }) => {
+  const oldA2 = { index: 3, savedDraft: 'visited' };
+  const oldB1 = { index: 6, savedDraft: 'had gone' };
+  await rpc({}, { id: 'old-advanced-cloud', fields: { name: 'Вика', step: 13, 'answers:grammarA2': oldA2, 'answers:grammarB1': oldB1, 'answers:differencesSceneVersion': 2, 'answers:differencesFound': [], 'ratings:reading': 2 } });
+  await route(context); await login(page);
+  await expect(page.locator('.nav-item')).toHaveCount(12);
+  await expect(page.locator('.section-heading h1')).toHaveText('Find the differences');
+  await expect(page.locator('.grammar-challenge')).toHaveCount(0);
+  await sync(page);
+  await page.reload();
+  await expect(page.locator('.section-heading h1')).toHaveText('Find the differences');
+  const result = await rpc();
+  expect(result.fields.step.value).toBe(13);
+  expect(result.fields.step.revision).toBe(1);
+  expect(result.fields['answers:grammarA2'].value).toEqual(oldA2);
+  expect(result.fields['answers:grammarB1'].value).toEqual(oldB1);
+  expect(result.fields['ratings:reading'].value).toBe(2);
 });

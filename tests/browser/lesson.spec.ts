@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 async function stage(page: any, n: number) {
+  if (n === 14) {
+    const teacher = page.getByRole("button", { name: "Teacher mode", exact: true });
+    if (await teacher.isVisible()) await teacher.click();
+    await page.getByRole("button", { name: "Results & PDF", exact: true }).click();
+    return;
+  }
   await page.locator(".nav-item").nth(n).click();
 }
 test("welcome, navigation, persistence and confirmed restart", async ({
@@ -148,13 +154,13 @@ test("all chapters render without browser errors; responsive layout", async ({
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/#/lessons/trial");
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 12; i++) {
     await stage(page, i);
     await expect(page.locator("main")).not.toBeEmpty();
   }
   expect(errors).toEqual([]);
   await page.setViewportSize({ width: 390, height: 844 });
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 12; i++) {
     await page.getByRole("combobox").selectOption(String(i));
     expect(
       await page.evaluate(
@@ -328,7 +334,7 @@ test("all illustrated chapters load local artwork without system emoji", async (
     expect(response.headers()["content-type"]).toContain("image/webp");
     expect((await response.body()).length).toBeGreaterThan(10000);
   }
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 12; i++) {
     await stage(page, i);
     const visibleText = await page.locator("main").innerText();
     expect(visibleText).not.toMatch(/\p{Extended_Pictographic}/u);
@@ -491,7 +497,7 @@ test("spot six differences, oral examples, teacher grades and persistence", asyn
     fullPage: true,
   });
 });
-test("existing saved lesson results migrate to the new final chapter", async ({
+test("legacy saved results survive fallback from the removed final chapter", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -513,7 +519,8 @@ test("existing saved lesson results migrate to the new final chapter", async ({
       );
   });
   await page.goto("/#/lessons/trial");
-  await expect(page.locator(".congratulations")).toBeVisible();
+  await expect(page.locator(".section-heading h1")).toHaveText("Find the differences");
+  await stage(page, 14);
   await expect(page.getByPlaceholder("Your name", { exact: true })).toHaveValue(
     "Alice",
   );
@@ -525,7 +532,8 @@ test("existing saved lesson results migrate to the new final chapter", async ({
   expect(stored.data.scores.grammar0.correct).toBe(true);
   expect(stored.data.ratings.reading).toBe(2);
   await page.reload();
-  await expect(page.locator(".congratulations")).toBeVisible();
+  await expect(page.locator(".section-heading h1")).toHaveText("Find the differences");
+  await expect(page.locator(".congratulations")).toHaveCount(0);
 });
 
 test("revised fifth difference preserves four discoveries and teaches floor versus sofa", async ({

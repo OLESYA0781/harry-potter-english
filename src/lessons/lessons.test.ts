@@ -54,3 +54,8 @@ it('visiting the final chapter alone does not mean completing the trial lesson',
   expect(trialLesson.summarize({ ...initial, step: 14 })).toMatchObject({ status: 'in-progress', percent: 0 });
   expect(trialLesson.summarize(initial).status).toBe('not-started');
 });
+it('removed A2/B1 exercises do not affect progress of the twelve remaining chapters', () => {
+  const state = { ...structuredClone(initial), step: 12, answers: { grammarA2: { entries: Array.from({ length: 10 }, () => ({ attempts: [{ correct: true }] })) }, grammarB1: { entries: Array.from({ length: 10 }, () => ({ attempts: [{ correct: true }] })) } } };
+  expect(trialLesson.summarize(state)).toMatchObject({ percent: 0, detail: '0 из 52 заданий и оценок' });
+  expect(state.answers.grammarA2.entries).toHaveLength(10);
+});

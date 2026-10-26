@@ -51,3 +51,34 @@ test('missing speech support shows notice', async ({page}) => {
   await page.getByRole('button',{name:'Listen: Usually',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('недоступно');
 });
+
+for (const width of [390, 768, 1280]) test(`trial tabs remain visible and clickable beside chapter navigation at ${width}px`, async ({page}) => {
+  await page.setViewportSize({width,height:900});
+  await page.goto('/#/lessons/trial');
+  const lesson = page.getByRole('tab',{name:'Lesson',exact:true});
+  const homework = page.getByRole('tab',{name:'Homework',exact:true});
+  for (let i=0;i<2;i++) {
+    await homework.click();
+    await expect(page.getByRole('heading',{name:'My First Hogwarts Mission',exact:true})).toBeVisible();
+    if(width > 600) {
+      const sidebar = page.locator('.homework-sidebar');
+      await expect(sidebar).toBeVisible();
+      const rail = await sidebar.boundingBox();
+      const content = await page.locator('.homework').boundingBox();
+      expect(content!.x).toBeGreaterThanOrEqual(rail!.x+rail!.width);
+      await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
+    } else {
+      await page.getByRole('combobox',{name:'Choose homework section'}).selectOption('2');
+    }
+    await expect(page.getByRole('heading',{name:'The Secret Letter',exact:true})).toBeVisible();
+    await lesson.click();
+    await expect(page.locator('.sidebar nav button')).toHaveCount(12);
+    await expect(lesson).toHaveAttribute('aria-selected','true');
+    if(width>600) {
+      const rail=await page.locator('.sidebar').boundingBox();
+      const tab=await lesson.boundingBox();
+      expect(tab!.x).toBeGreaterThanOrEqual(rail!.x+rail!.width);
+    }
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

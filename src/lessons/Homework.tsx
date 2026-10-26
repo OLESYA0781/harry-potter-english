@@ -26,9 +26,16 @@ export default function Homework({ state, setState }: LessonProps) {
   const done = homeworkCompletion(state.answers);
   const field = (key: string, label: string, large = false) => <label className="hw-field" key={key}><span>{label}</span><textarea rows={large ? 8 : 2} value={text(key)} onChange={event => save(key, event.target.value)} spellCheck={false} autoCorrect="off" autoCapitalize="off" /></label>;
   const go = (next: number) => { setStep(next); window.speechSynthesis?.cancel(); };
-  return <main className="homework">
+  return <div className="app-shell homework-shell">
+    <aside className="sidebar homework-sidebar">
+      <a className="brand" href="#/lessons/trial" onClick={event => { event.preventDefault(); go(0); }}><span className="brand-icon">✦</span><span>HOGWARTS<small>ENGLISH ADVENTURE</small></span></a>
+      <div className="lesson-label">YOUR HOMEWORK <span>01</span></div>
+      <nav className="hw-steps" aria-label="Homework sections">{sections.map((name, i) => <button className={`nav-item ${step === i ? 'active' : ''}`} key={name} aria-label={`${i + 1}. ${name}`} aria-current={step === i ? 'step' : undefined} onClick={() => go(i)}><span className="nav-icon" aria-hidden="true">{['✦', '✎', '✉', '☀', '☾'][i]}</span><span>{name}</span>{done[i] ? <span className="nav-done">✓</span> : <small>{String(i + 1).padStart(2, '0')}</small>}</button>)}</nav>
+    </aside>
+    <div className="main-shell">
+    <div className="mobile-stage"><select aria-label="Choose homework section" value={step} onChange={event => go(Number(event.target.value))}>{sections.map((name, i) => <option key={name} value={i}>{i + 1}. {name}{done[i] ? ' ✓' : ''}</option>)}</select></div>
+    <main className="homework">
     <header><p className="hw-eyebrow">Homework 1 · A1–A2 · 20–25 minutes</p><h1>My First Hogwarts Mission</h1><p>Write your own answers. You can come back and change them.</p><small>Ответы сохраняются автоматически. Облачный статус — в панели наверху.</small></header>
-    <nav className="hw-steps" aria-label="Homework sections">{sections.map((name, i) => <button key={name} aria-current={step === i ? 'step' : undefined} onClick={() => go(i)}>{i + 1}. {name}{done[i] ? ' ✓' : ''}</button>)}</nav>
     {notice && <p role="status">{notice}</p>}
     <section className="hw-panel" aria-label={sections[step]}>
       <h2>{sections[step]}</h2>
@@ -39,5 +46,7 @@ export default function Homework({ state, setState }: LessonProps) {
       {step === 4 && <><p>Look at the picture. Write 4 sentences about the room.</p><img className="hw-room" src="/images/magic-room.svg" alt="A magical student bedroom with a bed, a desk, books, an owl sitting on the floor, a cup of tea on the desk and a broom near the bed." /><aside><h3>Useful Words</h3><p>There is… · There are… · I can see… · I like…</p><p>on the floor · is sitting · a cup of tea · clean my room</p></aside>{field('room', 'My room description', true)}<label><input type="checkbox" disabled={!text('room').trim()} checked={value('roomDone') === true && !!text('room').trim()} onChange={event => save('roomDone', event.target.checked)} /> Выполнено</label></>}
     </section>
     <div className="hw-paging"><button className="btn" disabled={step === 0} onClick={() => go(step - 1)}>← Back</button><span>{step + 1} / {sections.length}</span><button className="btn" disabled={step === sections.length - 1} onClick={() => go(step + 1)}>Next →</button></div>
-  </main>;
+  </main>
+    </div>
+  </div>;
 }

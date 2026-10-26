@@ -35,8 +35,11 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   expect(await page.locator('.hw-room').evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
   await page.getByLabel('My room description').fill('A owl.'); await page.getByLabel('Выполнено',{exact:true}).check();
   for(const width of [390,768,1280]) { await page.setViewportSize({width,height:900}); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
-  await page.getByRole('button',{name:'Mission progress',exact:true}).click();
-  await expect(page.getByRole('progressbar')).toHaveAttribute('value','3');
+  await expect(page.getByRole('button',{name:'Mission progress',exact:true})).toHaveCount(0);
+  await expect(page.locator('.hw-steps button')).toHaveCount(5);
+  await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
+  await expect(page.locator('.hw-paging')).toContainText('5 / 5');
+  await expect(page.getByRole('progressbar')).toHaveCount(0);
   await expect(page.getByText('Hogwarts Homework Star',{exact:true})).toHaveCount(0);
   await page.getByRole('tab',{name:'Lesson',exact:true}).click();
   await expect(page.locator('.nav-item')).toHaveCount(12);

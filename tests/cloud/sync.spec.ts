@@ -42,8 +42,8 @@ async function route(context: BrowserContext) {
     throw new Error(`Unexpected Supabase endpoint ${path.pathname}`);
   });
 }
-async function login(page: Page) {
-  await page.goto('/');
+async function login(page: Page, location = '/#/lessons/trial') {
+  await page.goto(location);
   await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
   await page.getByLabel('Email', { exact: true }).fill('learner@example.test');
   await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
@@ -97,7 +97,7 @@ test('offline edits survive immediate reload; stale same-field changes require a
   // Offline navigation is unavailable without a service worker; restoring network
   // loads the app and the durable queue, then detects the remote conflict.
   await other.getByPlaceholder('Your name', { exact: true }).fill('Other device name'); await sync(other);
-  await context.setOffline(false); await page.goto('/');
+  await context.setOffline(false); await page.goto('/#/lessons/trial');
   await page.getByText(/Облачное сохранение ·/).first().click();
   await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
   await expect(page.getByText(/Поле «name» изменено/)).toBeVisible();
@@ -134,7 +134,7 @@ test('local write-ahead log survives reload while consolidation is blocked', asy
 test('two tabs retain independent edits while the shared journal is locked', async ({ page, context }) => {
   await route(context); await login(page);
   await page.locator('.nav-item').nth(1).click(); await sync(page);
-  const other = await context.newPage(); await other.goto('/');
+  const other = await context.newPage(); await other.goto('/#/lessons/trial');
   await expect(other.getByPlaceholder('Your name', { exact: true })).toBeVisible();
   await other.evaluate(() => {
     const control = window as typeof window & { releaseJournal?: () => void };
@@ -152,7 +152,7 @@ test('two tabs retain independent edits while the shared journal is locked', asy
 });
 
 test('failed login and logout preserve progress and do not expose registration', async ({ page, context }) => {
-  await route(context); await page.goto('/');
+  await route(context); await page.goto('/#/lessons/trial');
   await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
   await page.getByLabel('Email', { exact: true }).fill('learner@example.test');
   await page.getByLabel('Пароль', { exact: true }).fill('wrong-password');
@@ -172,4 +172,56 @@ test('failed login and logout preserve progress and do not expose registration',
   const j = await page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
   expect(j.pending.name.value).toBe('Unsynced after logout');
   expect(j.owner).toBe(user);
+});
+
+test('lesson modules synchronize independently across devices and survive scoped resets', async ({ page, context, browser }) => {
+  const oldScore = { correct: true, first: false, latest: true, skill: 'Grammar' };
+  await rpc({}, { id: 'pre-platform-progress', fields: { name: 'Вика', step: 7, 'answers:grammar0': 2, 'scores:grammar0': oldScore, 'ratings:reading': 2 } });
+  await route(context);
+  const home = '/tests/fixtures/platform.html';
+  await login(page, home);
+  await page.getByLabel('Выбери своё приключение').selectOption('word-quest');
+  await page.getByRole('button', { name: 'Начать урок', exact: true }).click();
+  await page.getByLabel('Ответ нового урока').fill('Cloud word answer');
+  await page.getByRole('button', { name: 'Проверить новый урок' }).click(); await sync(page);
+  await page.getByText('Уроки', { exact: true }).click();
+  await page.locator('.lesson-menu').getByRole('link', { name: /Волшебное чтение/ }).click();
+  await page.getByLabel('Ответ нового урока').fill('Independent reading draft'); await sync(page);
+  const second = await browser.newContext(); await route(second);
+  const other = await second.newPage(); await login(other, `${home}#/lessons/word-quest`);
+  await expect(other.getByLabel('Ответ нового урока')).toHaveValue('Cloud word answer');
+  await other.reload(); await expect(other.getByLabel('Ответ нового урока')).toHaveValue('Cloud word answer');
+  await other.getByRole('button', { name: 'Сбросить этот урок' }).click(); await sync(other);
+  let result = await rpc();
+  expect(result.fields['scores:grammar0'].value).toEqual(oldScore);
+  expect(result.fields['ratings:reading'].value).toBe(2);
+  expect(result.fields['answers:@vika/lesson/reading-quest'].value.data.answers.draft).toBe('Independent reading draft');
+  expect(result.fields['answers:@vika/lesson/word-quest'].value.data.answers).toEqual({});
+  await page.getByText('Уроки', { exact: true }).click();
+  await page.locator('.lesson-menu').getByRole('link', { name: /Пробное занятие/ }).click();
+  await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
+  await page.getByRole('button', { name: 'Restart', exact: true }).click();
+  await page.getByRole('button', { name: 'Restart lesson', exact: true }).click(); await sync(page);
+  result = await rpc();
+  expect(result.fields['scores:grammar0'].value).toBeNull();
+  expect(result.fields['answers:@vika/lesson/reading-quest'].value.data.answers.draft).toBe('Independent reading draft');
+  await second.close();
+});
+
+test('same lesson edited offline retains both versions for explicit conflict resolution', async ({ page, context, browser }) => {
+  const home = '/tests/fixtures/platform.html#/lessons/word-quest';
+  await route(context); await login(page, home);
+  await page.getByLabel('Ответ нового урока').fill('Original'); await sync(page);
+  const second = await browser.newContext(); await route(second);
+  const other = await second.newPage(); await login(other, home);
+  await context.setOffline(true);
+  await page.getByLabel('Ответ нового урока').fill('Offline lesson answer');
+  await other.getByLabel('Ответ нового урока').fill('New remote answer'); await sync(other);
+  await context.setOffline(false);
+  await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
+  await expect(page.getByText(/Поле «answers:@vika\/lesson\/word-quest» изменено/)).toBeVisible();
+  await expect(page.getByLabel('Ответ нового урока')).toHaveValue('Offline lesson answer');
+  await page.getByRole('button', { name: 'Использовать облачную версию', exact: true }).click();
+  await expect(page.getByLabel('Ответ нового урока')).toHaveValue('New remote answer');
+  await second.close();
 });

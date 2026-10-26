@@ -2808,12 +2808,8 @@ footer > div {
 .classroom-home { max-width: 1240px; padding: 40px 40px 64px; }
 .classroom-welcome { display: grid; grid-template-columns: 1.25fr 1fr; align-items: center; gap: 24px; padding: 38px 42px; border: 1px solid #e3d8ba; border-radius: 23px; background: radial-gradient(ellipse at 80% 35%, #e5e9d6 0, transparent 55%), #f6f0df; overflow: hidden; }
 .classroom-welcome .eyebrow { font-size: 10px; letter-spacing: 2px; }
-.classroom-greeting { color: #6d754f; font-size: 14px; margin: 26px 0 12px; }
 .classroom-welcome h1 { font-size: clamp(34px, 4vw, 53px); line-height: 1.12; margin-bottom: 20px; }
 .classroom-welcome h1 em { display: block; color: #a58445; }
-.classroom-welcome-copy > p:last-of-type { font-size: 13px; max-width: 440px; }
-.classroom-tags { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 27px; }
-.classroom-tags span { display: flex; align-items: center; gap: 7px; color: #747b63; font-size: 10px; }
 .classroom-castle { position: relative; min-width: 0; text-align: center; }
 .classroom-castle .castle-art { width: 100%; max-width: 350px; margin: auto; filter: drop-shadow(0 14px 12px #5f714426); }
 .classroom-castle > .classroom-caption { display: inline-block; font: italic 16px Georgia, serif; color: #78653a; padding: 12px 20px; background: #fff9e9cc; border: 1px solid #e3d8ba; border-radius: 24px; transform: rotate(-3deg); }
@@ -2831,7 +2827,6 @@ footer > div {
 .lesson-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
 .lesson-number { display: grid; place-items: center; width: 43px; height: 43px; background: #efe7cd; color: #8c743f; font: 21px Georgia, serif; border-radius: 12px; }
 .lesson-status { font-size: 11px; color: #68745c; padding: 7px 11px; background: #edf0e5; border-radius: 20px; }
-.lesson-status.in-progress { color: #8a6b32; background: #f4e9cc; }
 .lesson-status.completed { color: #3d6b4d; background: #e1eddd; }
 .lesson-subtitle { text-transform: uppercase; font-size: 9px; letter-spacing: 2px; color: #99906f; }
 .lesson-card h3 { font-size: 28px; margin: 10px 0 12px; }
@@ -2840,7 +2835,6 @@ footer > div {
 .lesson-card .progress-track { height: 6px; }
 .lesson-card > small { display: block; margin-top: 9px; color: #969b88; font-size: 10px; }
 .lesson-card > button { margin-top: 22px; color: #6e713e; }
-.classroom-note { text-align: center; font: italic 15px Georgia, serif; margin: 28px 0 0; color: #8a8e79; }
 @media (max-width: 850px) {
   .platform-bar { padding: 0 24px; }
   .lesson-open .platform-cloud, .lesson-open > .platform-error { margin-left: 184px; }
@@ -2864,10 +2858,8 @@ footer > div {
   .classroom-welcome { grid-template-columns: 1fr; padding: 26px 23px; gap: 15px; }
   .classroom-welcome .eyebrow { font-size: 8px; }
   .classroom-welcome h1 { font-size: 36px; }
-  .classroom-greeting { margin-top: 20px; font-size: 12px; }
   .classroom-castle { width: 190px; max-width: 100%; margin: auto; }
   .classroom-castle > .classroom-caption { font-size: 13px; padding: 8px 16px; }
-  .classroom-tags { gap: 12px; margin-top: 20px; }
   .classroom-section-title h2 { font-size: 29px; }
   .classroom-total { font-size: 10px; padding: 8px 10px; }
   .lesson-picker { padding: 18px; }

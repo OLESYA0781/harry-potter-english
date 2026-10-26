@@ -28,7 +28,7 @@ async function route(context: BrowserContext) {
       else if (body.password !== 'test-only-password') return route.fulfill({ status: 400, headers, json: { error: 'invalid_grant', error_description: 'Invalid login credentials' } });
       const expires = Math.floor(Date.now() / 1000) + 3600;
       const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: user, exp: expires, role: 'authenticated' })).toString('base64url'), 'test-signature'].join('.');
-      return route.fulfill({ headers, json: { access_token: token, refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: user, email: 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
+      return route.fulfill({ headers, json: { access_token: token, refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: user, email: body.email || 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
     }
     if (path.pathname.includes('/logout')) return route.fulfill({ status: 204, headers });
     if (path.pathname.includes('/user')) return route.fulfill({ headers, json: { id: user, email: 'learner@example.test' } });
@@ -224,4 +224,28 @@ test('same lesson edited offline retains both versions for explicit conflict res
   await page.getByRole('button', { name: 'Использовать облачную версию', exact: true }).click();
   await expect(page.getByLabel('Ответ нового урока')).toHaveValue('New remote answer');
   await second.close();
+});
+
+test('Teacher mode is hidden for ddarya.rr, stays hidden after reload and resets when that account signs in', async ({ page, context }) => {
+  await route(context);
+  await page.goto('/#/lessons/trial');
+  await page.getByRole('button', { name: 'Teacher mode', exact: true }).click();
+  await expect(page.locator('.teacher-panel')).toBeVisible();
+  await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
+  await page.getByLabel('Email', { exact: true }).fill('ddarya.rr@gmail.com');
+  await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
+  await page.getByRole('button', { name: 'Войти', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Exit teacher mode', exact: true })).toHaveCount(0);
+  await expect(page.locator('.teacher-panel')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+  await page.locator('.nav-item').nth(12).click();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+  await expect(page.locator('.teacher-panel')).toHaveCount(0);
+  if (!await page.getByRole('button', { name: 'Выйти', exact: true }).isVisible()) await page.getByText(/Облачное сохранение ·/).first().click();
+  await page.getByRole('button', { name: 'Выйти', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toBeVisible();
+  await expect(page.locator('.teacher-panel')).toHaveCount(0);
 });

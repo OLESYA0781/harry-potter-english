@@ -41,7 +41,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
         <details className="lesson-menu" key={route || 'home'}>
           <summary>Уроки <ChevronDown size={22} /></summary>
           <ul>{items.map(({ lesson, summary }) => <li key={lesson.id}><a href={`#/lessons/${lesson.id}`} aria-current={active?.id === lesson.id ? 'page' : undefined}>
-            <strong>{lesson.title}</strong><span className="lesson-translation" lang="ru">{lesson.subtitle}</span><span>{summary.status !== 'in-progress' ? `${statusLabels[summary.status]} · ` : ''}{summary.percent}%</span><small>{lesson.description}</small>
+            <strong>{lesson.title}</strong><span className="lesson-translation" lang="ru">{lesson.subtitle}</span><span>{summary.status !== 'in-progress' ? `${statusLabels[summary.status]} · ` : ''}{summary.percent}%</span>{lesson.description && <small>{lesson.description}</small>}
           </a></li>)}</ul>
         </details>
       </div>

@@ -7,7 +7,6 @@ import {
   RotateCcw,
   GraduationCap,
   Sparkles,
-  Download,
   ChevronRight,
 } from "lucide-react";
 import {
@@ -63,8 +62,7 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
     [muted, setMuted] = useState(false),
     [audioMessage, setAudioMessage] = useState(""),
     [burst, setBurst] = useState(false),
-    [confirm, setConfirm] = useState(false),
-    [exporting, setExporting] = useState(false);
+    [confirm, setConfirm] = useState(false);
   const teacher = canTeach && teacherRequested;
   const [showResults, setShowResults] = useState(false);
   const activeStep = Math.min(savedState.step, lessonStages.length - 1);
@@ -203,16 +201,6 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
     .map((item) => `${item === "apple" ? "an" : "a"} ${item}`)
     .join(", ")
     .replace(/, ([^,]+)$/, " and $1")} in my school bag!`;
-  async function pdf(cert = false) {
-    setExporting(true);
-    try {
-      await (await import("../pdf")).downloadPDF(state, cert);
-    } catch {
-      setAudioMessage("Download failed. Please try again.");
-    } finally {
-      setExporting(false);
-    }
-  }
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -341,7 +329,7 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
                 Режим предназначен для совместного урока с преподавателем.
               </small>
               <button className="pill" onClick={() => setShowResults(!showResults)}>
-                {showResults ? "Back to lesson" : "Results & PDF"}
+                {showResults ? "Back to lesson" : "Results"}
               </button>
             </aside>
           )}
@@ -1170,7 +1158,7 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
                       That’s something to be proud of.
                     </p>
                     <label className="input-label">
-                      Name on your certificate
+                      Learner’s name
                       <input
                         maxLength={45}
                         value={state.name}
@@ -1180,13 +1168,6 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
                         }
                       />
                     </label>
-                    <button
-                      className="btn"
-                      disabled={exporting}
-                      onClick={() => pdf(true)}
-                    >
-                      <Download size={18} /> Download certificate
-                    </button>
                     <p className="micro">
                       Your teacher can open teacher mode to see your results.
                     </p>
@@ -1294,13 +1275,6 @@ export default function TrialLesson({ state: savedState, setState, canTeach = fa
                           </p>
                         ))}
                       </aside>
-                      <button
-                        className="btn"
-                        disabled={exporting}
-                        onClick={() => pdf()}
-                      >
-                        <Download size={18} /> Download results (PDF)
-                      </button>
                     </section>
                   )}
                 </>

@@ -8,7 +8,7 @@ export const trialLesson: LessonDefinition = {
   title: 'Trial Lesson',
   subtitle: 'Пробное занятие',
   addedAt: '2026-10-24T00:00:00Z',
-  description: 'Приключение в Хогвартсе: истории, игры, чтение и разговорная практика. 12 глав с интерактивными заданиями и диагностикой.',
+  description: '',
   initialState: initial,
   Component: TrialLesson,
   summarize(state) {

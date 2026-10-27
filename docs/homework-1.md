@@ -2,9 +2,9 @@
 
 Open Trial Lesson → Homework. Lesson continues to show the original twelve chapters.
 
-New Words contains the 15 requested entries and two additional expressions. Each has a translation toggle, pronunciation, example and saved learned checkbox. Speech uses the device's English Web Speech voice; playback requires a supported browser and an installed English voice. An unavailable API, missing English voice or playback error produces a notice. Actual voice/audio quality depends on the device.
+New Words contains the 15 requested entries and two additional expressions. Each has icon-only pronunciation, an example and a visible translation. Speech uses the device's English Web Speech voice; playback requires a supported browser and an installed English voice. An unavailable API, missing English voice or playback error produces a notice. Actual voice/audio quality depends on the device.
 
-All free text is saved as entered (no trimming, correction or grading). Trimming is used only to distinguish blank fields when deriving completion. New Words requires all 17 learned marks and five written recall answers. Grammar needs five nonblank answers; reading needs four. Both writing sections require nonblank text and the learner's completion mark. Sentence count is approximate and never blocks completion. There is no separate Mission progress tab, summary screen or star reward. Completion marks remain on the five section buttons.
+All free text is saved as entered (no trimming, correction or grading). Trimming is used only to distinguish blank fields when deriving completion. New Words requires five written recall answers. Vocabulary learned checkboxes have been removed; existing stored marks are retained without affecting completion. Grammar needs five nonblank answers; reading needs four. Both writing sections require nonblank text and the learner's completion mark. Sentence count is approximate and never blocks completion. There is no separate Mission progress tab, summary screen or star reward. Completion marks remain on the five section buttons.
 
 ## Storage and deployment
 

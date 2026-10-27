@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { homeworkCompletion, homeworkPrefix as p, words, sentenceCount } from './homeworkData';
+import { homeworkCompletion, homeworkPrefix as p, sentenceCount } from './homeworkData';
 import { readLesson, updateLesson } from './progress';
 import { trialLesson } from './registry';
 import { initial } from '../data';
 describe('homework completion without grading', () => {
-  it('needs studied vocabulary, written answers and explicit writing marks', () => {
+  it('needs recall answers and explicit writing marks', () => {
     const answers: Record<string, unknown> = {};
     expect(homeworkCompletion(answers)).toEqual([false,false,false,false,false]);
-    words.forEach((_, i) => answers[p + `learned${i}`] = true);
     for (const [key, n] of [['remember',5],['grammar',5],['letter',4]] as const) for(let i=0;i<n;i++) answers[p+key+i]='  my mistakess!?\n ';
     answers[p+'day']='I is happy'; answers[p+'room']='There are a owl';
     expect(homeworkCompletion(answers)).toEqual([true,true,true,false,false]);

@@ -11,14 +11,14 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   await expect(page.locator('.hw-words article')).toHaveCount(17);
   await page.getByRole('button',{name:'Listen: Usually',exact:true}).click();
   expect(await page.evaluate(()=>(window as any).spoken)).toEqual(['Usually']);
-  await page.locator('.hw-words input').first().check();
+  await expect(page.locator('.hw-words input[type=checkbox]')).toHaveCount(0);
   await page.getByLabel('Переведи «обычно» на английский.').fill('  usualy\n ');
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const drafts = ['  Hermione drink.\n','Ron sit!!','Harry write','There is book','She no like'];
   for (let i=0;i<5;i++) await page.locator('.hw-field textarea').nth(i).fill(drafts[i]);
   await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
   await expect(page.getByLabel('Переведи «обычно» на английский.')).toHaveValue('  usualy\n ');
-  await expect(page.locator('.hw-words input').first()).toBeChecked();
+  await expect(page.getByLabel('Выучено',{exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   for(let i=0;i<5;i++) await expect(page.locator('.hw-field textarea').nth(i)).toHaveValue(drafts[i]);
   await expect(page.getByRole('button',{name:/^Check$|Correct!|Try again!/})).toHaveCount(0);
@@ -99,8 +99,7 @@ test('large study cards and separate helper chips remain usable on tablet and ph
     expect(await cards.first().locator('h3').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(27);
     const listen=await cards.first().getByRole('button').boundingBox();
     expect(listen!.height).toBeGreaterThanOrEqual(48);
-    await cards.first().getByLabel('Выучено').check();
-    await expect(cards.first()).toHaveClass(/is-learned/);
+    await expect(cards.getByLabel('Выучено',{exact:true})).toHaveCount(0);
     if(width<=600) await page.getByLabel('Choose homework section').selectOption('3');
     else await page.getByRole('button',{name:'4. A Day at Hogwarts',exact:true}).click();
     await expect(page.locator('.hw-chips li')).toHaveCount(8);

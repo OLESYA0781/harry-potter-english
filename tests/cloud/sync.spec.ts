@@ -274,7 +274,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
   await route(context); await login(page);
   await page.getByRole('tab',{name:'Homework',exact:true}).click();
   await page.locator('.hw-words input').first().check();
-  await page.getByRole('button',{name:"2. Hermione's Grammar Challenge"}).click();
+  await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
   await page.locator('.hw-field textarea').first().fill(draft); await sync(page);
   const second = await browser.newContext(); await route(second);
@@ -282,7 +282,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
     const other = await second.newPage(); await login(other);
     await other.getByRole('tab',{name:'Homework',exact:true}).click();
     await expect(other.locator('.hw-words input').first()).toBeChecked();
-    await other.getByRole('button',{name:"2. Hermione's Grammar Challenge"}).click();
+    await other.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
     await expect(other.locator('.hw-field textarea').first()).toHaveValue(draft);
     await context.setOffline(true);
     await page.locator('.hw-field textarea').nth(1).fill('  Ron is sit.\n ');
@@ -291,7 +291,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
     await other.getByLabel('Mark as completed').check(); await sync(other);
     await context.setOffline(false); await sync(page);
     await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
-    await page.getByRole('button',{name:"2. Hermione's Grammar Challenge"}).click();
+    await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
     await expect(page.locator('.hw-field textarea').first()).toHaveValue(draft);
     await expect(page.locator('.hw-field textarea').nth(1)).toHaveValue('  Ron is sit.\n ');
     await page.getByRole('button',{name:'4. A Day at Hogwarts'}).click();

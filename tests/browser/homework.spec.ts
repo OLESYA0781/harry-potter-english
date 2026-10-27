@@ -84,7 +84,7 @@ for (const width of [390, 768, 1280]) test(`trial tabs remain visible and clicka
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('large study cards and separate helper chips remain usable on tablet and phone', async ({page}) => {
+test('study cards and writing tasks remain usable without helper blocks', async ({page}) => {
   for (const width of [390, 768, 1024, 1280]) {
     await page.setViewportSize({width,height:1000});
     await page.goto('/');
@@ -102,14 +102,14 @@ test('large study cards and separate helper chips remain usable on tablet and ph
     await expect(cards.getByLabel('Выучено',{exact:true})).toHaveCount(0);
     if(width<=600) await page.getByLabel('Choose homework section').selectOption('3');
     else await page.getByRole('button',{name:'4. A Day at Hogwarts',exact:true}).click();
-    await expect(page.locator('.hw-chips li')).toHaveCount(8);
-    await expect(page.locator('.hw-chips li').filter({hasText:'spend time with my family'})).toBeVisible();
+    await expect(page.locator('.hw-helper')).toHaveCount(0);
+    await expect(page.getByRole('heading',{name:'Useful Words',exact:true})).toHaveCount(0);
     expect(await page.locator('.hw-field textarea').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(20);
     await page.getByLabel('My magical day').fill('I is happy.  My owl sleep!');
     await expect(page.getByLabel('Mark as completed')).toHaveCount(0);
     if(width<=600) await page.getByLabel('Choose homework section').selectOption('4');
     else await page.getByRole('button',{name:'5. My Magic Room',exact:true}).click();
-    await expect(page.locator('.hw-chips li')).toHaveCount(8);
+    await expect(page.locator('.hw-helper')).toHaveCount(0);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   }
 });

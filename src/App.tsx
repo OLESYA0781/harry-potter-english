@@ -36,7 +36,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const current = items.find(item => item.lesson.id === active?.id);
   const open = (id: string) => { setSelected(id); window.location.hash = `/lessons/${id}`; };
   const Component = active?.Component;
-  return <div className={`platform-shell ${active ? 'lesson-open' : ''}`}>
+  return <div className={`platform-shell ${active ? 'lesson-open' : ''} ${active?.id === 'trial' && trialTab === 'homework' ? 'homework-open' : ''}`}>
     <nav className="platform-bar" aria-label="Навигация по урокам">
       <a href="#/" className="platform-brand"><Sparkles size={25} /><span>VIKA ENGLISH</span></a>
       <div className="platform-links"><a className="platform-home-link" aria-label="Главное меню" href="#/" aria-current={!active ? 'page' : undefined}><Home size={22} /><span>Главное меню</span></a>

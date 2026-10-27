@@ -273,7 +273,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
   await rpc({}, {id:'old-trial',fields:{'answers:diary':'Existing lesson answer', 'ratings:reading':2}});
   await route(context); await login(page);
   await page.getByRole('tab',{name:'Homework',exact:true}).click();
-  await page.locator('.hw-words input').first().check();
+  await page.getByLabel('Переведи «обычно» на английский.').fill('usualy');
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
   await page.locator('.hw-field textarea').first().fill(draft); await sync(page);
@@ -281,7 +281,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
   try {
     const other = await second.newPage(); await login(other);
     await other.getByRole('tab',{name:'Homework',exact:true}).click();
-    await expect(other.locator('.hw-words input').first()).toBeChecked();
+    await expect(other.getByLabel('Переведи «обычно» на английский.')).toHaveValue('usualy');
     await other.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
     await expect(other.locator('.hw-field textarea').first()).toHaveValue(draft);
     await context.setOffline(true);

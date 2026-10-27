@@ -23,8 +23,9 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   for(let i=0;i<5;i++) await expect(page.locator('.hw-field textarea').nth(i)).toHaveValue(drafts[i]);
   await expect(page.getByRole('button',{name:/^Check$|Correct!|Try again!/})).toHaveCount(0);
   await page.getByRole('button',{name:'3. The Secret Letter'}).click();
-  await page.getByRole('button',{name:'Listen to the letter'}).click();
-  expect((await page.evaluate(()=>(window as any).spoken))[0]).toContain('Tomorrow we will visit Hagrid.');
+  await expect(page.getByRole('button',{name:'Listen to the letter'})).toHaveCount(0);
+  await expect(page.getByText('Секретное письмо',{exact:true})).toBeVisible();
+  await expect(page.getByText('Прочитай письмо Гермионы и ответь на вопросы.',{exact:true})).toBeVisible();
   await expect(page.locator('.hw-field textarea')).toHaveCount(4);
   await page.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
   await page.getByLabel('My magical day').fill('I is happy.\nI has owl!');

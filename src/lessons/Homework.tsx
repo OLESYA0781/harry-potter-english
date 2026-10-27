@@ -38,7 +38,7 @@ export default function Homework({ state, setState }: LessonProps) {
     <div className="main-shell">
     <div className="mobile-stage"><select aria-label="Choose homework section" value={step} onChange={event => go(Number(event.target.value))}>{sections.map((name, i) => <option key={name} value={i}>{i + 1}. {name}{done[i] ? ' ✓' : ''}</option>)}</select></div>
     <main className="homework">
-    <header><span className="hw-stage-number" aria-hidden="true">{String(step + 1).padStart(2, '0')}</span><h1>{sections[step]}</h1>{step === 2 && <small lang="ru">Секретное письмо</small>}</header>
+    <header><span className="hw-stage-number" aria-hidden="true">{String(step + 1).padStart(2, '0')}</span><div className="hw-heading-copy"><h1>{sections[step]}</h1>{step === 2 && <small lang="ru">Секретное письмо</small>}</div></header>
     {notice && <p role="status">{notice}</p>}
     <section className={`hw-panel hw-task-${step}`} aria-label={sections[step]}>
       {step === 0 && <><div className="hw-words">{words.map(([english, russian, example]) => <article key={english} className="hw-word-card"><div className="hw-word-heading"><h3>{english}</h3><button className="hw-speak" aria-label={`Listen: ${english}`} title={`Прослушать: ${english}`} onClick={() => speak(english)}><Volume2 size={25} aria-hidden="true" /></button></div><p className="hw-translation" lang="ru">{russian}</p><p className="hw-example">{example}</p></article>)}</div><h3>Remember the Words</h3>{remember.map((q, i) => field(`remember${i}`, q))}</>}

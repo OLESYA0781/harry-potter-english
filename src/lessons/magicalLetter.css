@@ -1,0 +1,61 @@
+.magic-letter-scene {
+  position: relative;
+  isolation: isolate;
+  margin: 28px -12px 36px;
+  padding: 24px 8px 32px;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 35%, #244354, #101b2a 65%, #080f1b);
+  scroll-margin-top: calc(var(--platform-height, 76px) + 16px);
+}
+/* Nine-slice artwork preserves rolls/seal while the blank middle grows. */
+.magic-letter-scroll {
+  --scroll-top: clamp(160px, 30vw, 280px);
+  --scroll-bottom: clamp(90px, 15vw, 140px);
+  --scroll-left: clamp(28px, 5vw, 62px);
+  --scroll-right: clamp(25px, 4vw, 54px);
+  position: relative;
+  max-width: 760px;
+  margin: auto;
+  padding: var(--scroll-top) var(--scroll-right) var(--scroll-bottom) var(--scroll-left);
+  animation: letter-arrive .45s ease-out both;
+}
+.magic-letter-decoration {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  border-style: solid; border-color: transparent;
+  border-width: var(--scroll-top) var(--scroll-right) var(--scroll-bottom) var(--scroll-left);
+  border-image-source: url('/images/letter-parchment.webp');
+  border-image-slice: 50% 12% 20% 14% fill;
+  border-image-repeat: stretch;
+}
+/* Reserved zones keep real text clear of the artwork's header and footer. */
+.magic-letter-cap { position: absolute; left: 0; right: 0; pointer-events: none; }
+.magic-letter-top { top: 0; height: var(--scroll-top); }
+.magic-letter-bottom { bottom: 0; height: var(--scroll-bottom); }
+.magic-letter-text {
+  position: relative; z-index: 1;
+  margin: 0; padding: 20px 22px 26px;
+  color: #352719;
+  font: 400 24px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  text-align: left; transform: none; user-select: text;
+  overflow-wrap: break-word;
+  animation: letter-ink .3s .15s ease-out both;
+}
+.magic-letter-text p { margin: 0 0 1.15em; white-space: pre-line; color: inherit; font: inherit; }
+.magic-letter-text p:last-child { margin-bottom: 0; }
+.magic-letter-spark { position: absolute; pointer-events: none; color: #a8f6ff; text-shadow: 0 0 12px #40d9f5; font-size: 20px; }
+.spark-one { top: 25%; left: 3%; }.spark-two { top: 62%; right: 3%; font-size: 25px; }.spark-three { bottom: 12%; left: 4%; font-size: 14px; }
+@keyframes letter-arrive { from { opacity: 0; transform: translateY(12px) scaleY(.98); } to { opacity: 1; transform: none; } }
+@keyframes letter-ink { from { opacity: 0; } to { opacity: 1; } }
+@media(max-width:1100px) { .magic-letter-text { font-size: 23px; } }
+@media(max-width:600px) {
+  .magic-letter-scene { margin: 24px -16px 28px; padding: 14px 0 18px; border-radius: 18px; }
+  .magic-letter-text { padding: 18px 12px 24px; font-size: 20px; }
+  .magic-letter-spark { font-size: 13px; }.spark-two { right: 2%; }
+}
+@media(prefers-reduced-motion:reduce) { .magic-letter-scroll, .magic-letter-text { animation: none; } }
+@media print {
+  .magic-letter-scene { padding: 0; margin: 0; background: none; }
+  .magic-letter-scroll { padding: 0; }
+  .magic-letter-cap, .magic-letter-spark, .magic-letter-decoration { display: none; }
+  .magic-letter-text { padding: 20px; background: white; color: black; font-size: 22px; }
+}

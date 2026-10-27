@@ -1,0 +1,85 @@
+/* Game UI is scoped to Homework; lesson scoring and classroom layout stay intact. */
+.homework-open { --lesson-sidebar-width: 280px; }
+.homework-open .homework-sidebar { width: var(--lesson-sidebar-width); padding: 28px 18px; background: #203f35; }
+.homework-open .homework-shell > .main-shell { margin-left: var(--lesson-sidebar-width); }
+.homework-open .platform-cloud { margin-left: var(--lesson-sidebar-width); }
+.homework-open .trial-tabs { padding-inline: 28px; }
+.homework-open .trial-tabs button { min-height: 56px; font: 750 18px/1.3 system-ui,sans-serif; padding: 15px 32px; border: 2px solid #c7b993; box-shadow: 0 4px 0 #e2d9c1; }
+.homework-open .trial-tabs button[aria-selected=true] { background: #335844; border-color: #335844; box-shadow: 0 4px 0 #203e32; }
+.homework-shell .homework { max-width: 1220px; padding: 0 28px 40px; font-size: 21px; }
+.homework > header { border-radius: 25px; background: #294d3e; color: #fff9e9; padding: 26px 30px; box-shadow: 0 7px 0 #d6decb; }
+.homework > header h1 { color: #fff8df; font: 800 clamp(32px,3.4vw,44px)/1.2 system-ui,sans-serif; margin: 20px 0 22px; overflow-wrap: normal; }
+.homework > header small { color: #eee6cc; font-size: 18px; }
+.hw-stage-number { background: #f1d580; color: #514019; border: 0; border-radius: 18px; box-shadow: 0 4px 0 #b99b4a; font: 800 27px system-ui,sans-serif; }
+.hw-mission-path { gap: 10px; }
+.hw-mission-path span { background: #416350; color: #f4ecd8; width: 34px; height: 34px; border: 1px solid #6b806b; font-size: 17px; }
+.hw-mission-path .current { background: #e7dcf6; color: #4e386b; box-shadow: 0 0 0 3px #a993bd; border-color: #e7dcf6; }
+.hw-mission-path .done { background: #f1d580; color: #3f4326; border-color: #f1d580; }
+.hw-quest-progress { display: flex; align-items: center; gap: 16px; font: 700 16px system-ui,sans-serif; color: #f7efd9; }
+.hw-quest-track { height: 10px; background: #18372b; border-radius: 10px; flex: 1; overflow: hidden; }
+.hw-quest-track > span { display: block; height: 100%; background: #efd07c; border-radius: inherit; transition: width .2s ease; }
+.homework .hw-panel { margin-top: 30px; padding: 28px; border: 2px solid #e1d9c4; border-radius: 25px; background: #fffdf6; box-shadow: 0 5px 0 #e4ddc9; }
+.homework .hw-task-0 { border: 0; box-shadow: none; padding: 0; background: none; }
+.hw-words { gap: 24px; }
+.hw-words .hw-word-card { padding: 28px; border-radius: 24px; border-width: 2px; gap: 22px; background: #fff3cf; border-color: #d8c08a; box-shadow: 0 5px 0 #d9c699; }
+.hw-words .hw-word-card:nth-child(3n+2) { background: #eee5f8; border-color: #c7b4df; box-shadow: 0 5px 0 #c7b4df; }
+.hw-words .hw-word-card:nth-child(3n) { background: #e5efdd; border-color: #bdcda9; box-shadow: 0 5px 0 #bdcda9; }
+.hw-words .hw-word-card h3 { font: 800 30px/1.3 system-ui,sans-serif; color: #253f32; }
+.hw-words .hw-translation { padding: 14px 18px; border-radius: 14px; background: #fffdf6aa; font-size: 23px; color: #394334; }
+.hw-words .hw-example { font-size: 21px; background: #fffdf6; border-left: 4px solid #9f874c; padding: 18px; line-height: 1.6; }
+.hw-speak { flex-basis: 58px; width: 58px; height: 58px; border-radius: 18px; background: #fffdf5; border: 2px solid #8c783d; color: #4c562e; box-shadow: 0 4px 0 #b59c5f; }
+.hw-speak:hover { background: #f8e7ac; }.hw-speak:active { transform: translateY(3px); box-shadow: 0 1px 0 #b59c5f; }
+.homework h3 { font: 800 28px/1.3 system-ui,sans-serif; }.hw-panel > h3 { margin: 40px 0 22px; }
+.hw-panel > p { padding: 20px 22px; border-radius: 17px; background: #f1eddf; border: 1px solid #e1d8bf; font-size: 22px; line-height: 1.6; }
+.hw-panel > ul { list-style: none; padding: 0; display: grid; gap: 12px; margin: 24px 0; }
+.hw-panel > ul li { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: #f2edfa; border-radius: 15px; margin: 0; font-size: 21px; }
+.hw-panel > ul li::before { content: '✦'; color: #886a35; flex-shrink: 0; }
+.hw-field { padding: 24px; border-radius: 22px; border: 2px solid #d8d2bd; background: #f6f2e8; margin: 26px 0; box-shadow: 0 4px 0 #e4ddca; }
+.hw-field > span { font-size: 22px; font-weight: 750; line-height: 1.5; }
+.homework .hw-field textarea { font-size: 22px; line-height: 1.6; padding: 20px; border: 2px solid #b6c5a6; border-radius: 16px; min-height: 144px; background: #fffefa; }
+.homework .hw-field textarea:focus { border-color: #8163a8; outline: 4px solid #d8c9ea; outline-offset: 3px; }
+.homework .hw-field textarea[rows='8'] { min-height: 360px; }
+.hw-paging { gap: 16px; padding: 16px 0 8px; }
+.homework .hw-paging .btn { flex: 1; max-width: 260px; min-height: 62px; font-size: 21px; border-radius: 18px; border: 2px solid #315440; background: #416b50; box-shadow: 0 5px 0 #25452f; }
+.homework .hw-paging .btn:disabled { background: #eee8d7; color: #746c55; border-color: #d8d0b8; box-shadow: 0 4px 0 #d8d0b8; opacity: 1; }
+.homework-sidebar .hw-steps .nav-item { min-height: 90px; padding: 16px 13px; font-size: 18px; margin: 12px 0; border: 1px solid #47644f; border-radius: 17px; color: #f4efdd; gap: 14px; }
+.homework-sidebar .hw-steps .nav-item.active { background: #f1d580; color: #283d2b; box-shadow: 0 4px 0 #b99e56; border-color: #f1d580; }
+.homework-sidebar .hw-steps .nav-item.active .nav-icon { color: #536038; }
+.hw-nav-copy { display: block; flex: 1; min-width: 0; }.hw-nav-status { display: block; color: #bacdb9; font: 600 13px/1.4 system-ui,sans-serif; margin-top: 6px; }.nav-item.active .hw-nav-status { color: #50603c; }
+.homework-sidebar .hw-steps .nav-item small { display: none; }.homework-sidebar .nav-done { color: #ead18d; font-size: 20px; }
+.homework-sidebar .hw-steps .nav-item.active .nav-done { color: #315338; }
+.homework-sidebar .hw-steps .nav-item .nav-icon { width: 28px; font-size: 29px; }.homework-sidebar .lesson-label { font-size: 13px; color: #cad6be; }
+.homework-open .platform-cloud .cloud-progress { font-size: 18px; padding: 20px; }
+.homework-open .platform-cloud .cloud-progress button { min-height: 54px; font-size: 18px; padding: 14px 20px; }
+.homework-open .platform-cloud .cloud-progress input { font-size: 20px; }
+.homework .magic-letter-scene { border: 2px solid #cbb9e0; box-shadow: 0 5px 0 #e2d7ee; border-radius: 23px; }
+.homework .letter-open-button { min-height: 60px; font-size: 20px; padding: 16px 24px; border-radius: 18px; }
+.homework .letter-postal-header > span:first-child { font-size: 23px; }.homework .letter-from { font-size: 18px; }
+@media(max-width:1100px) {
+  .homework-open { --lesson-sidebar-width: 224px; }
+  .homework-sidebar .hw-steps .nav-item { gap: 10px; padding: 15px 10px; font-size: 17px; }
+  .hw-words { grid-template-columns: minmax(0,1fr); }
+}
+@media(max-width:850px) {
+  .homework-sidebar .hw-steps .nav-item { flex-wrap: nowrap; }
+  .homework-sidebar .nav-item > span:nth-child(2) { flex-basis: auto; }
+  .homework-sidebar .nav-done { margin-left: 0; }
+  .homework-shell .homework { padding: 0 22px 36px; }
+}
+@media(max-width:600px) {
+  .homework-open { --lesson-sidebar-width: 0px; }
+  .homework-open .trial-tabs { padding-inline: 16px; gap: 12px; }.homework-open .trial-tabs button { padding: 14px 20px; }
+  .homework-shell .homework { padding: 0 14px 30px; font-size: 20px; }
+  .homework > header { padding: 22px 20px; border-radius: 22px; }.homework > header h1 { font-size: 32px; }
+  .hw-mission-meta { gap: 10px; }.hw-mission-path { gap: 6px; }.hw-mission-path span { width: 28px; height: 28px; font-size: 15px; }
+  .hw-stage-number { width: 48px; height: 48px; font-size: 24px; }
+  .homework .hw-panel { padding: 18px; }.homework .hw-task-0 { padding: 0; }
+  .hw-words .hw-word-card { padding: 23px; }.hw-words .hw-word-card h3 { font-size: 28px; }
+  .hw-word-heading { gap: 12px; }.hw-words .hw-translation { font-size: 22px; padding: 14px; }
+  .hw-panel > p { padding: 16px; font-size: 21px; }.hw-panel > ul li { padding: 15px; font-size: 20px; }
+  .hw-field { padding: 17px; }.hw-field > span { font-size: 21px; }.homework .hw-field textarea { font-size: 21px; padding: 16px; }
+  .homework .hw-paging .btn { min-height: 58px; font-size: 19px; padding: 14px 20px; min-width: 92px; }
+  .hw-paging { gap: 12px; font-size: 17px; }.homework .letter-open-button { font-size: 18px; padding: 15px 18px; }
+  .homework-shell .mobile-stage select { min-height: 60px; font-size: 19px; border: 2px solid #52694e; background: #f9f4df; color: #2d4935; box-shadow: 0 4px 0 #d6d7bc; }
+}
+@media(prefers-reduced-motion:reduce) { .hw-quest-track > span { transition: none; } }

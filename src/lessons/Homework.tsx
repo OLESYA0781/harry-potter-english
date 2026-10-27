@@ -4,6 +4,7 @@ import { Volume2 } from 'lucide-react';
 import type { LessonProps } from './types';
 import { homeworkCompletion, homeworkPrefix, homeworkValue, letter, mistakes, questions, remember, sections, words } from './homeworkData';
 import './homework.css';
+import './homeworkGame.css';
 
 export default function Homework({ state, setState }: LessonProps) {
   const [step, setStep] = useState(0);
@@ -32,14 +33,14 @@ export default function Homework({ state, setState }: LessonProps) {
     <aside className="sidebar homework-sidebar">
       <a className="brand" href="#/lessons/trial" onClick={event => { event.preventDefault(); go(0); }}><span className="brand-icon">✦</span><span>HOGWARTS<small>ENGLISH ADVENTURE</small></span></a>
       <div className="lesson-label">YOUR HOMEWORK <span>01</span></div>
-      <nav className="hw-steps" aria-label="Homework sections">{sections.map((name, i) => <button className={`nav-item ${step === i ? 'active' : ''}`} key={name} aria-label={`${i + 1}. ${name}`} aria-current={step === i ? 'step' : undefined} onClick={() => go(i)}><span className="nav-icon" aria-hidden="true">{['✦', '✎', '✉', '☀', '☾'][i]}</span><span>{name}</span>{done[i] ? <span className="nav-done">✓</span> : <small>{String(i + 1).padStart(2, '0')}</small>}</button>)}</nav>
+      <nav className="hw-steps" aria-label="Homework sections">{sections.map((name, i) => <button className={`nav-item ${step === i ? 'active' : ''}`} key={name} aria-label={`${i + 1}. ${name}`} aria-current={step === i ? 'step' : undefined} onClick={() => go(i)}><span className="nav-icon" aria-hidden="true">{['✦', '✎', '✉', '☀', '☾'][i]}</span><span className="hw-nav-copy">{name}<span className="hw-nav-status">{done[i] ? 'Выполнено' : step === i ? 'Текущий этап' : 'Впереди'}</span></span>{done[i] ? <span className="nav-done">✓</span> : <small>{String(i + 1).padStart(2, '0')}</small>}</button>)}</nav>
     </aside>
     <div className="main-shell">
     <div className="mobile-stage"><select aria-label="Choose homework section" value={step} onChange={event => go(Number(event.target.value))}>{sections.map((name, i) => <option key={name} value={i}>{i + 1}. {name}{done[i] ? ' ✓' : ''}</option>)}</select></div>
     <main className="homework">
-    <header><div className="hw-mission-meta"><span className="hw-stage-number" aria-hidden="true">{String(step + 1).padStart(2, '0')}</span><div className="hw-mission-path" aria-label={`${done.filter(Boolean).length} из 5 разделов выполнено`}>{sections.map((name, i) => <span key={name} title={name} className={`${done[i] ? 'done' : ''} ${step === i ? 'current' : ''}`} aria-hidden="true">{done[i] ? '✓' : i + 1}</span>)}</div></div><h1>{sections[step]}</h1>{step === 2 && <small lang="ru">Секретное письмо</small>}</header>
+    <header><div className="hw-mission-meta"><span className="hw-stage-number" aria-hidden="true">{String(step + 1).padStart(2, '0')}</span><div className="hw-mission-path" aria-label={`${done.filter(Boolean).length} из 5 разделов выполнено`}>{sections.map((name, i) => <span key={name} title={name} className={`${done[i] ? 'done' : ''} ${step === i ? 'current' : ''}`} aria-hidden="true">{done[i] ? '✓' : i + 1}</span>)}</div></div><h1>{sections[step]}</h1><div className="hw-quest-progress"><span>{done.filter(Boolean).length} / {sections.length}</span><div className="hw-quest-track" aria-hidden="true"><span style={{ width: `${done.filter(Boolean).length / sections.length * 100}%` }} /></div></div>{step === 2 && <small lang="ru">Секретное письмо</small>}</header>
     {notice && <p role="status">{notice}</p>}
-    <section className="hw-panel" aria-label={sections[step]}>
+    <section className={`hw-panel hw-task-${step}`} aria-label={sections[step]}>
       {step === 0 && <><div className="hw-words">{words.map(([english, russian, example]) => <article key={english} className="hw-word-card"><div className="hw-word-heading"><h3>{english}</h3><button className="hw-speak" aria-label={`Listen: ${english}`} title={`Прослушать: ${english}`} onClick={() => speak(english)}><Volume2 size={25} aria-hidden="true" /></button></div><p className="hw-translation" lang="ru">{russian}</p><p className="hw-example">{example}</p></article>)}</div><h3>Remember the Words</h3>{remember.map((q, i) => field(`remember${i}`, q))}</>}
       {step === 1 && <><p>Hermione made some mistakes. Help her! Find the mistake and write the correct sentence.</p>{mistakes.map((q, i) => field(`grammar${i}`, `${i + 1}. ${q}`))}</>}
       {step === 2 && <><p>Read Hermione's letter and answer the questions.<br /><small lang="ru">Прочитай письмо Гермионы и ответь на вопросы.</small></p><MagicalLetter text={letter} />{questions.map((q, i) => field(`letter${i}`, q))}</>}

@@ -76,3 +76,81 @@
 @media print { .hw-letter-scene { background: none; padding: 0; } .hw-scroll { filter: none; } .hw-scroll::before, .hw-scroll::after, .hw-wax-seal, .hw-scroll-cord { display: none; } .hw-scroll .hw-letter { background: white; color: black; border: 1px solid #888; box-shadow: none; } }
 .hw-letter-scene { scroll-margin-top: calc(var(--platform-height, 76px) + 16px); }
 @media(max-width:600px) { .hw-scroll-cord { transform: none; } }
+/* Homework: generous type, tactile cards, and quiet quest accents. */
+.homework { font: 19px/1.65 system-ui, sans-serif; }
+.homework h1 { font: 700 clamp(32px, 3.5vw, 46px)/1.2 Georgia, serif; color: #24483e; margin: 16px 0 22px; overflow-wrap: anywhere; }
+.homework h3 { font: 700 27px/1.3 Georgia, serif; }
+.homework small, .homework > header small { font-size: 17px; line-height: 1.6; color: #576254; }
+.hw-mission-meta { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.hw-stage-number { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 20px; background: #f7dfa0; color: #604314; font: 700 28px Georgia,serif; border: 2px solid #dbc078; box-shadow: 0 4px 0 #e4cf9a; }
+.hw-mission-path { display: flex; gap: 8px; }
+.hw-mission-path span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #e9e4d6; color: #606253; font-size: 16px; font-weight: 700; }
+.hw-mission-path .current { background: #e0d5ef; color: #4f3971; box-shadow: 0 0 0 3px #c3aed9; }
+.hw-mission-path .done { background: #d4e8d6; color: #265a37; }
+.homework .hw-panel { margin-top: 28px; padding: clamp(20px, 3vw, 36px); border: 2px solid #dfd5bb; background: #fffcf5; border-radius: 28px; box-shadow: 0 8px 0 #e7dfce66, 0 16px 36px #2941320a; }
+.hw-panel > p { font-size: 21px; line-height: 1.7; margin: 0 0 28px; color: #344c41; }
+.hw-panel > ul { padding-left: 28px; }.hw-panel > ul li { margin-bottom: 14px; }
+.hw-words { gap: 26px; align-items: stretch; }
+.hw-words .hw-word-card { position: relative; padding: 26px; border: 2px solid #dbc78e; border-radius: 25px; background: linear-gradient(145deg, #fff8de, #fffdf6 60%, #f5ecd0); box-shadow: 0 6px 0 #e2d3ac, 0 12px 24px #4a44280c; display: flex; flex-direction: column; gap: 18px; transition: border-color .18s, box-shadow .18s; }
+.hw-words .hw-word-card:nth-child(3n+2) { background: linear-gradient(145deg,#ede5fa,#fffdf8 60%,#f2ecf9); border-color: #cdbce2; box-shadow: 0 6px 0 #ddd0ec,0 12px 24px #4a44280c; }
+.hw-words .hw-word-card:nth-child(3n) { background: linear-gradient(145deg,#e1f0e5,#fffdf8 60%,#eaf3e5); border-color: #b6d0b6; box-shadow: 0 6px 0 #cddfc7,0 12px 24px #4a44280c; }
+.hw-card-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.hw-card-art { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 23px; background: #ffffffa6; border: 1px solid #ffffff; box-shadow: 0 4px 12px #473d2110; }
+.hw-card-art .art-icon { width: 64px; height: 64px; }
+.hw-card-number { font-size: 16px; font-weight: 700; color: #625b4a; letter-spacing: 1px; }
+.hw-words .hw-word-card h3 { font-size: 29px; color: #263f35; margin: 0; }
+.homework .btn { min-height: 54px; padding: 14px 22px; font: 700 19px/1.35 system-ui,sans-serif; border-radius: 15px; border: 2px solid #285344; background: #346751; color: #fffdf2; box-shadow: 0 4px 0 #234a3e; justify-content: center; }
+.homework .btn:hover { background: #285440; }.homework .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #234a3e; }
+.hw-word-card > .btn { align-self: flex-start; background: #ead18a; color: #3c331d; border-color: #cfb66f; box-shadow: 0 4px 0 #c8ad65; }
+.hw-word-card > .btn:hover { background: #f7dfa1; }
+.hw-words .hw-word-card details { margin: 0; }
+.hw-word-card summary { min-height: 48px; padding: 10px 14px; border-radius: 12px; cursor: pointer; background: #ffffff99; color: #454a39; font-size: 18px; font-weight: 650; }
+.hw-word-card details p { font-size: 22px; line-height: 1.5; margin: 14px 4px 0; color: #293c33; }
+.hw-words .hw-example { border-left: 4px solid #c0aa74; padding: 16px; margin: 0; font-size: 20px; line-height: 1.65; color: #3f5148; background: #ffffffa6; border-radius: 0 14px 14px 0; font-style: normal; }
+.homework .hw-completion { display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 14px 18px; border: 2px solid #c3d4bb; border-radius: 16px; background: #edf4e6; font-size: 19px; font-weight: 700; color: #31533b; cursor: pointer; }
+.hw-word-card .hw-completion { margin-top: auto; }
+.homework .hw-completion input { width: 26px; height: 26px; margin: 0; flex-shrink: 0; cursor: pointer; accent-color: #35654b; }
+.homework .hw-completion:has(input:checked) { background: #d5ebd5; border-color: #629d6e; }
+.homework .hw-completion:has(input:focus-visible) { outline: 3px solid #ad85d8; outline-offset: 3px; }
+.homework .hw-completion:has(input:disabled) { opacity: .65; cursor: default; }
+.hw-words .hw-word-card.is-learned { border-color: #6f9b65; }
+.hw-panel > h3 { margin: 48px 0 24px; }
+.homework .hw-helper { border: 2px solid #c7b3df; background: linear-gradient(130deg,#eee5fa,#faf5ff); border-radius: 22px; padding: 26px; margin: 30px 0; }
+.hw-helper h3 { display: flex; align-items: center; gap: 12px; color: #4c386c; margin: 0 0 22px; }.hw-helper h3 span { color: #99742b; font-size: 32px; }
+.hw-chips { display: flex; flex-wrap: wrap; gap: 12px; padding: 0; margin: 0 0 18px; list-style: none; }
+.hw-chips li { display: block; padding: 12px 18px; border-radius: 16px; border: 1px solid #c7b7dd; background: #fffdf7; color: #49365e; box-shadow: 0 3px 0 #ddd0eb; font-size: 20px; font-weight: 650; line-height: 1.5; max-width: 100%; overflow-wrap: anywhere; }
+.hw-field { margin: 30px 0; padding: 22px; border: 1px solid #e2d6bd; border-radius: 20px; background: #f6f1e6; }
+.hw-field > span { margin-bottom: 18px; font-size: 21px; font-weight: 650; line-height: 1.6; color: #304a3c; }
+.homework .hw-field textarea { min-height: 126px; padding: 18px; border: 2px solid #c6c5ac; background: #fffefa; border-radius: 16px; font: 21px/1.7 system-ui,sans-serif; color: #243e35; box-shadow: inset 0 2px 5px #344e3310; }
+.homework .hw-field textarea:focus { border-color: #8b6ab7; outline: 4px solid #d9c8f0; outline-offset: 2px; }
+.homework .hw-field textarea[rows='8'] { min-height: 320px; }
+.hw-paging { margin-top: 32px; gap: 12px; font-size: 19px; font-weight: 700; }
+.hw-paging .btn { min-width: 120px; }
+.homework-sidebar .hw-steps .nav-item { gap: 10px; min-height: 78px; padding: 16px 10px; margin: 10px 0; font-size: 16px; line-height: 1.5; }
+.homework-sidebar .hw-steps .nav-item > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+.homework-sidebar .hw-steps .nav-item.active { background: #4c6551; color: #fff0ba; box-shadow: inset 4px 0 #ebc66e, 0 4px 12px #152c2822; }
+.homework-sidebar .nav-icon { width: 27px; flex-shrink: 0; font-size: 28px; }.homework-sidebar .nav-item small { font-size: 13px; }
+.homework-sidebar .lesson-label { font-size: 12px; letter-spacing: 1px; margin-top: 32px; }
+.homework-open .platform-cloud .cloud-progress { font-size: 17px; line-height: 1.6; }
+.homework-open .platform-cloud .cloud-progress button { font-size: 17px; min-height: 48px; padding: 12px 18px; border-radius: 13px; }
+.homework-open .platform-cloud .cloud-progress input { font-size: 18px; min-height: 48px; }
+@media(max-width:1100px) { .hw-words { grid-template-columns: minmax(0,1fr); } }
+@media(max-width:850px) {
+  .homework-sidebar .hw-steps .nav-item { flex-wrap: wrap; gap: 7px; font-size: 16px; padding: 14px 10px; }
+  .homework-sidebar .nav-item > span:nth-child(2) { flex-basis: calc(100% - 38px); }
+  .homework-sidebar .nav-item small, .homework-sidebar .nav-done { margin-left: 36px; }
+  .homework-sidebar .hw-steps .nav-item .nav-icon { width: 24px; font-size: 26px; }
+}
+@media(max-width:600px) {
+  .homework { font-size: 18px; }.homework h1 { font-size: 32px; }.homework h3 { font-size: 25px; }
+  .homework .hw-panel { padding: 16px; border-radius: 22px; }
+  .hw-words .hw-word-card { padding: 21px; gap: 18px; }.hw-words .hw-word-card h3 { font-size: 27px; }
+  .hw-field { padding: 16px; margin: 24px 0; }.hw-field > span { font-size: 20px; }
+  .homework .hw-field textarea { font-size: 20px; padding: 14px; }
+  .homework .hw-helper { padding: 20px; }.hw-chips li { font-size: 19px; padding: 11px 14px; }
+  .hw-panel > p { font-size: 20px; }.hw-paging .btn { min-width: 96px; padding: 14px 16px; }
+  .hw-mission-path { gap: 5px; }.hw-mission-path span { width: 28px; height: 28px; font-size: 14px; }
+  .hw-stage-number { width: 50px; height: 50px; font-size: 25px; }
+  .homework-shell .mobile-stage select { font-size: 18px; padding: 15px 12px; border-radius: 14px; min-height: 56px; border: 2px solid #c9c3a6; color: #2c4b3a; }
+}
+@media(prefers-reduced-motion:reduce) { .hw-word-card, .homework .btn { transition: none; } }

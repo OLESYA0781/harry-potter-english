@@ -83,3 +83,34 @@ for (const width of [390, 768, 1280]) test(`trial tabs remain visible and clicka
   }
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+test('large study cards and separate helper chips remain usable on tablet and phone', async ({page}) => {
+  for (const width of [390, 768, 1024, 1280]) {
+    await page.setViewportSize({width,height:1000});
+    await page.goto('/');
+    await page.goto('/#/lessons/trial');
+    await page.getByRole('tab',{name:'Homework',exact:true}).click();
+    const cards=page.locator('.hw-word-card');
+    await expect(cards).toHaveCount(17);
+    if(width<=1100) {
+      const first=await cards.nth(0).boundingBox(), second=await cards.nth(1).boundingBox();
+      expect(second!.y).toBeGreaterThan(first!.y+first!.height);
+    }
+    expect(await cards.first().locator('h3').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(27);
+    const listen=await cards.first().getByRole('button').boundingBox();
+    expect(listen!.height).toBeGreaterThanOrEqual(48);
+    await cards.first().getByLabel('Выучено').check();
+    await expect(cards.first()).toHaveClass(/is-learned/);
+    if(width<=600) await page.getByLabel('Choose homework section').selectOption('3');
+    else await page.getByRole('button',{name:'4. A Day at Hogwarts',exact:true}).click();
+    await expect(page.locator('.hw-chips li')).toHaveCount(8);
+    await expect(page.locator('.hw-chips li').filter({hasText:'spend time with my family'})).toBeVisible();
+    expect(await page.locator('.hw-field textarea').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(20);
+    await page.getByLabel('My magical day').fill('I is happy.  My owl sleep!');
+    await page.getByLabel('Mark as completed').check();
+    if(width<=600) await page.getByLabel('Choose homework section').selectOption('4');
+    else await page.getByRole('button',{name:'5. My Magic Room',exact:true}).click();
+    await expect(page.locator('.hw-chips li')).toHaveCount(8);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+});

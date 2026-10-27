@@ -33,7 +33,7 @@ Tomorrow we will visit Hagrid. He has many interesting animals. Will you come wi
 
 Your friend,
 Hermione`;
-export const sections = ['New Words', "Hermione's Grammar Challenge", 'The Secret Letter', 'A Day at Hogwarts', 'My Magic Room'];
+export const sections = ['New Words', "Найди и исправь ошибки", 'The Secret Letter', 'A Day at Hogwarts', 'My Magic Room'];
 export type HomeworkAnswers = Record<string, unknown>;
 export const homeworkValue = (answers: HomeworkAnswers, key: string) => answers[homeworkPrefix + key];
 export function homeworkCompletion(answers: HomeworkAnswers): boolean[] {

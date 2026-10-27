@@ -59,7 +59,7 @@ for (const width of [390, 768, 1280]) test(`trial tabs remain visible and clicka
   const homework = page.getByRole('tab',{name:'Homework',exact:true});
   for (let i=0;i<2;i++) {
     await homework.click();
-    await expect(page.getByRole('heading',{name:'My First Hogwarts Mission',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'New Words',exact:true})).toBeVisible();
     if(width > 600) {
       const sidebar = page.locator('.homework-sidebar');
       await expect(sidebar).toBeVisible();

@@ -83,3 +83,9 @@
   .homework-shell .mobile-stage select { min-height: 60px; font-size: 19px; border: 2px solid #52694e; background: #f9f4df; color: #2d4935; box-shadow: 0 4px 0 #d6d7bc; }
 }
 @media(prefers-reduced-motion:reduce) { .hw-quest-track > span { transition: none; } }
+.homework > header { display: flex; align-items: center; justify-content: flex-start; gap: 22px; }
+.homework > header .hw-stage-number { flex-shrink: 0; }
+.hw-heading-copy { flex: 1; min-width: 0; }
+.homework > header h1 { margin: 0; overflow-wrap: anywhere; }
+.homework > header small { margin-top: 8px; }
+@media(max-width:600px) { .homework > header { gap: 16px; }.homework > header h1 { font-size: clamp(24px,6.5vw,32px); } }

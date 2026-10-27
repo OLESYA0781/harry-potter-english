@@ -35,10 +35,9 @@ export default function Homework({ state, setState }: LessonProps) {
     <div className="main-shell">
     <div className="mobile-stage"><select aria-label="Choose homework section" value={step} onChange={event => go(Number(event.target.value))}>{sections.map((name, i) => <option key={name} value={i}>{i + 1}. {name}{done[i] ? ' ✓' : ''}</option>)}</select></div>
     <main className="homework">
-    <header><h1>My First Hogwarts Mission</h1></header>
+    <header><h1>{sections[step]}</h1></header>
     {notice && <p role="status">{notice}</p>}
     <section className="hw-panel" aria-label={sections[step]}>
-      <h2>{sections[step]}</h2>
       {step === 0 && <><div className="hw-words">{words.map(([english, russian, example], i) => <article key={english}><h3>{english}</h3><button className="btn" aria-label={`Listen: ${english}`} onClick={() => speak(english)}>♫ Listen</button><details open><summary>Перевод</summary><p lang="ru">{russian}</p></details><p className="hw-example">{example}</p><label><input type="checkbox" checked={value(`learned${i}`) === true} onChange={event => save(`learned${i}`, event.target.checked)} /> Выучено</label></article>)}</div><h3>Remember the Words</h3>{remember.map((q, i) => field(`remember${i}`, q))}</>}
       {step === 1 && <><p>Hermione made some mistakes. Help her! Find the mistake and write the correct sentence.</p>{mistakes.map((q, i) => field(`grammar${i}`, `${i + 1}. ${q}`))}</>}
       {step === 2 && <><p>Read Hermione's letter and answer the questions.</p><button className="btn" onClick={() => speak(letter)}>♫ Listen to the letter</button><div className="hw-letter">{letter}</div>{questions.map((q, i) => field(`letter${i}`, q))}</>}

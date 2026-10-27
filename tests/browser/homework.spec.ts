@@ -16,6 +16,7 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const drafts = ['  Hermione drink.\n','Ron sit!!','Harry write','There is book','She no like'];
   for (let i=0;i<5;i++) await page.locator('.hw-field textarea').nth(i).fill(drafts[i]);
+  await expect(page.locator('.hw-quest-progress')).toContainText('1 / 5');
   await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
   await expect(page.getByLabel('Переведи «обычно» на английский.')).toHaveValue('  usualy\n ');
   await expect(page.getByLabel('Выучено',{exact:true})).toHaveCount(0);
@@ -98,7 +99,7 @@ test('study cards and writing tasks remain usable without helper blocks', async 
     }
     expect(await cards.first().locator('h3').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(27);
     const listen=await cards.first().getByRole('button').boundingBox();
-    expect(listen!.height).toBeGreaterThanOrEqual(48);
+    expect(listen!.height).toBeGreaterThanOrEqual(58);
     await expect(cards.getByLabel('Выучено',{exact:true})).toHaveCount(0);
     if(width<=600) await page.getByLabel('Choose homework section').selectOption('3');
     else await page.getByRole('button',{name:'4. A Day at Hogwarts',exact:true}).click();

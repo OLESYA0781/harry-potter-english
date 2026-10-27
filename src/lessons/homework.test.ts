@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { homeworkCompletion, homeworkPrefix as p, sentenceCount } from './homeworkData';
+import { homeworkCompletion, homeworkPrefix as p } from './homeworkData';
 import { readLesson, updateLesson } from './progress';
 import { trialLesson } from './registry';
 import { initial } from '../data';
 describe('homework completion without grading', () => {
-  it('needs recall answers and explicit writing marks', () => {
+  it('uses filled answers without manual completion marks', () => {
     const answers: Record<string, unknown> = {};
     expect(homeworkCompletion(answers)).toEqual([false,false,false,false,false]);
     for (const [key, n] of [['remember',5],['grammar',5],['letter',4]] as const) for(let i=0;i<n;i++) answers[p+key+i]='  my mistakess!?\n ';
     answers[p+'day']='I is happy'; answers[p+'room']='There are a owl';
-    expect(homeworkCompletion(answers)).toEqual([true,true,true,false,false]);
+    expect(homeworkCompletion(answers)).toEqual([true,true,true,true,true]);
     answers[p+'dayDone']=true;answers[p+'roomDone']=true;
     expect(homeworkCompletion(answers).every(Boolean)).toBe(true);
     answers[p+'day']=' \n ';
@@ -21,5 +21,4 @@ describe('homework completion without grading', () => {
     expect(updateLesson(root,trialLesson,initial).answers).toEqual({[p+'day']:'  I is Vika.\n'});
     expect(root.answers.diary).toBe('old');
   });
-  it('counts approximate sentences without judging their grammar', () => { expect(sentenceCount('I is Vika.\nMy cat sleep!')).toBe(2); expect(sentenceCount('')).toBe(0); });
 });

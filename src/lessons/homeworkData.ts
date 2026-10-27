@@ -27,7 +27,7 @@ Yesterday I went to the library with Harry. We found an old book about magical a
 
 Harry wanted to read about dragons, but I wanted to read about cats.
 
-After school, I usually rest and write a letter to my friends. Sometimes I drink a cup of tea.
+After school, I usually rest and write letters to my friends. Sometimes I drink a cup of tea.
 
 Tomorrow we will visit Hagrid. He has many interesting animals. Will you come with us?
 

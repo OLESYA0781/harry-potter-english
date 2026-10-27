@@ -16,7 +16,7 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const drafts = ['  Hermione drink.\n','Ron sit!!','Harry write','There is book','She no like'];
   for (let i=0;i<5;i++) await page.locator('.hw-field textarea').nth(i).fill(drafts[i]);
-  await expect(page.locator('.hw-quest-progress')).toContainText('1 / 5');
+  await expect(page.locator('.hw-quest-progress, .hw-mission-path')).toHaveCount(0);
   await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
   await expect(page.getByLabel('Переведи «обычно» на английский.')).toHaveValue('  usualy\n ');
   await expect(page.getByLabel('Выучено',{exact:true})).toHaveCount(0);

@@ -154,3 +154,9 @@
   .homework-shell .mobile-stage select { font-size: 18px; padding: 15px 12px; border-radius: 14px; min-height: 56px; border: 2px solid #c9c3a6; color: #2c4b3a; }
 }
 @media(prefers-reduced-motion:reduce) { .hw-word-card, .homework .btn { transition: none; } }
+.hw-word-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.hw-word-heading h3 { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.hw-speak { display: grid; place-items: center; flex: 0 0 52px; width: 52px; height: 52px; padding: 0; border: 2px solid #c8ad65; border-radius: 16px; background: #f3dfa1; color: #51401c; box-shadow: 0 3px 0 #c8ad65; cursor: pointer; }
+.hw-speak:hover { background: #ffeab2; }.hw-speak:active { transform: translateY(2px); box-shadow: 0 1px 0 #c8ad65; }
+.hw-speak:focus-visible { outline: 3px solid #8b6ab7; outline-offset: 4px; }
+.hw-words .hw-translation { font-size: 22px; line-height: 1.5; color: #293c33; margin: 0; }

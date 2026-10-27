@@ -39,6 +39,5 @@ export const homeworkValue = (answers: HomeworkAnswers, key: string) => answers[
 export function homeworkCompletion(answers: HomeworkAnswers): boolean[] {
   const text = (key: string) => typeof homeworkValue(answers, key) === 'string' && !!(homeworkValue(answers, key) as string).trim();
   const filled = (prefix: string, length: number) => Array.from({ length }, (_, i) => text(`${prefix}${i}`)).every(Boolean);
-  return [filled('remember', 5), filled('grammar', 5), filled('letter', 4), text('day') && homeworkValue(answers, 'dayDone') === true, text('room') && homeworkValue(answers, 'roomDone') === true];
+  return [filled('remember', 5), filled('grammar', 5), filled('letter', 4), text('day'), text('room')];
 }
-export const sentenceCount = (text: string) => text.trim() ? text.trim().split(/[.!?]+(?:\s+|$)/).filter(part => part.trim()).length : 0;

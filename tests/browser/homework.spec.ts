@@ -29,12 +29,12 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   await expect(page.locator('.hw-field textarea')).toHaveCount(4);
   await page.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
   await page.getByLabel('My magical day').fill('I is happy.\nI has owl!');
-  await page.getByLabel('Mark as completed').check();
-  await expect(page.getByText('About 2 sentences')).toBeVisible();
+  await expect(page.getByLabel('Mark as completed')).toHaveCount(0);
+  await expect(page.getByText(/sentences · aim for/)).toHaveCount(0);
   await page.getByRole('button',{name:'5. My Magic Room'}).click();
   await expect(page.locator('.hw-room')).toBeVisible();
   expect(await page.locator('.hw-room').evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);
-  await page.getByLabel('My room description').fill('A owl.'); await page.getByLabel('Выполнено',{exact:true}).check();
+  await page.getByLabel('My room description').fill('A owl.'); await expect(page.getByLabel('Выполнено',{exact:true})).toHaveCount(0);
   for(const width of [390,768,1280]) { await page.setViewportSize({width,height:900}); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); }
   await expect(page.getByRole('button',{name:'Mission progress',exact:true})).toHaveCount(0);
   await expect(page.locator('.hw-steps button')).toHaveCount(5);
@@ -106,7 +106,7 @@ test('large study cards and separate helper chips remain usable on tablet and ph
     await expect(page.locator('.hw-chips li').filter({hasText:'spend time with my family'})).toBeVisible();
     expect(await page.locator('.hw-field textarea').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(20);
     await page.getByLabel('My magical day').fill('I is happy.  My owl sleep!');
-    await page.getByLabel('Mark as completed').check();
+    await expect(page.getByLabel('Mark as completed')).toHaveCount(0);
     if(width<=600) await page.getByLabel('Choose homework section').selectOption('4');
     else await page.getByRole('button',{name:'5. My Magic Room',exact:true}).click();
     await expect(page.locator('.hw-chips li')).toHaveCount(8);

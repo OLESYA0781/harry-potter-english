@@ -288,7 +288,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
     await page.locator('.hw-field textarea').nth(1).fill('  Ron is sit.\n ');
     await other.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
     await other.getByLabel('My magical day').fill('I has owl.');
-    await other.getByLabel('Mark as completed').check(); await sync(other);
+    await sync(other);
     await context.setOffline(false); await sync(page);
     await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
     await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
@@ -296,7 +296,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
     await expect(page.locator('.hw-field textarea').nth(1)).toHaveValue('  Ron is sit.\n ');
     await page.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
     await expect(page.getByLabel('My magical day')).toHaveValue('I has owl.');
-    await expect(page.getByLabel('Mark as completed')).toBeChecked();
+    await expect(page.getByLabel('Mark as completed')).toHaveCount(0);
     const journal = await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
     expect(journal.state.answers.diary).toBe('Existing lesson answer');
     expect(journal.state.ratings.reading).toBe(2);

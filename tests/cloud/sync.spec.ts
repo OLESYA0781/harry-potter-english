@@ -302,3 +302,27 @@ test('homework sync preserves exact drafts across devices and independent offlin
     expect(journal.state.ratings.reading).toBe(2);
   } finally { await second.close(); }
 });
+
+test('Lesson 1 restores on a second device, preserves Trial/Homework and resolves offline conflicts',async({page,context,browser})=>{
+  await rpc({}, {id:'existing-lesson-pupil',fields:{'answers:diary':'Keep old lesson', 'ratings:reading':2, 'answers:@vika/lesson/trial-homework/day':'Old homework draft'}});
+  await route(context);await login(page,'/#/lessons/lesson-1');
+  await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
+  await page.getByRole('button',{name:'Next slide →',exact:true}).click();
+  const note='  I is Vika.\nMy original notes!  ';
+  await page.getByLabel('Мои заметки по грамматике').fill(note);await sync(page);
+  const second=await browser.newContext();await route(second);
+  try {
+    const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
+    await expect(other.getByRole('heading',{name:'Signal Words',exact:true})).toBeVisible();
+    await expect(other.getByLabel('Мои заметки по грамматике')).toHaveValue(note);
+    await context.setOffline(true);await page.getByLabel('Мои заметки по грамматике').fill('Offline notes');
+    await other.getByLabel('Мои заметки по грамматике').fill('Other device notes');await sync(other);
+    await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
+    await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-1» изменено/)).toBeVisible();
+    await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Offline notes');
+    await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();
+    await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Other device notes');
+    await page.reload();await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Other device notes');
+    const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep old lesson');expect(saved.fields['ratings:reading'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Old homework draft');
+  } finally {await second.close();}
+});

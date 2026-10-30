@@ -11,7 +11,7 @@ test('root opens classroom; trial resumes old answers and all twelve remaining c
   await expect(page.getByText(/Завершено:/)).toHaveCount(0);
   await expect(page.locator('.platform-brand small')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Trial Lesson', exact: true })).toBeVisible();
-  await expect(page.locator('.lesson-card .lesson-subtitle')).toHaveText('Пробное занятие');
+  await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Trial Lesson',exact:true})}).locator('.lesson-subtitle')).toHaveText('Пробное занятие');
   await expect(page.getByText('В процессе', { exact: true })).toHaveCount(0);
   await expect(page.locator('.classroom-home')).not.toContainText('Welcome to your English Adventure!');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR MAGICAL CLASSROOM');
@@ -23,7 +23,8 @@ test('root opens classroom; trial resumes old answers and all twelve remaining c
   await expect(page.locator('.classroom-home')).not.toContainText('Каждая попытка');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR NEXT CHAPTER');
   await expect(page.locator('.classroom-home')).not.toContainText('Твоё путешествие продолжается');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Trial Lesson']);
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 1 — Present Simple · Ещё не начат', 'Trial Lesson']);
+  await page.getByLabel('Выбери своё приключение').selectOption('trial');
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
   await expect(page.locator('.nav-item')).toHaveCount(12);

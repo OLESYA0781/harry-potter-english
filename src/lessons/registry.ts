@@ -1,5 +1,7 @@
 import { diagnose, initial } from '../data';
 import TrialLesson from './TrialLesson';
+import PresentSimpleLesson from './presentSimple/PresentSimpleLesson';
+import { lesson1Summary } from './presentSimple/model';
 import type { LessonDefinition } from './types';
 import { TRIAL_ID } from './progress';
 
@@ -35,5 +37,10 @@ export function sortLessons(lessons: readonly LessonDefinition[]): LessonDefinit
   }
   return [...lessons].sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt) || a.id.localeCompare(b.id));
 }
+export const presentSimpleLesson: LessonDefinition = {
+  id: 'lesson-1', title: 'Lesson 1 — Present Simple', subtitle: 'Урок 1 — Настоящее простое время',
+  addedAt: '2026-10-30T00:00:00Z', description: '', initialState: structuredClone(initial),
+  Component: PresentSimpleLesson, summarize: lesson1Summary,
+};
 // Add a new module here. Both menus and the dashboard use this one registry.
-export const lessons = sortLessons([trialLesson]);
+export const lessons = sortLessons([presentSimpleLesson, trialLesson]);

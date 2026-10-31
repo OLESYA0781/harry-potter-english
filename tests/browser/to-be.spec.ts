@@ -32,7 +32,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await toStage(page,6);await expect(page.getByText(/Авторское закрепление to be/)).toHaveCount(0);
  await expect(page.locator('.tb-task')).toHaveCount(6);
  await page.getByLabel('The café is open.',{exact:true}).fill('The café no open.\n');
- await toStage(page,7);await page.getByLabel('The hospital is next to the bank.',{exact:true}).fill('Hospital is next to bank??');
+ await toStage(page,7);await page.getByLabel('The hospital is clean.',{exact:true}).fill('Hospital clean??');
  await toStage(page,8);await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
  await toStage(page,9);await expect(page.locator('.tb-reading input')).toHaveCount(8);await page.getByLabel('Пропуск 1',{exact:true}).fill('am');
  await toStage(page,10);await expect(page.getByRole('region',{name:'Mixed Grammar Challenge',exact:true}).locator('.tb-task')).toHaveCount(6);
@@ -40,7 +40,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await page.reload();await expect(page.getByLabel('Is the boat on the river?',{exact:true})).toHaveValue('  Yes, it is.\n ');
  await toStage(page,5);await expect(page.getByLabel('I ... a pupil.',{exact:true})).toHaveValue('  is?  ');
  await toStage(page,6);await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('The café no open.\n');
- await toStage(page,7);await expect(page.getByLabel('The hospital is next to the bank.',{exact:true})).toHaveValue('Hospital is next to bank??');
+ await toStage(page,7);await expect(page.getByLabel('The hospital is clean.',{exact:true})).toHaveValue('Hospital clean??');
  await toStage(page,9);await expect(page.getByLabel('Пропуск 1',{exact:true})).toHaveValue('am');
  await expect(page.getByText(/Correct!|Try again!/)).toHaveCount(0);
  await toStage(page,12);await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();

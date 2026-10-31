@@ -15,3 +15,19 @@
 @media(max-width:1150px) { .tb-table { display: block; }.tb-table-head { display: none; }.tb-table-row { display: grid; grid-template-columns: 1fr 1fr; padding: 16px; gap: 16px; border-bottom: 1px solid #dfd2b4; }.tb-table-row > div { display: block; border: 0; padding: 0; min-width: 0; overflow-wrap: anywhere; }.tb-cell-label { display: block; font-size: 15px; font-weight: 700; color: #677058; margin-bottom: 6px; } }
 @media(max-width:850px) { .tb-main { padding: 25px; }.tb-panel { padding: 22px; }.tb-sidebar .nav-item { font-size: 14px; }.tb-transformation { flex-direction: column; gap: 8px; }.tb-transformation > span { transform: rotate(90deg); }.tb-transformation p { width: 100%; margin: 8px 0; } }
 @media(max-width:600px) { .tb-main { padding: 22px 14px 35px; font-size: 20px; }.tb-main .tb-heading { padding: 22px 18px; gap: 14px; }.tb-heading > span { width: 45px; height: 48px; font-size: 24px; }.tb-heading h1 { font-size: 26px; }.tb-heading small { font-size: 14px; }.tb-panel { padding: 18px; }.tb-table-row { grid-template-columns: 1fr; }.tb-formula { padding: 18px; font-size: 22px; gap: 10px; }.tb-main h2 { font-size: 25px; }.tb-task { padding: 18px; }.tb-answer textarea,.tb-answer input { font-size: 20px; }.tb-reading { padding: 18px; font-size: 21px; }.tb-main .btn { font-size: 17px; padding: 13px 18px; } }
+/* Question cards use a wide question beside a vertically paired Yes / No. */
+.tb-question-table { display: block; }
+.tb-question-table .tb-table-head { display: none; }
+.tb-question-table .tb-table-row { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); grid-template-rows: auto auto; gap: 16px 22px; padding: 22px; border-bottom: 1px solid #dfd2b4; }
+.tb-question-table .tb-table-row:last-child { border-bottom: 0; }
+.tb-question-table .tb-table-row > div { display: block; border: 0; padding: 10px 0; min-width: 0; overflow-wrap: anywhere; }
+.tb-question-table .tb-cell-label { display: block; margin-bottom: 10px; font-size: 17px; line-height: 1.4; font-weight: 700; color: #657052; }
+.tb-question-table .tb-table-row > div:first-child { grid-column: 1; grid-row: 1 / 3; padding: 22px; border: 1px solid #d8c8e8; border-radius: 18px; background: #eee7f6; color: #294534; font-size: 26px; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.tb-question-table .tb-table-row > div:nth-child(2) { grid-column: 2; grid-row: 1; }
+.tb-question-table .tb-table-row > div:nth-child(3) { grid-column: 2; grid-row: 2; }
+@media(max-width:600px) {
+  .tb-question-table .tb-table-row { gap: 12px; padding: 14px; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); }
+  .tb-question-table .tb-table-row > div:first-child { padding: 16px 12px; font-size: 23px; }
+  .tb-question-table .tb-table-row > div:not(:first-child) { font-size: 20px; }
+  .tb-question-table .tb-cell-label { font-size: 16px; }
+}

@@ -1,7 +1,7 @@
 import {affirmativeRows,negativeRows,questionRows} from './data';
 const form=(text:string)=>text.split(/\b(am|is|are|not|isn't|aren't)\b/gi).map((part,i)=>/^(am|is|are|not|isn't|aren't)$/i.test(part)?<strong className="tb-key" key={i}>{part}</strong>:part);
 export function ToBeTable({headers,rows}:{headers:string[];rows:string[][]}) {
- return <div className="tb-table" role="table"><div className="tb-table-head" role="row">{headers.map(title=><strong role="columnheader" key={title}>{title}</strong>)}</div>{rows.map((row,i)=><div className="tb-table-row" role="row" key={i}>{row.map((value,j)=><div role="cell" key={j}><span className="tb-cell-label" aria-hidden="true">{headers[j]}</span>{form(value)}</div>)}</div>)}</div>;
+ return <div className={`tb-table ${headers.length===3 ? 'tb-question-table' : ''}`} role="table"><div className="tb-table-head" role="row">{headers.map(title=><strong role="columnheader" key={title}>{title}</strong>)}</div>{rows.map((row,i)=><div className="tb-table-row" role="row" key={i}>{row.map((value,j)=><div role="cell" key={j}><span className="tb-cell-label" aria-hidden="true">{headers[j]}</span><span className="tb-cell-value">{form(value)}</span></div>)}</div>)}</div>;
 }
 export default function ToBeTheory({step}:{step:number}) {
  return <section className="tb-theory">

@@ -7,7 +7,7 @@ export const toBeBlocks = [
  {id:'negative',title:'Negative Sentences',legacyStep:2,parts:[2,6]},
  {id:'questions',title:'Questions',legacyStep:3,parts:[3,7]},
  {id:'short-answers',title:'Short Answers',legacyStep:4,parts:[4,14]},
- {id:'mixed',title:'Mixed Practice',legacyStep:8,parts:[8,9,10]},
+ {id:'mixed',title:'Mixed Practice',legacyStep:8,parts:[8,9]},
  {id:'summary',title:'Grammar Summary',legacyStep:12,parts:[12]},
 ];
 export const toBeStages=toBeBlocks.map(block=>block.title);
@@ -15,7 +15,7 @@ export function toBeBlockIndex(state:LessonState) {
  const explicit=toBeBlocks.findIndex(block=>block.id===state.answers.toBeActiveBlock);
  if(explicit>=0 && state.step===toBeBlocks[explicit].legacyStep)return explicit;
  const legacy=toBeBlocks.findIndex(block=>block.parts.includes(state.step));
- return legacy>=0?legacy:state.step===11?toBeBlocks.findIndex(block=>block.id==='summary'):0;
+ return legacy>=0?legacy:state.step===10?toBeBlocks.findIndex(block=>block.id==='mixed'):state.step===11?toBeBlocks.findIndex(block=>block.id==='summary'):0;
 }
 export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers'];
 
@@ -98,6 +98,7 @@ export const shortAnswerItems:SourceItem[]=[
  ['gg3-p5-underground','Авторское · Go Getter 3, стр. 5 · Нет','Is the underground station far?'],
 ].map(([id,source,text])=>({id,source,text}));
 export const readingText='Helen ... a painter. She has some fine pictures. They ... on the walls. She has much paper. It ... on the shelf. The shelf ... brown. It ... on the wall. Helen has a brother. He ... a student. He has a family. His family ... not in St. Petersburg, it ... in Moscow.';
+// Retired exercise: retain provenance and historical answer IDs; not rendered or counted.
 export const mixedItems:SourceItem[]=[
  ['157-7','Упр. 157, № 7','... your aunt a doctor? — Yes, she ... .'],
  ['157-8','Упр. 157, № 8','... they at home? — No, they ... not at home, they ... at work.'],
@@ -129,7 +130,7 @@ export function toBeSummary(state:LessonState) {
  const text=(key:string)=>typeof state.answers[key]==='string' && !!(state.answers[key] as string).trim();
  const list=(prefix:string,items:{id:string}[])=>items.every(item=>text(`${prefix}:${item.id}`));
  const theory=[0,1,2,3,4,12].filter(i=>state.answers[`seen:${i}`]===true).length;
- const tasks=[(list('affirmative',affirmativeItems)||list('affirmative',legacyAffirmativeItems)),(list('short',shortAnswerItems)||list('short',legacyShortAnswerItems)),list('mistake',mistakeItems),list('complete',completeItems),(list('negative',negativeItems)||list('negative',legacyTransformationItems)||list('negative',previousNegativeItems)),(list('question',questionItems)||list('question',legacyTransformationItems)||list('question',previousQuestionItems)),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems)].filter(Boolean).length;
+ const tasks=[(list('affirmative',affirmativeItems)||list('affirmative',legacyAffirmativeItems)),(list('short',shortAnswerItems)||list('short',legacyShortAnswerItems)),list('mistake',mistakeItems),list('complete',completeItems),(list('negative',negativeItems)||list('negative',legacyTransformationItems)||list('negative',previousNegativeItems)),(list('question',questionItems)||list('question',legacyTransformationItems)||list('question',previousQuestionItems)),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean)].filter(Boolean).length;
  const done=theory+tasks;
- return {percent:Math.round(done/14*100),status:done===14?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 14 частей`};
+ return {percent:Math.round(done/13*100),status:done===13?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 13 частей`};
 }

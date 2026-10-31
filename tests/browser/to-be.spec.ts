@@ -35,7 +35,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await toStage(page,7);await page.getByLabel('The hospital is clean.',{exact:true}).fill('Hospital clean??');
  await toStage(page,8);await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
  await toStage(page,9);await expect(page.locator('.tb-reading input')).toHaveCount(8);await page.getByLabel('Пропуск 1',{exact:true}).fill('am');
- await toStage(page,10);await expect(page.getByRole('region',{name:'Mixed Grammar Challenge',exact:true}).locator('.tb-task')).toHaveCount(6);
+ await toStage(page,10);await expect(page.getByRole('region',{name:'Mixed Grammar Challenge',exact:true})).toHaveCount(0);
  await toStage(page,4);await page.getByLabel('Is the boat on the river?',{exact:true}).fill('  Yes, it is.\n ');
  await page.reload();await expect(page.getByLabel('Is the boat on the river?',{exact:true})).toHaveValue('  Yes, it is.\n ');
  await toStage(page,5);await expect(page.getByLabel('I ... a pupil.',{exact:true})).toHaveValue('  is?  ');
@@ -82,12 +82,12 @@ test('correction cards save all original drafts without revealing answers or gra
  await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'← Back',exact:true}).click();
  await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea').first()).toHaveValue(drafts[0]);
  await page.getByRole('link',{name:'Главное меню',exact:true}).click();
- await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('3 из 14 частей');
+ await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('3 из 13 частей');
 });
 
 test('seven topics alternate theory and practice without duplicating old sections',async({page})=>{
  await page.goto('/#/lessons/lesson-0');
- const layout=[['TO BE','Complete the sentences'],['Affirmative','Make affirmative sentences'],['Negative','Make negative sentences'],['Questions','Make questions'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete','Mixed Grammar Challenge'],['To Be Cheat Sheet']];
+ const layout=[['TO BE','Complete the sentences'],['Affirmative','Make affirmative sentences'],['Negative','Make negative sentences'],['Questions','Make questions'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete'],['To Be Cheat Sheet']];
  const actual:string[]=[];
  for(let i=0;i<7;i++){
   await expect(page.locator('.tb-part')).toHaveCount(layout[i].length);
@@ -97,7 +97,7 @@ test('seven topics alternate theory and practice without duplicating old section
   if(i===4){await expect(page.getByRole('region',{name:'Write short answers',exact:true}).locator('textarea')).toHaveCount(6);await page.getByRole('region',{name:'Write short answers',exact:true}).getByLabel('Is the boat on the river?',{exact:true}).fill('  Yes, it is!\n ');}
   if(i<6)await page.getByRole('button',{name:'Next →',exact:true}).click();
  }
- expect(new Set(actual).size).toBe(14);
+ expect(new Set(actual).size).toBe(13);
  await page.reload();await expect(page.locator('.tb-heading h1')).toHaveText('Grammar Summary');
  await toStage(page,1);await expect(page.getByLabel('George ... fourteen years old.',{exact:true})).toHaveValue('  George is fourteen.\n ');
  await toStage(page,4);await expect(page.getByLabel('Is the boat on the river?',{exact:true})).toHaveValue('  Yes, it is!\n ');

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { LessonProps } from './types';
 import ToBeDiagram from './toBe/ToBeDiagram';
 import ToBeTheory from './toBe/Theory';
-import {completeItems,mixedItems,mistakeItems,readingText,toBeStages,toBeBlocks,toBeBlockIndex,legacyPartTitles,affirmativeItems,shortAnswerItems,negativeItems,questionItems} from './toBe/data';
+import {completeItems,mistakeItems,readingText,toBeStages,toBeBlocks,toBeBlockIndex,legacyPartTitles,affirmativeItems,shortAnswerItems,negativeItems,questionItems} from './toBe/data';
 import type {SourceItem} from './toBe/data';
 import './toBeLesson.css';
 
@@ -28,7 +28,6 @@ export default function ToBeLesson({state,setState,canTeach=false}:LessonProps) 
  {step===7 && <><h2>Make questions</h2>{sourceNote('Авторское закрепление to be с лексикой Go Getter 3, стр. 5.')}<p>Начни вопрос с Am, Is или Are.</p>{exercises('question',questionItems)}</>}
  {step===8 && <><h2>Correct the mistakes</h2><p>Find the mistake in each sentence. Write the correct sentence.</p><div className="tb-tasks">{mistakeItems.map((item,i)=><article className="tb-task" key={item.id}>{field(`mistake:${item.id}`,`${i+1}. ${item.text}`)}</article>)}</div></>}
  {step===9 && <><h2>Read and complete</h2>{sourceNote('Упражнение 157, № 20.')}<p>Вставьте глагол to be в Present Simple.</p><div className="tb-reading">{readingText.split('...').map((part,i)=><span key={i}>{i>0 && <input aria-label={`Пропуск ${i}`} value={value(`reading:${i-1}`)} onChange={e=>save(`reading:${i-1}`,e.target.value)} spellCheck={false} autoCorrect="off" autoCapitalize="off" />}{part}</span>)}</div></>}
- {step===10 && <><h2>Mixed Grammar Challenge</h2>{sourceNote('Упражнение 157: № 7, 8, 10, 11, 13, 15 — в исходном порядке. В оригинале нужно вставить to be.')}<p>Перепиши целиком каждый диалог, заполнив пропуски.</p>{exercises('mixed',mixedItems)}</>}
  {step===13 && <><h2>Make affirmative sentences</h2><p>Напиши полное утвердительное предложение, заполнив пропуск.</p>{sourceNote('Авторское закрепление лексики Go Getter 3, стр. 4.')}{exercises('affirmative',affirmativeItems)}</>}
  {step===14 && <><h2>Write short answers</h2><p>Напиши краткий ответ по отметке «Да» или «Нет».</p>{sourceNote('Авторское закрепление лексики Go Getter 3, стр. 5.')}{exercises('short',shortAnswerItems)}</>}
  </>;

@@ -13,7 +13,15 @@ export function readCourse(state:LessonState):Course {
 export function updateCourse(state:LessonState,action:(course:Course)=>Course):LessonState {
  return {...state,answers:{...state.answers,[courseKey]:action(readCourse(state))}};
 }
-export const pageIndex=(course:Course)=>Math.max(0,pages.findIndex(page=>page.id===course.activePage));
+export function pageIndex(course:Course){
+ const exact=pages.findIndex(page=>page.id===course.activePage);
+ if(exact>=0)return exact;
+ // Retired introductory Places screens resume at the first retained exercise.
+ if(course.activePage.startsWith('places/hogwarts-town/'))return pages.findIndex(page=>page.unit.id==='town-museum');
+ if(course.activePage.startsWith('word-order/'))return pages.findIndex(page=>page.topicId==='affirmative');
+ if(course.activePage==='places/places-cards' || course.activePage.startsWith('places/places-match/'))return pages.findIndex(page=>page.topicId==='places');
+ return 0;
+}
 export function legacyResponses(state:LessonState):[string,string][] {
  return Object.entries(state.answers).filter(([key])=>key!==courseKey).flatMap(([key,value])=>{
   if(typeof value==='string' && value.trim())return [[key,value]];

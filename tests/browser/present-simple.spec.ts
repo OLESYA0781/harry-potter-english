@@ -5,14 +5,14 @@ async function topic(page:import('@playwright/test').Page,id:string,width=1280){
  if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
  else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(topics.findIndex(topic=>topic.id===id)).click();
 }
-test('thirteen new topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
+test('twelve topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:{step:8,name:'',scores:{},ratings:{},answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Historical answer'}}}}}})));
  await page.goto(route);
- await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(13);
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(12);
  await expect(page.locator('.ps2-heading h1')).toHaveText('The Magic of Everyday Life');
  await expect(page.getByRole('dialog')).not.toBeVisible();
  await expect(page.getByText(/Ожидаются оригинальные материалы|Professor’s Grammar Room|Watch or listen and read/)).toHaveCount(0);
- await topic(page,'word-order');await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await topic(page,'negative');await page.getByRole('button',{name:'Next →',exact:true}).click();
  const first=page.locator('.ps2-task textarea').first();await expect(first).toHaveValue('');
  await first.fill('  My words stay.\n ');
  await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();
@@ -43,7 +43,7 @@ test('all new practice pages save original responses and allow completion withou
  await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
  await page.getByRole('link',{name:'Главное меню',exact:true}).click();
  await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 1 — Present Simple',exact:true})})).toContainText('100%');
- await page.goto(route);await topic(page,'word-order');await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await page.goto(route);await topic(page,'negative');await page.getByRole('button',{name:'Next →',exact:true}).click();
  await expect(page.locator('.ps2-task textarea').first()).toHaveValue(/Pupil draft/);
 });
 for(const width of [390,768,1024,1366])test(`new Lesson 1 topics, tables and vocabulary fit ${width}px`,async({page})=>{
@@ -52,6 +52,10 @@ for(const width of [390,768,1024,1366])test(`new Lesson 1 topics, tables and voc
   await topic(page,entry.id,width);await expect(page.locator('.ps2-heading h1')).toHaveText(entry.title);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
+ await topic(page,'places',width);await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await expect(page.locator('.ps2-panel h2')).toHaveText('Hogwarts Town — Museum');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`work/lesson1-town-${width}.png`,fullPage:true});
  await topic(page,'short-answers',width);
  const row=page.locator('.ps2-question-table .ps2-table-row').first(),cells=row.getByRole('cell');
  const question=await cells.nth(0).boundingBox(),yes=await cells.nth(1).boundingBox(),no=await cells.nth(2).boundingBox();
@@ -67,12 +71,51 @@ test('speech uses the existing browser mechanism and unavailable speech has a cl
   Object.defineProperty(window,'SpeechSynthesisUtterance',{value:class {text:string;constructor(text:string){this.text=text;}}});
   Object.defineProperty(window,'speechSynthesis',{value:{cancel(){},getVoices(){return[];},speak(utterance:{text:string}){(window as unknown as {spoken:string[]}).spoken.push(utterance.text);}}});
  });
- await page.goto(route);await topic(page,'places');await page.locator('.ps2-panel').getByRole('button',{name:'Listen: bank',exact:true}).click();
+ await page.goto(route);await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Listen: bank',exact:true}).click();
  expect(await page.evaluate(()=>(window as unknown as {spoken:string[]}).spoken)).toEqual(['bank']);
 });
 
 test('unsupported speech reports a notice without losing drafts',async({page})=>{
  await page.addInitScript(()=>{delete (window as unknown as {speechSynthesis?:unknown}).speechSynthesis;delete (window as unknown as {SpeechSynthesisUtterance?:unknown}).SpeechSynthesisUtterance;});
- await page.goto(route);await topic(page,'places');await page.locator('.ps2-panel').getByRole('button',{name:'Listen: bank',exact:true}).click();
+ await page.goto(route);await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Listen: bank',exact:true}).click();
  await expect(page.getByRole('status')).toHaveText('Английское произношение недоступно в этом браузере.');
+});
+
+test('Places starts at Where do we go, including a saved position on a removed matching page',async({page})=>{
+ await page.addInitScript(()=>{
+  const course={schemaVersion:2,activePage:'places/places-match/place-match-bank',seen:['places'],responses:{'place-match-bank':'банк','place-gap-01':'  cinema  '}};
+  const lesson={step:0,name:'',scores:{},ratings:{},answers:{'present-simple:v2':course}};
+  const data={step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:lesson}}};
+  localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data}));
+ });
+ await page.goto(route);await expect(page.locator('.ps2-panel h2')).toHaveText('Where do we go?');
+ await expect(page.locator('.ps2-task textarea').first()).toHaveValue('  cinema  ');
+ await expect(page.locator('.ps2-panel')).not.toContainText('Match the words');
+ await expect(page.locator('.ps2-panel .ps2-word-grid')).toHaveCount(0);
+ await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'← Back',exact:true}).click();
+ await expect(page.locator('.ps2-panel h2')).toHaveText('Where do we go?');
+ const answers=await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).state.answers['@vika/lesson/lesson-1'].data.answers['present-simple:v2'].responses);
+ expect(answers['place-match-bank']).toBe('банк');
+});
+
+test('Hogwarts Town reuses generated scenes for to be, likes and opening times',async({page})=>{
+ await page.goto(route);await topic(page,'places');await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'Next →',exact:true}).click();
+ for(const title of ['Museum','Café','Cinema','Theatre','Stadium']){
+  await expect(page.locator('.ps2-panel h2')).toHaveText(`Hogwarts Town — ${title}`);
+  const img=page.locator('.ps2-town-art img');await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await expect(img).toHaveAttribute('src','/art/lesson-0/places.webp');await expect(page.locator('.ps2-task textarea')).toHaveCount(3);
+  if(title==='Museum'){
+   await expect(page.locator('.ps2-town-scene')).toContainText('09:00');
+   await page.getByLabel('Гермиона любит музей.',{exact:true}).fill('  Hermione likes the museum.\n ');
+   await expect(page.getByText('Подсказки для учителя',{exact:true})).toHaveCount(0);
+   await expect(page.locator('.ps2-source li')).toHaveCount(0);
+   await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await page.getByText('Подсказки для учителя',{exact:true}).click();await expect(page.getByText('The museum opens at nine.',{exact:true})).toBeVisible();
+   await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();
+  }
+  await page.getByRole('button',{name:'Next →',exact:true}).click();
+ }
+ await expect(page.locator('.ps2-heading h1')).toHaveText('Affirmative Sentences');
+ await page.reload();await topic(page,'places');await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await expect(page.getByLabel('Гермиона любит музей.',{exact:true})).toHaveValue('  Hermione likes the museum.\n ');
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'})).not.toContainText('Word Order');
 });

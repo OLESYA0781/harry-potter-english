@@ -4,7 +4,7 @@ import type { LessonProps } from '../types';
 import type { Word } from './course';
 import { expressions, pages, places, topics, transport } from './course';
 import { legacyResponses, lesson1Summary, pageIndex, readCourse, updateCourse } from './model';
-import WordArt, { TownArt } from './WordArt';
+import WordArt from './WordArt';
 import './presentSimple.css';
 
 export default function PresentSimpleLesson({state,setState,canTeach=false}:LessonProps){
@@ -41,7 +41,7 @@ export default function PresentSimpleLesson({state,setState,canTeach=false}:Less
  {page.first && <>
  {unit.text && <p>{unit.text}</p>}
  {unit.visual==='book' && <div className="ps2-magic-book" aria-hidden="true"><BookOpen size={100}/><span>✦</span></div>}
- {unit.visual==='town' && <TownArt/>}
+
  {unit.visual==='order' && <div className="ps2-order" aria-label="Порядок слов"><strong>WHO?</strong><span aria-hidden="true">→</span><strong>DOES WHAT?</strong><span aria-hidden="true">→</span><strong>WHAT / WHERE / WHEN?</strong></div>}
  {unit.visual==='frequency' && <ol className="ps2-frequency">{['always','usually','often','sometimes','never'].map((word,i)=><li key={word}><strong>{word}</strong><span aria-hidden="true">{'●'.repeat(5-i)}{'○'.repeat(i)}</span></li>)}</ol>}
  {unit.formula && <div className="ps2-formula">{unit.formula.map((part,i)=><span key={part}>{i>0 && <b aria-hidden="true"> + </b>}{part}</span>)}</div>}
@@ -50,9 +50,9 @@ export default function PresentSimpleLesson({state,setState,canTeach=false}:Less
  {unit.words==='places' && cards(places)}{unit.words==='transport' && cards(transport)}{unit.words==='all' && vocabulary()}
  </>}
  {!page.first && unit.text && <p>{unit.text}</p>}
- {/* Keep the town picture beside all five labels, including the second task page. */}
- {!page.first && unit.visual==='town' && <TownArt/>}
- <div className="ps2-tasks">{page.tasks.map(task=><article className="ps2-task" key={task.id}>{task.art && <WordArt name={task.art} label={transport.find(word=>word.art===task.art)?.ru||'Транспорт'}/>}<label><span>{task.prompt}</span>{task.options?<select aria-label={task.prompt} value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)}><option value="">Выбери соответствие</option>{task.options.map(option=><option value={option} key={option}>{option}</option>)}</select>:<textarea rows={task.long?8:3} spellCheck={false} autoCorrect="off" value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)} />}</label></article>)}</div>
+ {unit.townScene && <figure className="ps2-town-scene"><div className="ps2-town-art"><img src="/art/lesson-0/places.webp" alt={unit.townScene.alt} loading="lazy" style={{left:`${-(unit.townScene.index%2)*100}%`,top:`${-Math.floor(unit.townScene.index/2)*100}%`}}/></div><figcaption>Время открытия: <strong>{unit.townScene.opens}</strong></figcaption></figure>}
+ {teacher && unit.teacherHints && <details className="ps2-source"><summary>Подсказки для учителя</summary><ul>{unit.teacherHints.map(hint=><li key={hint}>{hint}</li>)}</ul></details>}
+ <div className="ps2-tasks">{page.tasks.map(task=><article className="ps2-task" key={task.id}>{task.art && <WordArt name={task.art} label={transport.find(word=>word.art===task.art)?.ru||'Транспорт'}/>}<label><span id={`ps2-label-${task.id}`}>{task.prompt}</span>{task.options?<select aria-label={task.prompt} value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)}><option value="">Выбери соответствие</option>{task.options.map(option=><option value={option} key={option}>{option}</option>)}</select>:<textarea aria-labelledby={`ps2-label-${task.id}`} rows={task.long?8:3} spellCheck={false} autoCorrect="off" value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)} />}</label></article>)}</div>
  {page.topicId==='final' && page.unit.id==='final-story' && lesson1Summary(state).status==='completed' && <p className="ps2-finish">Lesson 1 Complete! ✦</p>}
  </section>
  <footer className="ps2-paging"><button className="ps2-button" disabled={index===0} onClick={()=>navigate(pages[index-1].id)}>← Back</button><span>Экран {index+1} / {pages.length}</span><button className="ps2-button" disabled={index===pages.length-1} onClick={()=>navigate(pages[index+1].id)}>Next →</button></footer>

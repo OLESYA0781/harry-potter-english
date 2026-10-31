@@ -58,6 +58,7 @@ for(const width of [390,768,1024,1366]) test(`question panel is larger and No si
  for(const stage of [3,4,12]) {
   await toStage(page,stage,width);
   const row=page.locator('.tb-question-table .tb-table-row').first();
+  await expect(row.getByRole('cell')).toHaveCount(3);
   const cells=await row.getByRole('cell').all();
   const question=await cells[0].boundingBox(),yes=await cells[1].boundingBox(),no=await cells[2].boundingBox();
   expect(question!.width).toBeGreaterThan(yes!.width);
@@ -88,7 +89,7 @@ test('correction cards save all original drafts without revealing answers or gra
 
 test('seven topics alternate theory and practice without duplicating old sections',async({page})=>{
  await page.goto('/#/lessons/lesson-0');
- const layout=[['TO BE','Complete the sentences','Hogwarts Magic Town — Look and Say'],['Affirmative','Make affirmative sentences','Who is this?'],['Negative','Make negative sentences','Find the False Facts'],['Questions','Make questions','The Mysterious Hogwarts Room'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete'],['To Be Cheat Sheet']];
+ const layout=[['TO BE','Complete the sentences','Hogwarts Magic Town — Look and Say'],['Affirmative','Make affirmative sentences','Who is this?'],['Negative','Make negative sentences','Find the False Facts'],['Questions','Make questions','Hogwarts Magic Town — Look and Describe'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete'],['To Be Cheat Sheet']];
  const actual:string[]=[];
  for(let i=0;i<7;i++){
   await expect(page.locator('.tb-part')).toHaveCount(layout[i].length);
@@ -136,7 +137,7 @@ async function loadedPictures(region:import('@playwright/test').Locator){
   await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
  }
 }
-test('visual speaking scenes, false facts and twenty revealable words work without pupil questions or recording',async({page})=>{
+test('visual speaking scenes, false facts and twenty translated words work without pupil questions or recording',async({page})=>{
  test.setTimeout(90000);
  await page.goto('/#/lessons/lesson-0');
  await toStage(page,1);
@@ -151,12 +152,13 @@ test('visual speaking scenes, false facts and twenty revealable words work witho
  const facts=page.getByRole('region',{name:'Find the False Facts',exact:true});await expect(facts.getByRole('button',{name:/Картинка/})).toHaveCount(3);
  for(let i=0;i<3;i++){await facts.getByRole('button',{name:`Картинка ${i+1}`,exact:true}).click();await loadedPictures(facts);await expect(facts.locator('.tb-false-facts li')).toHaveCount(3);}
  await expect(facts.getByText('Варианты исправлений для учителя')).toHaveCount(0);
- await toStage(page,3);const room=page.getByRole('region',{name:'The Mysterious Hogwarts Room',exact:true});await loadedPictures(room);await expect(room.locator('.tb-speaking-teacher')).toHaveCount(0);
+ await toStage(page,3);const room=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Describe',exact:true});await loadedPictures(room);await expect(room.locator('.tb-speaking-teacher')).toHaveCount(0);
  await toStage(page,0);const town=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});
  for(const group of ['Places','Transport']){
   await town.getByRole('button',{name:group,exact:true}).click();await expect(town.locator('.tb-town-word')).toHaveCount(10);
-  for(let i=0;i<10;i++){const card=town.locator('.tb-town-word').nth(i);await card.getByRole('button',{name:`Открыть слово ${i+1}`,exact:true}).click();await expect(card.locator('h3')).toBeVisible();await loadedPictures(card);}
+  for(let i=0;i<10;i++){const card=town.locator('.tb-town-word').nth(i);await expect(card.locator('h3')).toBeVisible();await expect(card.locator('p[lang=ru]')).toBeVisible();await loadedPictures(card);}
  }
+ await expect(town.getByRole('button',{name:/Открыть|Скрыть/})).toHaveCount(0);
  await page.reload();await expect(town.getByRole('button',{name:'Transport',exact:true})).toHaveAttribute('aria-pressed','true');await expect(town.getByRole('heading',{name:'underground',exact:true})).toBeVisible();
  await toStage(page,1);await expect(who.getByRole('button',{name:'Картинка 4',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(page.getByRole('button',{name:/микрофон|record|microphone/i})).toHaveCount(0);
@@ -165,14 +167,28 @@ test('visual speaking scenes, false facts and twenty revealable words work witho
 for(const width of [390,768,1024,1366])test(`oral illustrations and teacher panels fit ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:1000});await page.goto('/#/lessons/lesson-0');
  await page.getByRole('button',{name:'Teacher mode',exact:true}).click();
- for(const [stage,title] of [[1,'Who is this?'],[2,'Find the False Facts'],[3,'The Mysterious Hogwarts Room']] as const){
+ for(const [stage,title] of [[1,'Who is this?'],[2,'Find the False Facts'],[3,'Hogwarts Magic Town — Look and Describe']] as const){
   await toStage(page,stage,width);
   const region=page.getByRole('region',{name:title,exact:true});await loadedPictures(region);
   await region.scrollIntoViewIfNeeded();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  const picture=region.locator('.tb-speaking-picture,.tb-room-picture').first();const bounds=await picture.boundingBox();
+  const picture=region.locator('.tb-speaking-picture').first();const bounds=await picture.boundingBox();
   expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width);
-  if(stage===2){await region.getByRole('button',{name:'Картинка 2',exact:true}).click();await loadedPictures(region);await expect(region.getByText('The room is empty.',{exact:true})).toBeVisible();}
+  if(stage===2){await region.getByRole('button',{name:'Картинка 2',exact:true}).click();await loadedPictures(region);await expect(region.getByText('This is a hotel.',{exact:true})).toBeVisible();}
   await region.screenshot({path:`work/to-be-oral-${stage}-${width}.png`});
  }
+});
+
+test('old room selection opens the hospital replacement and teacher-only town hints follow each picture',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-0':{version:1,data:{step:2,name:'',scores:{},ratings:{},answers:{toBeActiveBlock:'negative','visual:v1:false:scene':'common-room'}}}}}})));
+ await page.goto('/#/lessons/lesson-0');const facts=page.getByRole('region',{name:'Find the False Facts',exact:true});
+ await expect(facts.getByRole('button',{name:'Картинка 2',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(facts.locator('.tb-false-facts')).toHaveText('This is a hotel.This is a museum.This is a bank.');
+ await expect(facts.locator('img')).toHaveAttribute('src','/art/lesson-0/places.webp');
+ await expect(facts).not.toContainText('The room is empty.');
+ await toStage(page,3);const describe=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Describe',exact:true});
+ await expect(describe.getByRole('button',{name:/Картинка/})).toHaveCount(8);await expect(describe.locator('.tb-speaking-teacher')).toHaveCount(0);
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(describe.getByText('Текстовые подсказки для учителя',{exact:true})).toBeVisible();
+ for(let i=0;i<8;i++){await describe.getByRole('button',{name:`Картинка ${i+1}`,exact:true}).click();await loadedPictures(describe);await expect(describe.locator('.tb-speaking-teacher').last()).toContainText('I am here');}
+ await page.reload();await expect(describe.getByRole('button',{name:'Картинка 8',exact:true})).toHaveAttribute('aria-pressed','true');await expect(describe.locator('.tb-speaking-teacher')).toHaveCount(0);
 });

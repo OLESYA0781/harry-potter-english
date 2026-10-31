@@ -50,3 +50,19 @@ for(const width of [390,768,1024,1366]) test(`all To Be theory and practice sect
  for(let i=0;i<13;i++){await toStage(page,i,width);await expect(page.locator('.tb-heading h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
  await page.screenshot({path:`work/to-be-expanded-${width}.png`,fullPage:true});
 });
+
+for(const width of [390,768,1024,1366]) test(`question panel is larger and No sits below Yes at ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:1000});await page.goto('/#/lessons/lesson-0');
+ for(const stage of [3,4,12]) {
+  await toStage(page,stage,width);
+  const row=page.locator('.tb-question-table .tb-table-row').first();
+  const cells=await row.getByRole('cell').all();
+  const question=await cells[0].boundingBox(),yes=await cells[1].boundingBox(),no=await cells[2].boundingBox();
+  expect(question!.width).toBeGreaterThan(yes!.width);
+  expect(Math.abs(no!.x-yes!.x)).toBeLessThan(1);
+  expect(no!.y).toBeGreaterThanOrEqual(yes!.y+yes!.height);
+  expect(question!.x+question!.width).toBeLessThanOrEqual(yes!.x);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.screenshot({path:`work/question-answers-${width}.png`,fullPage:true});
+});

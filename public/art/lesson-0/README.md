@@ -10,3 +10,5 @@ Original generated warm cinematic 3D storybook artwork, referenced against the e
 - `library.webp` — standalone Hermione and Ron, both students, in a library.
 
 Find the False Facts uses exactly three scenes: the Harry/Draco rivalry cell plus the approved common-room scene and library. Teacher answer variants are HTML text and never embedded into images. The attempted three-scene composite was not produced and is not referenced by the app.
+
+Current oral refresh: Find the False Facts uses the Harry/Draco rival cell, the hospital cell (places, row 2 right), and the library image. The previous common-room scene and separate room illustration are not used in these refreshed oral activities. Look and Describe reuses the café/museum/park and bus/car/train/boat/bikes cells with matching teacher text. No new images are required.

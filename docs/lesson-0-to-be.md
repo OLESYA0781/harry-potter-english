@@ -41,15 +41,23 @@ The retired Mixed Grammar Challenge (legacy step 10) opens Mixed Practice, conta
 
 The original seven-topic navigation and all thirteen graded-by-completion written/theory parts remain intact. Four new visual sections are inserted after related existing reinforcement:
 
-- Forms: existing diagram and nine gaps, then compact **Hogwarts Magic Town — Look and Say** (ten places and ten transport words).
+- Forms: existing diagram and nine gaps, then compact **Hogwarts Magic Town — Look and Say** (ten places and ten transport words, names and translations always visible).
 - Affirmative: original theory and written sentences, then **Who is this?** (four paired character pictures, displayed one at a time).
 - Negative: original theory and written negatives, then **Find the False Facts** (exactly three independent scenes, three false statements each).
-- Questions: original theory and written questions, then **The Mysterious Hogwarts Room** (one full illustration).
+- Questions: original theory and written questions, then **Hogwarts Magic Town — Look and Describe** (eight selectable finished town/transport illustrations, questions and teacher-only model answers).
 
 No microphone, recording, recognition, pronunciation scoring, mandatory written field or manual completion checkbox is added. Oral practice does not inflate or reset existing completion percentages. Teacher questions and optional false-fact corrections are rendered only in active Teacher mode using the existing access policy; question panels can be collapsed independently. Student false statements remain visible for oral correction.
 
-Scene selection and vocabulary reveal state have stable `visual:v1:*` keys inside the existing Lesson 0 record; they reuse the local queue and Supabase RPC/CAS. All existing answers, theory flags, scores and ratings are preserved. No shared storage/schema/auth changes and no changes to Lesson 1 or Trial.
+Scene selection and vocabulary group state have stable `visual:v1:*` keys inside the existing Lesson 0 record; they reuse the local queue and Supabase RPC/CAS. All existing answers, theory flags, scores and ratings are preserved. No shared storage/schema/auth changes and no changes to Lesson 1 or Trial.
 
 Artwork is original generated illustration, matched to the existing Trial Lesson character and common-room references. Finished scenes are stored locally in `public/art/lesson-0/`; CSS displays independent cells of the character and vocabulary atlases without changing the originals. The room and library are separate full landscape images; the Harry/Draco rivalry illustration is reused consistently between oral tasks. After the classroom generation failed, the owner explicitly approved reusing the existing Trial common-room illustration as the second false-fact scene. Its three statements and teacher corrections refer to the room rather than a classroom. Vocabulary words are the exact Go Getter 3 p.5 lists; the new speaking scenes and questions are author-created to-be practice.
 
 The room was visually inspected against all eleven questions: books and wand on the desk; owl by the window; exactly three ordinary chairs plus a separate armchair; cat by the fireplace; a bright room with park/café/museum, bus and train outside. The vocabulary art must keep bus/tram distinct, car blue, two pedal bikes, café beside park, boat beside park and underground below street level so teacher prompts match the scene.
+
+### Town-speaking refresh
+
+The former empty-room false-fact scene is replaced by the hospital illustration from the Magic Town atlas. All three false statements now use Go Getter place names (hotel, museum, bank); teacher corrections identify the hospital. An old saved `common-room` scene selection resolves to this same second slot through a read-only alias; stored data is not rewritten on load.
+
+The former room-description activity now uses eight existing Magic Town scenes: café, museum, park, bus, car, train, boat and bikes. Each has matching teacher questions, model full answers and text frames using to be; role-play “I am here” practices am. The selected image saves under `visual:v1:describe:scene`. No new artwork, recording or required fields are introduced. The old room image remains as an unused historical resource.
+
+All twenty Look and Say cards show English and Russian labels immediately. Reveal buttons are removed; historical reveal flags are preserved but ignored. Teacher questions and text hints remain hidden from the pupil.

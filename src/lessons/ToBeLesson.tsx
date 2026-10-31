@@ -5,7 +5,7 @@ import ToBeTheory from './toBe/Theory';
 import {completeItems,mistakeItems,readingText,toBeStages,toBeBlocks,toBeBlockIndex,legacyPartTitles,affirmativeItems,shortAnswerItems,negativeItems,questionItems} from './toBe/data';
 import type {SourceItem} from './toBe/data';
 import './toBeLesson.css';
-import { WhoIsThis, MysteriousRoom, FalseFacts, MagicTown } from './toBe/Speaking';
+import { WhoIsThis, DescribeTown, FalseFacts, MagicTown } from './toBe/Speaking';
 
 export default function ToBeLesson({state,setState,canTeach=false}:LessonProps) {
  const [teacherRequested,setTeacherRequested]=useState(false);
@@ -24,7 +24,7 @@ export default function ToBeLesson({state,setState,canTeach=false}:LessonProps) 
  const renderPart=(step:number)=><>
  {step===15 && <MagicTown state={state} teacher={teacher} save={save}/>}
  {step===16 && <WhoIsThis state={state} teacher={teacher} save={save}/>}
- {step===17 && <MysteriousRoom teacher={teacher}/>}
+ {step===17 && <DescribeTown state={state} teacher={teacher} save={save}/>}
  {step===18 && <FalseFacts state={state} teacher={teacher} save={save}/>}
  {step===0 && <ToBeDiagram />}
  {[1,2,3,4,12].includes(step) && <ToBeTheory step={step} />}

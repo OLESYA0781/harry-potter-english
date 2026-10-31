@@ -17,7 +17,7 @@ export function toBeBlockIndex(state:LessonState) {
  const legacy=toBeBlocks.findIndex(block=>block.parts.includes(state.step));
  return legacy>=0?legacy:state.step===10?toBeBlocks.findIndex(block=>block.id==='mixed'):state.step===11?toBeBlocks.findIndex(block=>block.id==='summary'):0;
 }
-export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers','Hogwarts Magic Town — Look and Say','Who is this?','The Mysterious Hogwarts Room','Find the False Facts'];
+export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers','Hogwarts Magic Town — Look and Say','Who is this?','Hogwarts Magic Town — Look and Describe','Find the False Facts'];
 
 export type SourceItem={id:string; source:string; text:string};
 export const completeItems:SourceItem[]=[

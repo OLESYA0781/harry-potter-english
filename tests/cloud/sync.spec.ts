@@ -404,16 +404,20 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
  }finally{await second.close();}
 });
 
-test('Lesson 0 oral scene and vocabulary choices sync without changing written progress or other lessons',async({page,context,browser})=>{
+test('Lesson 0 oral scene and town choices sync without changing written progress or other lessons',async({page,context,browser})=>{
  const lesson={version:1,data:{step:1,name:'Vika',answers:{toBeActiveBlock:'affirmative','affirmative:gg3-p4-george-age':'  Old full sentence.\n '},scores:{},ratings:{}}};
  await rpc({}, {id:'oral-scenes-pupil',fields:{'answers:@vika/lesson/lesson-0':lesson,'answers:diary':'Keep Trial','answers:@vika/lesson/trial-homework/day':'Keep Homework','answers:@vika/lesson/lesson-1':{version:1,data:{step:0,name:'',scores:{},ratings:{},answers:{'present-simple:v2':{schemaVersion:2,activePage:'welcome/everyday-book',seen:['welcome'],responses:{'final-story':'Keep Lesson 1'}}}}}}});
  await route(context);await login(page,'/#/lessons/lesson-0');
  const who=page.getByRole('region',{name:'Who is this?',exact:true});await who.getByRole('button',{name:'Картинка 2',exact:true}).click();
  await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(0).click();
- const town=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});await town.getByRole('button',{name:'Transport',exact:true}).click();await town.getByRole('button',{name:'Открыть слово 4',exact:true}).click();await sync(page);
+ const town=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});await town.getByRole('button',{name:'Transport',exact:true}).click();await expect(town.getByRole('heading',{name:'car',exact:true})).toBeVisible();
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(3).click();
+ const describe=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Describe',exact:true});await describe.getByRole('button',{name:'Картинка 8',exact:true}).click();await sync(page);
  const second=await browser.newContext();await route(second);
  try{
   const other=await second.newPage();await login(other,'/#/lessons/lesson-0');
+  const otherDescribe=other.getByRole('region',{name:'Hogwarts Magic Town — Look and Describe',exact:true});await expect(otherDescribe.getByRole('button',{name:'Картинка 8',exact:true})).toHaveAttribute('aria-pressed','true');
+  await other.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(0).click();
   const otherTown=other.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});await expect(otherTown.getByRole('heading',{name:'car',exact:true})).toBeVisible();
   await other.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(1).click();await expect(other.getByRole('region',{name:'Who is this?',exact:true}).getByRole('button',{name:'Картинка 2',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(other.getByLabel('George ... fourteen years old.',{exact:true})).toHaveValue('  Old full sentence.\n ');

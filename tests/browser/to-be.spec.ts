@@ -4,7 +4,7 @@ for(const width of [390,768,1024,1366]) test(`one To Be slide has three connecte
   await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 0 — To Be · Ещё не начат','Lesson 1 — Present Simple · Ещё не начат','Trial Lesson · Ещё не начат']);
   await page.getByRole('button',{name:'Начать урок',exact:true}).click();
   await expect(page).toHaveURL(/#\/lessons\/lesson-0$/);
-  await expect(page.getByRole('heading',{name:'TO BE',exact:true})).toHaveCount(1);
+  await expect(page.getByRole('heading',{name:'TO BE — Am / Is / Are',exact:true})).toHaveCount(1);
   await expect(page.locator('.to-be-source')).toHaveText('TO BE');
   await expect(page.locator('.to-be-arrows > path')).toHaveCount(3);
   await expect(page.locator('.to-be-group')).toHaveCount(3);
@@ -18,13 +18,14 @@ for(const width of [390,768,1024,1366]) test(`one To Be slide has three connecte
   await page.screenshot({path:`work/to-be-${width}.png`,fullPage:true});
 });
 
-async function toStage(page:import('@playwright/test').Page,index:number,width=1280) {
+async function toStage(page:import('@playwright/test').Page,legacy:number,width=1280) {
+ const index=[0,1,2,3,4,0,2,3,5,5,5,6,7][legacy];
  if(width<=600) await page.getByLabel('Choose Lesson 0 stage').selectOption(String(index));
  else await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(index).click();
 }
 test('expanded To Be lesson preserves original answers, identifies adaptations and never grades',async({page})=>{
  await page.goto('/#/lessons/lesson-0');
- await expect(page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button')).toHaveCount(13);
+ await expect(page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button')).toHaveCount(8);
  await toStage(page,5);
  await expect(page.locator('.tb-task')).toHaveCount(9);
  await page.getByLabel('I ... a pupil.',{exact:true}).fill('  is?  ');
@@ -32,9 +33,9 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await expect(page.locator('.tb-task')).toHaveCount(6);
  await page.getByLabel('I am a pupil.',{exact:true}).fill('I no pupil.\n');
  await toStage(page,7);await page.getByLabel('I am a pupil.',{exact:true}).fill('Am I a pupil??');
- await toStage(page,8);await expect(page.locator('.tb-panel textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
+ await toStage(page,8);await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
  await toStage(page,9);await expect(page.locator('.tb-reading input')).toHaveCount(8);await page.getByLabel('Пропуск 1',{exact:true}).fill('am');
- await toStage(page,10);await expect(page.locator('.tb-task')).toHaveCount(6);
+ await toStage(page,10);await expect(page.getByRole('region',{name:'Mixed Grammar Challenge',exact:true}).locator('.tb-task')).toHaveCount(6);
  await toStage(page,11);await expect(page.getByText('Авторское задание — не из учебника.')).toBeVisible();await expect(page.locator('.tb-panel textarea')).toHaveCount(7);await page.getByLabel('Утверждение 1',{exact:true}).fill('  I is Vika.\n ');
  await page.reload();await expect(page.getByLabel('Утверждение 1',{exact:true})).toHaveValue('  I is Vika.\n ');
  await toStage(page,5);await expect(page.getByLabel('I ... a pupil.',{exact:true})).toHaveValue('  is?  ');
@@ -47,7 +48,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
 });
 for(const width of [390,768,1024,1366]) test(`all To Be theory and practice sections fit ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:950});await page.goto('/#/lessons/lesson-0');
- for(let i=0;i<13;i++){await toStage(page,i,width);await expect(page.locator('.tb-heading h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+ for(const i of [0,1,2,3,4,8,11,12]){await toStage(page,i,width);await expect(page.locator('.tb-heading h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
  await page.screenshot({path:`work/to-be-expanded-${width}.png`,fullPage:true});
 });
 
@@ -70,16 +71,34 @@ for(const width of [390,768,1024,1366]) test(`question panel is larger and No si
 test('correction cards save all original drafts without revealing answers or grading',async({page})=>{
  await page.goto('/#/lessons/lesson-0');await toStage(page,8);
  await expect(page.getByText('Find the mistake in each sentence. Write the correct sentence.',{exact:true})).toBeVisible();
- await expect(page.locator('.tb-task')).toHaveCount(12);
+ await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('.tb-task')).toHaveCount(12);
  await expect(page.locator('.tb-panel select')).toHaveCount(0);
  const drafts=Array.from({length:12},(_,i)=>`  my own wrong answer ${i+1}.\n `);
- for(let i=0;i<12;i++)await page.locator('.tb-panel textarea').nth(i).fill(drafts[i]);
+ for(let i=0;i<12;i++)await page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea').nth(i).fill(drafts[i]);
  await page.reload();
- for(let i=0;i<12;i++)await expect(page.locator('.tb-panel textarea').nth(i)).toHaveValue(drafts[i]);
+ for(let i=0;i<12;i++)await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea').nth(i)).toHaveValue(drafts[i]);
  await expect(page.locator('.tb-panel')).not.toContainText('I am eleven years old.');
  await expect(page.locator('.tb-panel')).not.toContainText(/Correct!|Try again!|не найдено/);
  await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'← Back',exact:true}).click();
- await expect(page.locator('.tb-panel textarea').first()).toHaveValue(drafts[0]);
+ await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea').first()).toHaveValue(drafts[0]);
  await page.getByRole('link',{name:'Главное меню',exact:true}).click();
- await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('2 из 13 частей');
+ await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('2 из 15 частей');
+});
+
+test('eight topics alternate theory and practice without duplicating old sections',async({page})=>{
+ await page.goto('/#/lessons/lesson-0');
+ const layout=[['TO BE','Complete the sentences'],['Affirmative','Make affirmative sentences'],['Negative','Make negative sentences'],['Questions','Make questions'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete','Mixed Grammar Challenge'],['My Hogwarts Profile'],['To Be Cheat Sheet']];
+ const actual:string[]=[];
+ for(let i=0;i<8;i++){
+  await expect(page.locator('.tb-part')).toHaveCount(layout[i].length);
+  const parts=await page.locator('.tb-part').evaluateAll(elements=>elements.map(e=>e.getAttribute('aria-label')));
+  expect(parts).toEqual(layout[i]);actual.push(...parts as string[]);
+  if(i===1)await page.getByRole('region',{name:'Make affirmative sentences',exact:true}).getByLabel('I ... a pupil.',{exact:true}).fill('  I am a pupil.\n ');
+  if(i===4){await expect(page.getByRole('region',{name:'Write short answers',exact:true}).locator('textarea')).toHaveCount(6);await page.getByRole('region',{name:'Write short answers',exact:true}).getByLabel('Are you an engineer?',{exact:true}).fill('  Yes, I am!\n ');}
+  if(i<7)await page.getByRole('button',{name:'Next →',exact:true}).click();
+ }
+ expect(new Set(actual).size).toBe(15);
+ await page.reload();await expect(page.locator('.tb-heading h1')).toHaveText('Grammar Summary');
+ await toStage(page,1);await expect(page.getByLabel('I ... a pupil.',{exact:true})).toHaveValue('  I am a pupil.\n ');
+ await toStage(page,4);await expect(page.getByLabel('Are you an engineer?',{exact:true})).toHaveValue('  Yes, I am!\n ');
 });

@@ -1,12 +1,12 @@
 import {expect,it} from 'vitest';
 import {initial} from '../../data';
-import {completeItems,mixedItems,mistakeItems,toBeSummary,transformationItems} from './data';
+import {toBeBlocks,toBeBlockIndex,affirmativeItems,shortAnswerItems,completeItems,mixedItems,mistakeItems,toBeSummary,transformationItems} from './data';
 import {toBeLesson,trialLesson,presentSimpleLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 it('counts filled work and viewed theory without judging grammar, including the correction task',()=>{
  const answers:Record<string,unknown>={};for(const n of [0,1,2,3,4,12])answers[`seen:${n}`]=true;
- expect(toBeSummary({...initial,answers})).toMatchObject({percent:46,status:'in-progress'});
- for(const [key,items] of [['complete',completeItems],['negative',transformationItems],['question',transformationItems],['mixed',mixedItems]] as const) for(const item of items)answers[`${key}:${item.id}`]='  I is?\n ';
+ expect(toBeSummary({...initial,answers})).toMatchObject({percent:40,status:'in-progress'});
+ for(const [key,items] of [['affirmative',affirmativeItems],['short',shortAnswerItems],['complete',completeItems],['negative',transformationItems],['question',transformationItems],['mixed',mixedItems]] as const) for(const item of items)answers[`${key}:${item.id}`]='  I is?\n ';
  for(const item of mistakeItems)answers[`mistake:${item.id}`]='  incorrect original text!  ';
  for(let i=0;i<8;i++)answers[`reading:${i}`]='wrong';for(let i=0;i<7;i++)answers[`profile:${i}`]='own text';
  expect(toBeSummary({...initial,answers})).toMatchObject({percent:100,status:'completed'});
@@ -25,6 +25,16 @@ it('requires all twelve nonblank correction responses, not correctness',()=>{
  for(const item of mistakeItems.slice(0,11))answers[`mistake:${item.id}`]='wrong';
  expect(toBeSummary({...initial,answers}).percent).toBe(0);
  answers['mistake:12']='   ';expect(toBeSummary({...initial,answers}).percent).toBe(0);
- answers['mistake:12']='my own mistake';expect(toBeSummary({...initial,answers}).percent).toBe(8);
+ answers['mistake:12']='my own mistake';expect(toBeSummary({...initial,answers}).percent).toBe(7);
  expect(mistakeItems).toHaveLength(12);
+});
+
+it('maps every legacy position into exactly one stable topic and preserves earned theory flags',()=>{
+ const expected=[0,1,2,3,4,0,2,3,5,5,5,6,7];
+ expected.forEach((index,step)=>expect(toBeBlockIndex({...initial,step})).toBe(index));
+ expect(toBeBlocks.flatMap(block=>block.parts).slice().sort((a,b)=>a-b)).toEqual(Array.from({length:15},(_,i)=>i));
+ expect(new Set(toBeBlocks.map(block=>block.id)).size).toBe(8);
+ expect(toBeBlockIndex({...initial,step:12,answers:{toBeActiveBlock:'summary'}})).toBe(7);
+ // An old client may change only numeric step, leaving a stale new-client marker.
+ expect(toBeBlockIndex({...initial,step:6,answers:{toBeActiveBlock:'summary'}})).toBe(2);
 });

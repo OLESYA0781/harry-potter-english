@@ -8,7 +8,6 @@ export const toBeBlocks = [
  {id:'questions',title:'Questions',legacyStep:3,parts:[3,7]},
  {id:'short-answers',title:'Short Answers',legacyStep:4,parts:[4,14]},
  {id:'mixed',title:'Mixed Practice',legacyStep:8,parts:[8,9,10]},
- {id:'profile',title:'My Hogwarts Profile',legacyStep:11,parts:[11]},
  {id:'summary',title:'Grammar Summary',legacyStep:12,parts:[12]},
 ];
 export const toBeStages=toBeBlocks.map(block=>block.title);
@@ -16,7 +15,7 @@ export function toBeBlockIndex(state:LessonState) {
  const explicit=toBeBlocks.findIndex(block=>block.id===state.answers.toBeActiveBlock);
  if(explicit>=0 && state.step===toBeBlocks[explicit].legacyStep)return explicit;
  const legacy=toBeBlocks.findIndex(block=>block.parts.includes(state.step));
- return legacy>=0?legacy:0;
+ return legacy>=0?legacy:state.step===11?toBeBlocks.findIndex(block=>block.id==='summary'):0;
 }
 export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers'];
 
@@ -33,7 +32,7 @@ export const completeItems:SourceItem[]=[
  ['160-8','Упр. 160, № 8','Vera ... afraid of snakes.'],
 ].map(([id,source,text])=>({id,source,text}));
 // Affirmatives obtained by filling the original gaps. Adapted task, never an original transformation exercise.
-export const transformationItems:SourceItem[]=[
+export const legacyTransformationItems:SourceItem[]=[
  ['157-5','Упр. 157, № 5','I am a pupil.'],
  ['157-9a','Упр. 157, № 9 (первое предложение)','My brother is a worker.'],
  ['157-14','Упр. 157, № 14','My sister is at home.'],
@@ -42,15 +41,49 @@ export const transformationItems:SourceItem[]=[
  ['157-18','Упр. 157, № 18','My uncle is an office worker.'],
 ].map(([id,source,text])=>({id,source,text}));
 // New full-sentence practice uses six unchanged affirmative gap prompts from the original selection.
-export const affirmativeItems=completeItems.slice(0,6);
+export const legacyAffirmativeItems=completeItems.slice(0,6);
 // Existing Ex. 157 dialogue questions, with gaps filled; short responses are now practiced separately.
-export const shortAnswerItems:SourceItem[]=[
+export const legacyShortAnswerItems:SourceItem[]=[
  ['157-7','Упр. 157, № 7 · Да','Is your aunt a doctor?'],
  ['157-8','Упр. 157, № 8 · Нет','Are they at home?'],
  ['157-10','Упр. 157, № 10 · Да','Are you an engineer?'],
  ['157-11','Упр. 157, № 11 · Нет','Is your sister a typist?'],
  ['157-13','Упр. 157, № 13 · Нет','Is your sister at school?'],
  ['157-15','Упр. 157, № 15 · Да','Is this your watch?'],
+].map(([id,source,text])=>({id,source,text}));
+// New author-created To Be practice: vocabulary checked against Go Getter 3 SB pp. 4–5.
+// These are NOT verbatim book exercises. New IDs prevent old responses appearing under changed prompts.
+export const affirmativeItems:SourceItem[]=[
+ ['gg3-p4-george-age','Авторское · лексика Go Getter 3, стр. 4','George ... fourteen years old.'],
+ ['gg3-p4-emma-poppy','Авторское · лексика Go Getter 3, стр. 4','Emma and Poppy ... best friends.'],
+ ['gg3-p4-tennis','Авторское · лексика Go Getter 3, стр. 4','Harry ... a tennis genius.'],
+ ['gg3-p4-mum','Авторское · лексика Go Getter 3, стр. 4','Angela ... their mum.'],
+ ['gg3-p4-gran','Авторское · лексика Go Getter 3, стр. 4',"Bertie ... Emma's gran."],
+ ['gg3-p4-helmet','Авторское · лексика Go Getter 3, стр. 4','The helmet ... on the chair.'],
+].map(([id,source,text])=>({id,source,text}));
+export const negativeItems:SourceItem[]=[
+ ['gg3-p5-cafe','Авторское · лексика Go Getter 3, стр. 5','The café is open.'],
+ ['gg3-p5-park','Авторское · лексика Go Getter 3, стр. 5','The park is quiet.'],
+ ['gg3-p5-cinema','Авторское · лексика Go Getter 3, стр. 5','The cinema is near our school.'],
+ ['gg3-p5-hotel','Авторское · лексика Go Getter 3, стр. 5','The hotel is small.'],
+ ['gg3-p5-museum','Авторское · лексика Go Getter 3, стр. 5','The museum is busy.'],
+ ['gg3-p5-restaurant','Авторское · лексика Go Getter 3, стр. 5','The restaurant is expensive.'],
+].map(([id,source,text])=>({id,source,text}));
+export const questionItems:SourceItem[]=[
+ ['gg3-p5-hospital-bank','Авторское · лексика Go Getter 3, стр. 5','The hospital is next to the bank.'],
+ ['gg3-p5-stadium','Авторское · лексика Go Getter 3, стр. 5','The stadium is big.'],
+ ['gg3-p5-theatre','Авторское · лексика Go Getter 3, стр. 5','The theatre is old.'],
+ ['gg3-p5-bike','Авторское · лексика Go Getter 3, стр. 5','The bike is new.'],
+ ['gg3-p5-bus','Авторское · лексика Go Getter 3, стр. 5','The bus is red.'],
+ ['gg3-p5-train','Авторское · лексика Go Getter 3, стр. 5','The train is fast.'],
+].map(([id,source,text])=>({id,source,text}));
+export const shortAnswerItems:SourceItem[]=[
+ ['gg3-p5-boat','Авторское · Go Getter 3, стр. 5 · Да','Is the boat on the river?'],
+ ['gg3-p5-cars','Авторское · Go Getter 3, стр. 5 · Нет','Are the cars outside?'],
+ ['gg3-p5-motorbike','Авторское · Go Getter 3, стр. 5 · Нет','Is the motorbike black?'],
+ ['gg3-p5-plane','Авторское · Go Getter 3, стр. 5 · Да','Is the plane in the sky?'],
+ ['gg3-p5-taxis','Авторское · Go Getter 3, стр. 5 · Да','Are the taxis yellow?'],
+ ['gg3-p5-underground','Авторское · Go Getter 3, стр. 5 · Нет','Is the underground station far?'],
 ].map(([id,source,text])=>({id,source,text}));
 export const readingText='Helen ... a painter. She has some fine pictures. They ... on the walls. She has much paper. It ... on the shelf. The shelf ... brown. It ... on the wall. Helen has a brother. He ... a student. He has a family. His family ... not in St. Petersburg, it ... in Moscow.';
 export const mixedItems:SourceItem[]=[
@@ -84,7 +117,7 @@ export function toBeSummary(state:LessonState) {
  const text=(key:string)=>typeof state.answers[key]==='string' && !!(state.answers[key] as string).trim();
  const list=(prefix:string,items:{id:string}[])=>items.every(item=>text(`${prefix}:${item.id}`));
  const theory=[0,1,2,3,4,12].filter(i=>state.answers[`seen:${i}`]===true).length;
- const tasks=[list('affirmative',affirmativeItems),list('short',shortAnswerItems),list('mistake',mistakeItems),list('complete',completeItems),list('negative',transformationItems),list('question',transformationItems),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems),Array.from({length:7},(_,i)=>text(`profile:${i}`)).every(Boolean)].filter(Boolean).length;
+ const tasks=[(list('affirmative',affirmativeItems)||list('affirmative',legacyAffirmativeItems)),(list('short',shortAnswerItems)||list('short',legacyShortAnswerItems)),list('mistake',mistakeItems),list('complete',completeItems),(list('negative',negativeItems)||list('negative',legacyTransformationItems)),(list('question',questionItems)||list('question',legacyTransformationItems)),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems)].filter(Boolean).length;
  const done=theory+tasks;
- return {percent:Math.round(done/15*100),status:done===15?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 15 частей`};
+ return {percent:Math.round(done/14*100),status:done===14?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 14 частей`};
 }

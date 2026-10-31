@@ -50,5 +50,6 @@ export const toBeLesson: LessonDefinition = {
   Component: ToBeLesson,
   summarize: toBeSummary,
 };
-// Add a new module here. Both menus and the dashboard use this one registry.
-export const lessons = sortLessons([toBeLesson, presentSimpleLesson, trialLesson]);
+// Explicit display order shared by the main menu and lesson picker.
+// Keep Trial Lesson last; publication dates do not determine the teaching order.
+export const lessons: LessonDefinition[] = [presentSimpleLesson, toBeLesson, trialLesson];

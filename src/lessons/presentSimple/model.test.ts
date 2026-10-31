@@ -4,7 +4,7 @@ import {lesson1Summary,exerciseDone} from './model';
 import {presentSimpleLesson,lessons,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 it('only counts real viewed grammar and never completes missing originals',()=>{
-  expect(lessons.map(l=>l.id)).toEqual(['lesson-0','lesson-1','trial']);
+  expect(lessons.map(l=>l.id)).toEqual(['lesson-1','lesson-0','trial']);
   const state={...initial,step:8,answers:Object.fromEntries(Array.from({length:6},(_,i)=>[`grammarSeen${i}`,true]))};
   expect(lesson1Summary(state)).toMatchObject({percent:43,status:'in-progress'});
   expect(lesson1Summary(initial)).toMatchObject({percent:0,status:'not-started'});

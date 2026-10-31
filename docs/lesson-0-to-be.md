@@ -29,3 +29,5 @@ Supabase Auth, RPC/CAS conflict handling, local queue, SQL migrations and produc
 ## Verification
 
 Unit checks cover topic order, unique sentence contexts, legacy progress and position compatibility. Browser checks cover desktop, iPad and phone layouts, draft restoration, correction cards, and preservation of hidden historical profile answers. Isolated SQL/RPC cloud checks cover restoration on another device and offline conflicts without accessing the real pupil database.
+
+Source labels, page numbers and adaptation notes are visible only while Teacher mode is enabled using the existing teacher-access policy. The toggle is local UI state and never saved into pupil progress. Pupil instructions and Yes/No directions remain visible.

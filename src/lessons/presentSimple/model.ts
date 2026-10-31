@@ -1,24 +1,32 @@
 import type { LessonState } from '../../data';
-import { lesson1Materials as materials, weekDays } from './materials';
-import type { BookExercise } from './materials';
-export const stageTitles = ['Welcome to Hogwarts!', "Professor’s Grammar Room", 'Exercise 3', 'Exercise 4', 'Exercise 5', 'Exercise 6', 'Exercise 7', 'Exercise 8', 'Exercise 9'];
-export const slideTitles = ['When do we use Present Simple?', 'Signal Words', 'Affirmative Sentences', 'Negative Sentences', 'Questions', 'Grammar Cheat Sheet'];
-export function exerciseDone(state: LessonState, key: string, exercise: BookExercise | null): boolean {
-  if (!exercise?.instruction.trim()) return false;
-  const required=exercise.items.filter(item=>!item.example);
-  const filled=required.length>0 && required.every(item=>{
-    const response=state.answers[`${key}:${item.id}`];
-    return typeof response==='string' && !!response.trim();
-  });
-  const days=state.answers[`${key}:busy-days`];
-  return filled && (!exercise.calendar || Array.isArray(days) && days.some(day=>typeof day==='string' && weekDays.includes(day)));
+import { allTasks, pages, topics } from './course';
+export const courseKey='present-simple:v2';
+export type Course={schemaVersion:2;activePage:string;seen:string[];responses:Record<string,string>};
+export const freshCourse=():Course=>({schemaVersion:2,activePage:pages[0].id,seen:[],responses:{}});
+export function readCourse(state:LessonState):Course {
+ const value=state.answers[courseKey];
+ if(value===undefined)return freshCourse();
+ const saved=value as Partial<Course>|null;
+ if(!saved || saved.schemaVersion!==2 || typeof saved.activePage!=='string' || !Array.isArray(saved.seen) || saved.seen.some(id=>typeof id!=='string') || !saved.responses || typeof saved.responses!=='object' || Array.isArray(saved.responses) || Object.values(saved.responses).some(value=>typeof value!=='string'))throw new Error('Не удалось прочитать версию Lesson 1. Сохранённые данные не изменены. Обратитесь к преподавателю.');
+ return saved as Course;
 }
-export function grammarSeen(state: LessonState): number[] {
-  return Array.from({length:6},(_,i)=>i).filter(i=>state.answers[`grammarSeen${i}`] === true);
+export function updateCourse(state:LessonState,action:(course:Course)=>Course):LessonState {
+ return {...state,answers:{...state.answers,[courseKey]:action(readCourse(state))}};
 }
-export function lesson1Summary(state: LessonState) {
-  const intro = !!materials.introduction?.dialogue.trim() && exerciseDone(state,'intro',materials.introduction.comprehension);
-  const done = grammarSeen(state).length + Number(intro) + [3,4,5,6,7,8,9].filter(n=>exerciseDone(state,`exercise${n}`,materials.exercises[n])).length;
-  const percent = Math.round(done / 14 * 100);
-  return { percent, status: done === 14 ? 'completed' as const : state.step > 0 || Object.keys(state.answers).length ? 'in-progress' as const : 'not-started' as const, detail: `${done} из 14 частей` };
+export const pageIndex=(course:Course)=>Math.max(0,pages.findIndex(page=>page.id===course.activePage));
+export function legacyResponses(state:LessonState):[string,string][] {
+ return Object.entries(state.answers).filter(([key])=>key!==courseKey).flatMap(([key,value])=>{
+  if(typeof value==='string' && value.trim())return [[key,value]];
+  if(Array.isArray(value) && value.every(item=>typeof item==='string') && value.length)return [[key,value.join(', ')]];
+  return [];
+ });
+}
+export function lesson1Summary(state:LessonState){
+ const course=readCourse(state);
+ const filled=(id:string)=>!!course.responses[id]?.trim();
+ const answersDone=allTasks.filter(task=>filled(task.id)).length;
+ const viewed=topics.filter(topic=>course.seen.includes(topic.id)).length;
+ const completed=topics.filter(topic=>course.seen.includes(topic.id) && topic.units.every(unit=>(unit.tasks||[]).every(task=>filled(task.id)))).length;
+ const total=allTasks.length+topics.length;
+ return {percent:Math.round((answersDone+viewed)/total*100),status:completed===topics.length?'completed' as const:answersDone+viewed>0 || Object.keys(state.answers).length>0?'in-progress' as const:'not-started' as const,detail:`${completed} из ${topics.length} тем · ${answersDone} из ${allTasks.length} ответов`};
 }

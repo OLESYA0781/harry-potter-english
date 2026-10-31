@@ -1,92 +1,78 @@
-import { test, expect } from '@playwright/test';
+import {test,expect} from '@playwright/test';
+import {allTasks,pages,topics} from '../../src/lessons/presentSimple/course';
 const route='/#/lessons/lesson-1';
-async function stage(page: import('@playwright/test').Page,index:number,width=1280) {
-  if(width<=600) await page.getByLabel('Choose Lesson 1 stage').selectOption(String(index));
-  else await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(index).click();
+async function topic(page:import('@playwright/test').Page,id:string,width=1280){
+ if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
+ else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(topics.findIndex(topic=>topic.id===id)).click();
 }
-test('first menu entry; nine stages and six grammar slides; notes restore independently',async({page})=>{
-  await page.goto('/');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option').nth(0)).toContainText('Lesson 1 — Present Simple');
-  await page.getByLabel('Выбери своё приключение').selectOption('lesson-1');
-  await page.getByRole('button',{name:'Начать урок',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Welcome to Hogwarts!',exact:true})).toBeVisible();
-  await expect(page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button')).toHaveCount(9);
-  await expect(page.getByRole('heading',{name:'Hello!',exact:true})).toBeVisible();
-  await expect(page.getByText('George: Hi, I’m George Nichols.',{exact:false})).toBeVisible();
-  await expect(page.locator('audio,video')).toHaveCount(0);
-  await stage(page,1);
-  const titles=['When do we use Present Simple?','Signal Words','Affirmative Sentences','Negative Sentences','Questions','Grammar Cheat Sheet'];
-  for(let i=0;i<6;i++) {
-    await expect(page.getByRole('heading',{name:titles[i],exact:true})).toBeVisible();
-    if(i<5) await page.getByRole('button',{name:'Next slide →',exact:true}).click();
-  }
-  await page.getByLabel('Мои заметки по грамматике').fill('  She play?\nDon’t change my notes.  ');
-  await page.reload();
-  await expect(page.getByRole('heading',{name:'Grammar Cheat Sheet',exact:true})).toBeVisible();
-  await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('  She play?\nDon’t change my notes.  ');
-  await page.getByRole('button',{name:"Continue to Student's Book",exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Exercise 3',exact:true,level:2})).toBeVisible();
-  await expect(page.getByText('Ожидаются оригинальные материалы')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Monday',exact:true})).toBeVisible();
-  for(let i=3;i<=8;i++) { await page.getByRole('button',{name:'Next →',exact:true}).click(); await expect(page.locator('.ps-heading h1')).toHaveText(`Exercise ${i+1}`); }
-  await expect(page.getByRole('heading',{name:'Lesson 1 Complete!',exact:true})).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
-  await page.getByRole('link',{name:'Главное меню',exact:true}).click();
-  await page.getByLabel('Выбери своё приключение').selectOption('trial');
-  await page.getByRole('button',{name:'Начать урок',exact:true}).click();
-  await expect(page.locator('.nav-item')).toHaveCount(12);
-  await page.getByRole('tab',{name:'Homework',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'New Words',exact:true})).toBeVisible();
+test('thirteen new topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:{step:8,name:'',scores:{},ratings:{},answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Historical answer'}}}}}})));
+ await page.goto(route);
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(13);
+ await expect(page.locator('.ps2-heading h1')).toHaveText('The Magic of Everyday Life');
+ await expect(page.getByRole('dialog')).not.toBeVisible();
+ await expect(page.getByText(/Ожидаются оригинальные материалы|Professor’s Grammar Room|Watch or listen and read/)).toHaveCount(0);
+ await topic(page,'word-order');await page.getByRole('button',{name:'Next →',exact:true}).click();
+ const first=page.locator('.ps2-task textarea').first();await expect(first).toHaveValue('');
+ await first.fill('  My words stay.\n ');
+ await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();
+ const dictionary=page.getByRole('dialog');await expect(dictionary).toBeVisible();await expect(dictionary.locator('.ps2-word')).toHaveCount(20);
+ await expect(dictionary.getByRole('heading',{name:'Useful expressions'})).toBeVisible();
+ await page.getByRole('button',{name:'Закрыть словарь'}).click();await expect(first).toHaveValue('  My words stay.\n ');
+ await page.reload();await expect(first).toHaveValue('  My words stay.\n ');
+ await page.getByText('Ответы предыдущей версии урока',{exact:true}).click();
+ await expect(page.getByLabel('Заметки по грамматике')).toHaveValue('  Old notes\n ');
+ await expect(page.locator('.ps2-legacy textarea').last()).toHaveValue('Historical answer');
+ await expect(page.locator('.ps2-panel')).not.toContainText('Авторский материал');
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(page.locator('.ps2-source')).toContainText('Авторский материал');
+ await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();await expect(page.locator('.ps2-source')).toHaveCount(0);
 });
-for(const width of [390,768,1024,1366]) test(`grammar and pending stages fit ${width}px`,async({page})=>{
-  await page.setViewportSize({width,height:950});await page.goto(route);await stage(page,1,width);
-  for(let i=0;i<6;i++) {
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-    for(const word of await page.locator('.ps-highlight').all()){
-      await expect(word).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
-      await expect(word).toHaveCSS('padding','0px');
-      await expect(word).toHaveCSS('font-weight','800');
-    }
-    if(i===4){
-      const answers=page.locator('.ps-short-answers p');
-      for(const offset of [0,2]){
-        const yes=await answers.nth(offset).boundingBox(),no=await answers.nth(offset+1).boundingBox();
-        expect(Math.abs(yes!.x-no!.x)).toBeLessThan(1);
-        expect(no!.y).toBeGreaterThanOrEqual(yes!.y+yes!.height);
-      }
-    }
-    if(i===5){
-      await expect(page.locator('.ps-cheat-head')).toHaveCSS('background-color','rgb(229, 237, 219)');
-      await expect(page.locator('.ps-cheat-row').first()).toHaveCSS('background-color','rgb(255, 249, 231)');
-      await expect(page.locator('.ps-cheat-row').last()).toHaveCSS('background-color','rgb(245, 240, 231)');
-    }
-    if(i<5) await page.getByRole('button',{name:'Next slide →',exact:true}).click();
-  }
-  await page.screenshot({path:`work/present-simple-${width}.png`,fullPage:true});
-  for(let i=0;i<9;i++) {await stage(page,i,width);await expect(page.locator('.ps-heading h1')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+test('all new practice pages save original responses and allow completion without grading',async({page})=>{
+ test.setTimeout(90000);
+ await page.goto(route);
+ let answered=0;
+ for(let i=0;i<pages.length;i++){
+  await expect(page.locator('.ps2-panel h2')).toHaveText(pages[i].unit.title);
+  const selects=page.locator('.ps2-task select'),fields=page.locator('.ps2-task textarea');
+  for(const select of await selects.all()){await select.selectOption({index:1});answered++;}
+  for(const field of await fields.all()){await field.fill(`  Pupil draft ${answered}.\n `);answered++;}
+  await expect(page.locator('.ps2-panel')).not.toContainText(/Correct!|Try again!/);
+  if(i<pages.length-1)await page.getByRole('button',{name:'Next →',exact:true}).click();
+ }
+ expect(answered).toBe(allTasks.length);
+ await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
+ await page.getByRole('link',{name:'Главное меню',exact:true}).click();
+ await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 1 — Present Simple',exact:true})})).toContainText('100%');
+ await page.goto(route);await topic(page,'word-order');await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await expect(page.locator('.ps2-task textarea').first()).toHaveValue(/Pupil draft/);
+});
+for(const width of [390,768,1024,1366])test(`new Lesson 1 topics, tables and vocabulary fit ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:1000});await page.goto(route);
+ for(const entry of topics){
+  await topic(page,entry.id,width);await expect(page.locator('.ps2-heading h1')).toHaveText(entry.title);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await topic(page,'short-answers',width);
+ const row=page.locator('.ps2-question-table .ps2-table-row').first(),cells=row.getByRole('cell');
+ const question=await cells.nth(0).boundingBox(),yes=await cells.nth(1).boundingBox(),no=await cells.nth(2).boundingBox();
+ expect(question!.width).toBeGreaterThan(yes!.width);expect(Math.abs(yes!.x-no!.x)).toBeLessThan(1);expect(no!.y).toBeGreaterThanOrEqual(yes!.y+yes!.height);
+ await page.screenshot({path:`work/lesson1-v2-${width}.png`,fullPage:true});
+ await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();
+ const dictionary=page.getByRole('dialog');expect(await dictionary.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await page.keyboard.press('Escape');await expect(dictionary).not.toBeVisible();
+});
+test('speech uses the existing browser mechanism and unavailable speech has a clear notice',async({page})=>{
+ await page.addInitScript(()=>{
+  (window as unknown as {spoken:string[]}).spoken=[];
+  Object.defineProperty(window,'SpeechSynthesisUtterance',{value:class {text:string;constructor(text:string){this.text=text;}}});
+  Object.defineProperty(window,'speechSynthesis',{value:{cancel(){},getVoices(){return[];},speak(utterance:{text:string}){(window as unknown as {spoken:string[]}).spoken.push(utterance.text);}}});
+ });
+ await page.goto(route);await topic(page,'places');await page.locator('.ps2-panel').getByRole('button',{name:'Listen: bank',exact:true}).click();
+ expect(await page.evaluate(()=>(window as unknown as {spoken:string[]}).spoken)).toEqual(['bank']);
 });
 
-test('all original textbook tasks accept drafts and complete only after the responses are filled',async({page})=>{
- await page.goto(route);
- const intro=page.locator('.ps-book-task textarea');await expect(intro).toHaveCount(4);
- for(let i=0;i<4;i++)await intro.nth(i).fill(`  Intro draft ${i}.\n `);
- await stage(page,1);
- for(let i=0;i<5;i++)await page.getByRole('button',{name:'Next slide →',exact:true}).click();
- await page.getByLabel('Мои заметки по грамматике').fill('Keep old notes');
- const counts=[5,1,4,1,4,7,5];
- for(let step=2;step<=8;step++){
-  await stage(page,step);
-  const fields=page.locator('.ps-book-task textarea');await expect(fields).toHaveCount(counts[step-2]);
-  if(step===2)await page.getByRole('button',{name:'Monday',exact:true}).click();
-  if(step===5 || step===6){const image=page.locator('.ps-book-image');await expect(image).toBeVisible();expect(await image.evaluate(img=>(img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);}
-  for(let i=0;i<counts[step-2];i++)await fields.nth(i).fill(`  My own wrong answer ${step}:${i}.\n `);
-  await expect(page.locator('.ps-panel')).not.toContainText(/Correct!|Try again!|Ожидаются оригинальные материалы/);
- }
- await expect(page.getByRole('heading',{name:'Lesson 1 Complete!',exact:true})).toBeVisible();
- await page.reload();await expect(page.locator('.ps-book-task textarea').first()).toHaveValue('  My own wrong answer 8:0.\n ');
- await stage(page,2);await expect(page.getByRole('button',{name:'Monday',exact:true})).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('.ps-book-task textarea').first()).toHaveValue('  My own wrong answer 2:0.\n ');
- await stage(page,0);await expect(page.locator('.ps-book-task textarea').first()).toHaveValue('  Intro draft 0.\n ');
- await expect(page.locator('.ps-panel')).not.toContainText('Go Getter');
- await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(page.locator('.ps-panel')).toContainText('Go Getter');
+test('unsupported speech reports a notice without losing drafts',async({page})=>{
+ await page.addInitScript(()=>{delete (window as unknown as {speechSynthesis?:unknown}).speechSynthesis;delete (window as unknown as {SpeechSynthesisUtterance?:unknown}).SpeechSynthesisUtterance;});
+ await page.goto(route);await topic(page,'places');await page.locator('.ps2-panel').getByRole('button',{name:'Listen: bank',exact:true}).click();
+ await expect(page.getByRole('status')).toHaveText('Английское произношение недоступно в этом браузере.');
 });

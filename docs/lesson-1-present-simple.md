@@ -1,41 +1,50 @@
-# Lesson 1 — Present Simple
+# Lesson 1 — Present Simple, course schema v2
 
-Route: `/#/lessons/lesson-1`. Catalog order is explicitly Lesson 1, Lesson 0, Trial Lesson. Existing grammar, Trial Lesson, Homework and Lesson 0 are unchanged.
+This replaces the old Lesson 1 UI rather than appending to it. The repository catalog order and route `/#/lessons/lesson-1` are unchanged. Lesson 0, Trial Lesson, Homework, authentication and shared saving code are unchanged.
 
-## Source and tasks
+## Old blocks and dependencies
 
-The supplied `go_getter_3_student_s_book.pdf` (116 pages) was read and visually checked at printed/PDF pages 4–5. The site transcribes these pages; it does not publish the full PDF. Existing filled-in annotations in the PDF are not included as pupil answers. Source notes appear only in Teacher mode.
+The former lesson contained Welcome (page-4 dialogue and comprehension), one Grammar Room with six slides, and page-5 Exercises 3–9. `PresentSimpleLesson.tsx` rendered `materials.ts` and `GrammarSlides.tsx`; `model.ts` counted grammar flags, intro responses and seven exercises. Those obsolete content/rendering files and the two original-PDF crops are retired. No pupil database records are deleted.
 
-| Stage | Implementation |
+## New learning order
+
+| Topic | Explanation followed by practice |
 | --- | --- |
-| Welcome, p. 4 Ex. 1 | Original George/Harry/Emma/Poppy/Gran dialogue and all four comprehension questions |
-| Grammar Room | Existing six Present Simple grammar slides and saved notes |
-| Ex. 3 | Original six sentences, including the two printed worked examples; four response fields; interactive busy-day calendar and free-day response |
-| Ex. 4 | Original ten places; personal response to “Which places do you visit for fun?” |
-| Ex. 5 | Original five sentences; worked stadium example and four empty response fields |
-| Ex. 6 | Original ten transport words, original page-4 photograph and a response field identifying visible transport |
-| Ex. 7 | Original numbered transport illustrations, worked Emma/bus dialogue and four question/answer dialogue fields in original order |
-| Ex. 8 | Original page-4 dialogue shown again; seven fields for its seven sentences containing frequency adverbs |
-| Ex. 9 | Five personal sentences; original model and vocabulary from both boxes |
+| 01 The Magic of Everyday Life | Short welcome, magic book and four bilingual examples |
+| 02 When Do We Use Present Simple? | Exactly four uses: habits, facts, feelings/thoughts/states, schedules; 8 classification tasks, two per category |
+| 03 Places in Town | All 10 illustrated words; 10 translation matches, 8 context gaps, 5 numbered town locations |
+| 04 Word Order | Emerald/gold/blue WHO → DOES WHAT → WHAT/WHERE/WHEN diagram; 8 full-sentence word-order tasks |
+| 05 Affirmative Sentences | Subject groups, -s/-es/-ies and has; 10 verb gaps, 6 full sentences, 6 endings |
+| 06 Means of Transport | All 10 illustrated words; by + transport, on foot; 10 picture/name matches, 8 gaps, 5 personal journeys |
+| 07 Negative Sentences | Don’t / doesn’t + base verb; 8 full negatives, 4 corrections |
+| 08 Questions | Do / Does + subject + base verb; 8 reordered questions, 6 transformations |
+| 09 Short Answers | Wide question panel, Yes above No; 8 written short answers |
+| 10 Adverbs of Frequency | Always / usually / often / sometimes / never; before verbs, after to be; 8 positioning tasks, 5 personal sentences |
+| 11 Present Simple vs To Be | Compare statement, question, negative; 8 full-sentence corrections |
+| 12 Final Hogwarts Challenge | 16 mixed tasks covering every requested target, followed by one 6–8 sentence personal Hogwarts story; no copyable model |
+| 13 My Vocabulary | All 20 book words plus the 14 requested useful expressions, translations and optional browser pronunciation |
 
-Exercise 2 (pair role play) is intentionally omitted per the original task specification. Teacher mode is local UI state using the existing access policy. It is never persisted in pupil progress.
+There are 156 response fields in total. Practice is paginated into at most four tasks per screen inside the 13 topics. Stable screen IDs derive from topic/unit/task IDs, never numeric slide positions. There is no fifth use category. Vocabulary opens only on request in a native modal dialog from any topic; Escape/Close restores focus and leaves the active exercise and draft intact.
 
-## Media availability
+## Sources and authorship
 
-The attached PDF contains no usable original audio/video. The owner supplied the Yandex Disk folder `https://disk.yandex.ru/d/eQvibNgP2JDQkg/Go%20getter%203`. Fetching its public API from the managed environment fails with `URLError: <urlopen error Tunnel connection failed: 403 Forbidden>`; the web tool also reports the folder inaccessible. A supported network-permission grant was obtained and the API retried, but the sidecar still denies the domain. Environment policy is restricted and enforced. Original media files cannot yet be inspected or downloaded; no file URLs are guessed.
+The owner’s supplied Go Getter 3 Student’s Book PDF was visually checked at printed/PDF pp. 4–5. Exactly the two ten-word lists and grammar targets are retained. The former long verbatim dialogue and textbook task transcriptions are removed from the active lesson. All new exercises, examples and local SVG illustrations are author-created; source references in Teacher mode identify pp. 4–5 and Ex. 3–9 as learning references, not verbatim task claims. No original book audio/video or synthetic replacement recording is represented as available. Individual-word pronunciation reuses the existing browser SpeechSynthesis approach used in Homework; there is a clear fallback for unsupported browsers.
 
-Intro Video 0.1 and audio 1.2, 1.3, 1.4 remain null in `materials.ts` until actual files are available. No synthetic replacements are used. Missing media is stated briefly; all text-based tasks can be read and completed with a teacher. A media playback event is never treated as evidence that a response was completed. To connect media, allow `cloud-api.yandex.net`, `disk.yandex.ru` and the actual returned download host in the environment’s outbound policy, or attach the four original files directly.
+## Versioned responses and legacy recovery
 
-The two local WebP illustrations are cropped from the supplied PDF: the page-4 photograph needed by Ex. 6 and numbered page-5 transport pictures needed by Ex. 7. Alt text provides equivalent visual information.
+The outer shared storage record stays `{version:1,data:LessonState}` at `@vika/lesson/lesson-1`; changing that version would break the existing read/write adapter and other lessons. The new course has its own explicit schema at `answers['present-simple:v2']`:
 
-## Saving and completion
+- `schemaVersion: 2`
+- `activePage`: stable page ID
+- `seen`: stable topic IDs
+- `responses`: stable task ID → original typed string
 
-Responses and the busy-day array use stable `intro:p4-1-*` and `exerciseN:p5-N-*` keys inside the existing version-1 `@vika/lesson/lesson-1` record. Grammar notes and previously saved fields are preserved. Drafts are stored verbatim, without grading, automatic correction or answer disclosure. Printed worked examples are not editable and do not count as required response fields.
+Every edit uses the existing functional lesson-state update and spreads the complete previous lesson/answer record. Old `step`, name, scores, ratings, grammar notes/flags/slides, `intro:*`, `exerciseN:*` and busy-day arrays are retained verbatim. They do not count toward new tasks or appear as new-task responses. A read-only “Ответы предыдущей версии урока” section exposes old written responses, notes and day selections for recovery. No database migration, destructive reset, source-index mapping or overwriting import is performed. Unknown course schemas fail closed with an error while preserving their data.
 
-All nonblank response fields and the selected-day calendar are required for Exercise 3; the other tasks require their nonblank responses. Six viewed grammar slides and eight completed textbook tasks yield 14/14 and the existing finish screen. Correctness is not a completion requirement.
+Completion counts nonblank new responses and visited topics, not correctness. Each topic completes after its responses are filled and it has been viewed. Percentages are granular across 156 responses plus 13 topic visits. Visiting or filling some fields never completes the final challenge. No automatic Correct!/Try again! feedback or answer key is shown.
 
-No change to Supabase Auth, RPC/CAS, local queue, conflict resolution, SQL or environment variables. The lesson remains one whole-record conflict unit. No production pupil data is read or modified.
+The existing Supabase RPC/CAS, local journal/queue, retry and explicit whole-lesson conflict resolution remain unchanged. Concurrent Lesson 1 edits are still one lesson-record conflict unit; both versions remain available to choose. Tests use isolated SQL/RPC fixtures only; the real pupil database is not accessed.
 
-## Verification
+## Validation
 
-Production build, unit coverage of completion and printed-example exclusion, browser coverage of all nine stages, six slides, original task counts, calendar/draft reload, teacher-only annotations, full completion and responsive layouts at 390/768/1024/1366px. Isolated cloud integration checks verify new responses/calendar and existing notes restoring on another device, plus existing offline conflict behavior and preservation of other lessons.
+Production build; unit coverage for exact topic/vocabulary/task counts, stable IDs, no old/new response mapping, legacy recovery, unknown schema handling and preservation of other lesson records. Browser checks cover all response pages and full completion, exact reload persistence, read-only recovery, dictionary interaction, speech fallback, 390/768/1024/1366px layouts and Yes/No positioning. Isolated cloud tests cover second-device restoration of matching/writing responses, legacy data and offline conflicts. Existing Lesson 0, Homework and main-menu tests remain applicable.

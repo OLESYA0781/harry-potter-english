@@ -303,28 +303,28 @@ test('homework sync preserves exact drafts across devices and independent offlin
   } finally { await second.close(); }
 });
 
-test('Lesson 1 restores on a second device, preserves Trial/Homework and resolves offline conflicts',async({page,context,browser})=>{
-  await rpc({}, {id:'existing-lesson-pupil',fields:{'answers:diary':'Keep old lesson', 'ratings:reading':2, 'answers:@vika/lesson/trial-homework/day':'Old homework draft'}});
-  await route(context);await login(page,'/#/lessons/lesson-1');
-  await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
-  await page.getByRole('button',{name:'Next slide →',exact:true}).click();
-  const note='  I is Vika.\nMy original notes!  ';
-  await page.getByLabel('Мои заметки по грамматике').fill(note);await sync(page);
-  const second=await browser.newContext();await route(second);
-  try {
-    const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
-    await expect(other.getByRole('heading',{name:'Signal Words',exact:true})).toBeVisible();
-    await expect(other.getByLabel('Мои заметки по грамматике')).toHaveValue(note);
-    await context.setOffline(true);await page.getByLabel('Мои заметки по грамматике').fill('Offline notes');
-    await other.getByLabel('Мои заметки по грамматике').fill('Other device notes');await sync(other);
-    await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
-    await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-1» изменено/)).toBeVisible();
-    await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Offline notes');
-    await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();
-    await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Other device notes');
-    await page.reload();await expect(page.getByLabel('Мои заметки по грамматике')).toHaveValue('Other device notes');
-    const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep old lesson');expect(saved.fields['ratings:reading'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Old homework draft');
-  } finally {await second.close();}
+test('rebuilt Lesson 1 restores new responses and resolves offline conflicts while retaining old records',async({page,context,browser})=>{
+ const legacy={version:1,data:{step:8,name:'Vika',answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Old book draft'},scores:{},ratings:{}}};
+ await rpc({}, {id:'existing-lesson-pupil',fields:{'answers:diary':'Keep old lesson','ratings:reading':2,'answers:@vika/lesson/trial-homework/day':'Old homework draft','answers:@vika/lesson/lesson-1':legacy}});
+ await route(context);await login(page,'/#/lessons/lesson-1');
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(6).click();
+ await page.getByRole('button',{name:'Next →',exact:true}).click();
+ const field=page.locator('.ps2-task textarea').first(),draft='  I no play.\nMy own answer!  ';
+ await expect(field).toHaveValue('');await field.fill(draft);await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
+  const otherField=other.locator('.ps2-task textarea').first();await expect(otherField).toHaveValue(draft);
+  await context.setOffline(true);await field.fill('Offline response');await otherField.fill('Other device response');await sync(other);
+  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
+  await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-1» изменено/)).toBeVisible();
+  await expect(field).toHaveValue('Offline response');await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();
+  await expect(field).toHaveValue('Other device response');await page.reload();await expect(field).toHaveValue('Other device response');
+  await page.getByText('Ответы предыдущей версии урока',{exact:true}).click();await expect(page.getByLabel('Заметки по грамматике')).toHaveValue('  Old notes\n ');
+  const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep old lesson');expect(saved.fields['ratings:reading'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Old homework draft');
+  const record=saved.fields['answers:@vika/lesson/lesson-1'].value as typeof legacy;
+  expect(record.version).toBe(1);expect(record.data.step).toBe(8);expect(record.data.answers['exercise3:p5-3-2']).toBe('Old book draft');
+ }finally{await second.close();}
 });
 
 test('Lesson 0 exact answers restore across devices; offline conflict preserves other lessons',async({page,context,browser})=>{
@@ -382,23 +382,18 @@ test('reordered To Be topics restore legacy reading position and sync new practi
  }finally{await second.close();}
 });
 
-test('Lesson 1 textbook drafts and busy days restore across devices without losing old notes',async({page,context,browser})=>{
+test('Lesson 1 stable matching and writing IDs restore after reload and on a second device',async({page,context,browser})=>{
  await route(context);await login(page,'/#/lessons/lesson-1');
- const draft='  Original pupil response.\nDo not correct it.  ';
- await page.locator('.ps-book-task textarea').first().fill(draft);
- await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
- await page.getByLabel('Мои заметки по грамматике').fill('Existing notes');
- await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(2).click();
- await page.getByRole('button',{name:'Monday',exact:true}).click();
- await page.locator('.ps-book-task textarea').first().fill(draft);await sync(page);
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(2).click();
+ await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await page.locator('.ps2-task select').first().selectOption('банк');
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(3).click();
+ await page.getByRole('button',{name:'Next →',exact:true}).click();
+ const draft='  My sentence stays.\n ';await page.locator('.ps2-task textarea').first().fill(draft);await sync(page);
  const second=await browser.newContext();await route(second);
  try{
-  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
-  await expect(other.getByRole('button',{name:'Monday',exact:true})).toHaveAttribute('aria-pressed','true');
-  await expect(other.locator('.ps-book-task textarea').first()).toHaveValue(draft);
-  await other.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(0).click();
-  await expect(other.locator('.ps-book-task textarea').first()).toHaveValue(draft);
-  await other.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
-  await expect(other.getByLabel('Мои заметки по грамматике')).toHaveValue('Existing notes');
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
+  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(2).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
+  await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');await other.reload();await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');
  }finally{await second.close();}
 });

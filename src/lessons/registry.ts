@@ -1,5 +1,6 @@
 import { diagnose, initial } from '../data';
 import TrialLesson from './TrialLesson';
+import ToBeLesson from './ToBeLesson';
 import PresentSimpleLesson from './presentSimple/PresentSimpleLesson';
 import { lesson1Summary } from './presentSimple/model';
 import type { LessonDefinition } from './types';
@@ -42,5 +43,11 @@ export const presentSimpleLesson: LessonDefinition = {
   addedAt: '2026-10-30T00:00:00Z', description: '', initialState: structuredClone(initial),
   Component: PresentSimpleLesson, summarize: lesson1Summary,
 };
+export const toBeLesson: LessonDefinition = {
+  id: 'lesson-0', title: 'Lesson 0 — To Be', subtitle: 'Урок 0 — Глагол to be',
+  addedAt: '2026-10-31T00:00:00Z', description: '', initialState: structuredClone(initial),
+  Component: ToBeLesson,
+  summarize: () => ({ status: 'not-started', percent: 0, detail: 'Один слайд · TO BE' }),
+};
 // Add a new module here. Both menus and the dashboard use this one registry.
-export const lessons = sortLessons([presentSimpleLesson, trialLesson]);
+export const lessons = sortLessons([toBeLesson, presentSimpleLesson, trialLesson]);

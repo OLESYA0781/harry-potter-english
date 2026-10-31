@@ -6,7 +6,8 @@ async function stage(page: import('@playwright/test').Page,index:number,width=12
 }
 test('first menu entry; nine stages and six grammar slides; notes restore independently',async({page})=>{
   await page.goto('/');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option').first()).toContainText('Lesson 1 — Present Simple');
+  await expect(page.getByLabel('Выбери своё приключение').locator('option').nth(1)).toContainText('Lesson 1 — Present Simple');
+  await page.getByLabel('Выбери своё приключение').selectOption('lesson-1');
   await page.getByRole('button',{name:'Начать урок',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Welcome to Hogwarts!',exact:true})).toBeVisible();
   await expect(page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button')).toHaveCount(9);

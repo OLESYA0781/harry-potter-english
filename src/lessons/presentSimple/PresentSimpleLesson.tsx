@@ -1,42 +1,63 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Volume2, BookOpen, X } from 'lucide-react';
 import type { LessonProps } from '../types';
-import { lesson1Materials as materials, weekDays } from './materials';
-import type { BookExercise } from './materials';
-import { grammarSeen, lesson1Summary, slideTitles, stageTitles } from './model';
-import GrammarSlides from './GrammarSlides';
+import type { Word } from './course';
+import { expressions, pages, places, topics, transport } from './course';
+import { legacyResponses, lesson1Summary, pageIndex, readCourse, updateCourse } from './model';
+import WordArt, { TownArt } from './WordArt';
 import './presentSimple.css';
 
-export default function PresentSimpleLesson({state,setState,canTeach=false}: LessonProps) {
-  const [teacherRequested,setTeacherRequested]=useState(false);
-  const teacher=canTeach && teacherRequested;
-  useEffect(()=>{if(!canTeach)setTeacherRequested(false);},[canTeach]);
-  const step=Math.min(state.step,8);
-  const slide=typeof state.answers.grammarSlide === 'number' ? Math.max(0,Math.min(5,state.answers.grammarSlide)) : 0;
-  const save=(key:string,value:unknown)=>setState(previous=>({...previous,answers:{...previous.answers,[key]:value}}));
-  const navigate=(next:number)=>{setState(previous=>({...previous,step:next,answers:next===1?{...previous.answers,[`grammarSeen${slide}`]:true}:previous.answers}));window.scrollTo({top:0});};
-  const changeSlide=(next:number)=>setState(previous=>({...previous,answers:{...previous.answers,grammarSlide:next,[`grammarSeen${next}`]:true}}));
-  const summary=lesson1Summary(state);
-  const exercise=step>=2?step+1:null;
-  const source=(text:string)=>teacher && text?<p className="ps-source-note">{text}</p>:null;
-  const media=(src:string|null,label:string)=>src?<audio controls preload="metadata" src={src} aria-label={label} />:<p className="ps-media-missing">{label} пока недоступно. Можно прочитать текст и слова с учителем.</p>;
-  const task=(key:string,book:BookExercise)=>{
-    const selected=Array.isArray(state.answers[`${key}:busy-days`])?state.answers[`${key}:busy-days`] as string[]:['Thursday'];
-    return <div className="ps-book-task"><p>{book.instruction}</p>
-      {book.words && <div className="ps-word-bank" aria-label="Vocabulary">{book.words.map(word=><span key={word}>{word}</span>)}</div>}
-      {book.image && <img className="ps-book-image" src={book.image} alt={book.imageAlt || ''} />}
-      {book.dialogue && <div className="ps-dialogue">{materials.introduction.dialogue}</div>}
-      {book.example && <div className="ps-book-example"><strong>Example</strong><p>{book.example}</p></div>}
-      {book.calendar && <fieldset className="ps-calendar"><legend>Cross out the busy days</legend><div>{weekDays.map(day=><button type="button" className={selected.includes(day)?'is-busy':''} aria-pressed={selected.includes(day)} key={day} onClick={()=>save(`${key}:busy-days`,selected.includes(day)?selected.filter(value=>value!==day):[...selected,day])}>{day}</button>)}</div></fieldset>}
-      {book.items.map(item=>item.example?<p className="ps-book-example" key={item.id}>{item.prompt}</p>:<label className="ps-answer" key={item.id}><span>{item.prompt}</span>{item.choices?<select value={typeof state.answers[`${key}:${item.id}`]==='string'?state.answers[`${key}:${item.id}`] as string:''} onChange={e=>save(`${key}:${item.id}`,e.target.value)}><option value="">Выбери ответ</option>{item.choices.map(option=><option key={option} value={option}>{option}</option>)}</select>:<textarea rows={3} spellCheck={false} autoCorrect="off" value={typeof state.answers[`${key}:${item.id}`]==='string'?state.answers[`${key}:${item.id}`] as string:''} onChange={e=>save(`${key}:${item.id}`,e.target.value)} />}</label>)}
-    </div>;
-  };
-  return <div className="app-shell ps-shell"><aside className="sidebar ps-sidebar"><div className="brand"><span className="brand-icon">✦</span><span>HOGWARTS<small>LESSON 1</small></span></div><div className="lesson-label">PRESENT SIMPLE</div><nav aria-label="Lesson 1 stages">{stageTitles.map((title,i)=><button className={`nav-item ${step===i?'active':''}`} aria-current={step===i?'step':undefined} key={title} onClick={()=>navigate(i)}><span className="ps-nav-number">{i+1}</span><span>{title}</span></button>)}</nav></aside>
-    <div className="main-shell"><div className="mobile-stage"><select aria-label="Choose Lesson 1 stage" value={step} onChange={e=>navigate(Number(e.target.value))}>{stageTitles.map((title,i)=><option value={i} key={title}>{i+1}. {title}</option>)}</select></div>
-    <main className="ps-main"><header className="ps-heading"><span>{String(step+1).padStart(2,'0')}</span><div><small>Lesson 1 · Present Simple</small><h1>{stageTitles[step]}</h1></div></header>
-      {canTeach && <button className={`teacher-toggle ${teacher?'enabled':''}`} aria-pressed={teacher} onClick={()=>setTeacherRequested(!teacherRequested)}>{teacher?'Exit teacher mode':'Teacher mode'}</button>}
-      {step===0 && <section className="ps-panel"><h2>Hello!</h2>{source('Go Getter 3 · Student’s Book · page 4 · Exercise 1')}{materials.introVideo && <video controls preload="metadata" src={materials.introVideo} aria-label="Intro Video 0.1" />}{source(!materials.introVideo?'Intro Video 0.1 — исходный файл не подключён.':'')}{media(materials.audio12,'Audio 1.2')}<div className="ps-dialogue">{materials.introduction.dialogue}</div>{task('intro',materials.introduction.comprehension)}</section>}
-      {step===1 && <section className="ps-panel"><div className="ps-slide-indicator" aria-label="Grammar slide">{slide+1} / 6 · {grammarSeen(state).length} просмотрено</div><GrammarSlides slide={slide} /><div className="ps-slide-controls"><button className="btn" disabled={slide===0} onClick={()=>changeSlide(slide-1)}>← Back slide</button>{slide<5?<button className="btn" onClick={()=>changeSlide(slide+1)}>Next slide →</button>:<button className="btn" onClick={()=>navigate(2)}>Continue to Student's Book</button>}</div><label className="ps-answer"><span>Мои заметки по грамматике</span><textarea rows={3} value={typeof state.answers.grammarNotes==='string'?state.answers.grammarNotes:''} onChange={e=>save('grammarNotes',e.target.value)} spellCheck={false} autoCorrect="off" /></label></section>}
-      {exercise && <section className="ps-panel"><h2>Exercise {exercise}</h2>{source(`Go Getter 3 · Student’s Book · page 5 · Exercise ${exercise}`)}{exercise===4 && media(materials.audio13,'Audio 1.3')}{exercise===6 && media(materials.audio14,'Audio 1.4')}{task(`exercise${exercise}`,materials.exercises[exercise])}{exercise===9 && summary.status==='completed' && <div className="ps-finish"><h2>Lesson 1 Complete!</h2><p>Вика, ещё одно волшебное приключение позади! Ты познакомилась с Present Simple и выполнила задания.</p></div>}</section>}
-      <footer className="ps-paging"><button className="btn" disabled={step===0} onClick={()=>navigate(step-1)}>← Back</button><span>{step+1} / 9</span><button className="btn" disabled={step===8} onClick={()=>navigate(step+1)}>Next →</button></footer>
-    </main></div></div>;
+export default function PresentSimpleLesson({state,setState,canTeach=false}:LessonProps){
+ const course=readCourse(state),index=pageIndex(course),page=pages[index];
+ const topic=topics.find(topic=>topic.id===page.topicId)!;
+ const topicIndex=topics.indexOf(topic),unit=page.unit;
+ const [teacherRequested,setTeacherRequested]=useState(false),[dictionary,setDictionary]=useState(false),[notice,setNotice]=useState('');
+ const dictionaryButton=useRef<HTMLButtonElement>(null),dialog=useRef<HTMLDialogElement>(null),speech=useRef<SpeechSynthesisUtterance|null>(null);
+ const teacher=canTeach && teacherRequested;
+ useEffect(()=>{if(!canTeach)setTeacherRequested(false);},[canTeach]);
+ useEffect(()=>{if(!course.seen.includes(topic.id))setState(previous=>updateCourse(previous,current=>({...current,seen:[...new Set([...current.seen,topic.id])]})));},[topic.id,course.seen,setState]);
+ useEffect(()=>{if(dictionary && !dialog.current?.open)dialog.current?.showModal();else if(!dictionary && dialog.current?.open)dialog.current?.close();},[dictionary]);
+ useEffect(()=>()=>{if(speech.current && 'speechSynthesis' in window)window.speechSynthesis.cancel();},[]);
+ const navigate=(id:string)=>{window.speechSynthesis?.cancel();setState(previous=>updateCourse(previous,current=>({...current,activePage:id})));window.scrollTo({top:0,behavior:'instant'});};
+ const save=(id:string,value:string)=>setState(previous=>updateCourse(previous,current=>({...current,responses:{...current.responses,[id]:value}})));
+ const speak=(text:string)=>{
+  if(!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)){setNotice('Английское произношение недоступно в этом браузере.');return;}
+  window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='en-GB';utterance.rate=.85;
+  const voices=window.speechSynthesis.getVoices();const voice=voices.find(voice=>voice.lang==='en-GB')||voices.find(voice=>voice.lang.startsWith('en'));if(voice)utterance.voice=voice;
+  utterance.onerror=event=>{if(event.error!=='interrupted' && event.error!=='canceled')setNotice('Не удалось включить произношение. Попробуй ещё раз.');};speech.current=utterance;setNotice('');window.speechSynthesis.speak(utterance);
+ };
+ const pronounce=(english:string)=><button className="ps2-speak" aria-label={`Listen: ${english}`} onClick={()=>speak(english)}><Volume2 size={23} aria-hidden="true"/></button>;
+ const cards=(words:Word[])=><div className="ps2-word-grid">{words.map(word=><article className="ps2-word" key={word.en}><WordArt name={word.art} label={word.ru}/><div><h3>{word.en}</h3>{pronounce(word.en)}</div><p lang="ru">{word.ru}</p></article>)}</div>;
+ const vocabulary=()=> <><h3>Places in town</h3>{cards(places)}<h3>Means of transport</h3>{cards(transport)}<h3>Useful expressions</h3><dl className="ps2-expressions">{expressions.map(([en,ru])=><div key={en}><dt>{en}{pronounce(en)}</dt><dd lang="ru">{ru}</dd></div>)}</dl></>;
+ const old=legacyResponses(state);
+ const closeDictionary=()=>{setDictionary(false);dictionaryButton.current?.focus();};
+ return <div className="app-shell ps2-shell"><aside className="sidebar ps2-sidebar"><div className="brand"><span className="brand-icon">✦</span><span>HOGWARTS<small>LESSON 1</small></span></div><div className="lesson-label">PRESENT SIMPLE</div><nav aria-label="Lesson 1 topics">{topics.map((topic,i)=><button className={`nav-item ${topic.id===page.topicId?'active':''}`} key={topic.id} aria-current={topic.id===page.topicId?'step':undefined} onClick={()=>navigate(pages.find(page=>page.topicId===topic.id)!.id)}><span>{String(i+1).padStart(2,'0')}</span><span>{topic.title}</span></button>)}</nav></aside>
+ <div className="main-shell"><div className="mobile-stage"><select aria-label="Choose Lesson 1 topic" value={topic.id} onChange={event=>navigate(pages.find(page=>page.topicId===event.target.value)!.id)}>{topics.map((topic,i)=><option value={topic.id} key={topic.id}>{i+1}. {topic.title}</option>)}</select></div>
+ <main className="ps2-main"><header className="ps2-heading"><span>{String(topicIndex+1).padStart(2,'0')}</span><div><small>Lesson 1 · Present Simple</small><h1>{topic.title}</h1></div></header>
+ <div className="ps2-tools"><button className="ps2-button" ref={dictionaryButton} onClick={()=>setDictionary(true)}><BookOpen size={21} aria-hidden="true"/>My Vocabulary</button>{canTeach && <button className="teacher-toggle" aria-pressed={teacher} onClick={()=>setTeacherRequested(!teacherRequested)}>{teacher?'Exit teacher mode':'Teacher mode'}</button>}</div>
+ {notice && !dictionary && <p role="status">{notice}</p>}
+ <section className="ps2-panel" aria-label={unit.title}><h2>{unit.title}</h2>
+ {teacher && <aside className="ps2-source">{unit.book||'Авторский материал по Present Simple и лексике Go Getter 3, стр. 4–5. Не дословное упражнение учебника.'}</aside>}
+ {page.first && <>
+ {unit.text && <p>{unit.text}</p>}
+ {unit.visual==='book' && <div className="ps2-magic-book" aria-hidden="true"><BookOpen size={100}/><span>✦</span></div>}
+ {unit.visual==='town' && <TownArt/>}
+ {unit.visual==='order' && <div className="ps2-order" aria-label="Порядок слов"><strong>WHO?</strong><span aria-hidden="true">→</span><strong>DOES WHAT?</strong><span aria-hidden="true">→</span><strong>WHAT / WHERE / WHEN?</strong></div>}
+ {unit.visual==='frequency' && <ol className="ps2-frequency">{['always','usually','often','sometimes','never'].map((word,i)=><li key={word}><strong>{word}</strong><span aria-hidden="true">{'●'.repeat(5-i)}{'○'.repeat(i)}</span></li>)}</ol>}
+ {unit.formula && <div className="ps2-formula">{unit.formula.map((part,i)=><span key={part}>{i>0 && <b aria-hidden="true"> + </b>}{part}</span>)}</div>}
+ {unit.table && <div className={`ps2-table ${unit.id==='short-rule'?'ps2-question-table':''}`} role="table"><div className="ps2-table-head" role="row">{unit.table.headers.map(header=><strong role="columnheader" key={header}>{header}</strong>)}</div>{unit.table.rows.map((row,i)=><div className="ps2-table-row" role="row" key={i}>{row.map((cell,j)=><div role="cell" key={j}><span className="ps2-cell-label" aria-hidden="true">{unit.table!.headers[j]}</span><span>{cell}</span></div>)}</div>)}</div>}
+ {unit.examples && <div className="ps2-examples">{unit.examples.map(([en,ru])=><article key={en}><strong>{en}</strong><p lang="ru">{ru}</p></article>)}</div>}
+ {unit.words==='places' && cards(places)}{unit.words==='transport' && cards(transport)}{unit.words==='all' && vocabulary()}
+ </>}
+ {!page.first && unit.text && <p>{unit.text}</p>}
+ {/* Keep the town picture beside all five labels, including the second task page. */}
+ {!page.first && unit.visual==='town' && <TownArt/>}
+ <div className="ps2-tasks">{page.tasks.map(task=><article className="ps2-task" key={task.id}>{task.art && <WordArt name={task.art} label={transport.find(word=>word.art===task.art)?.ru||'Транспорт'}/>}<label><span>{task.prompt}</span>{task.options?<select aria-label={task.prompt} value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)}><option value="">Выбери соответствие</option>{task.options.map(option=><option value={option} key={option}>{option}</option>)}</select>:<textarea rows={task.long?8:3} spellCheck={false} autoCorrect="off" value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)} />}</label></article>)}</div>
+ {page.topicId==='final' && page.unit.id==='final-story' && lesson1Summary(state).status==='completed' && <p className="ps2-finish">Lesson 1 Complete! ✦</p>}
+ </section>
+ <footer className="ps2-paging"><button className="ps2-button" disabled={index===0} onClick={()=>navigate(pages[index-1].id)}>← Back</button><span>Экран {index+1} / {pages.length}</span><button className="ps2-button" disabled={index===pages.length-1} onClick={()=>navigate(pages[index+1].id)}>Next →</button></footer>
+ {old.length>0 && <details className="ps2-legacy"><summary>Ответы предыдущей версии урока</summary><p>Они сохранены отдельно от новых заданий и доступны только для чтения.</p>{old.map(([key,value],i)=><label key={key}><span>{key==='grammarNotes'?'Заметки по грамматике':key.endsWith(':busy-days')?'Занятые дни':`Сохранённый ответ ${i+1}`}</span>{teacher && <small>{key}</small>}<textarea readOnly value={value} rows={3}/></label>)}</details>}
+ </main></div>
+ <dialog className="ps2-dictionary" ref={dialog} aria-labelledby="ps2-dictionary-title" onCancel={event=>{event.preventDefault();closeDictionary();}} onClose={()=>setDictionary(false)}><header><h2 id="ps2-dictionary-title">My Vocabulary</h2><button className="ps2-button" aria-label="Закрыть словарь" onClick={closeDictionary}><X aria-hidden="true"/></button></header>{notice && <p role="status">{notice}</p>}{vocabulary()}</dialog>
+ </div>;
 }

@@ -31,14 +31,30 @@ export const mixedItems:SourceItem[]=[
  ['157-13','Упр. 157, № 13','... your sister at school? — No, she ... not at school.'],
  ['157-15','Упр. 157, № 15','... this your watch? — Yes, it ... .'],
 ].map(([id,source,text])=>({id,source,text}));
+// Author-created correction exercise supplied by the owner, on the book's grammar topic.
+// NOT an original exercise 157–160. Expected text is internal reference only, never graded or rendered.
+export const mistakeItems = [
+ ['I is eleven years old.', 'I am eleven years old.'],
+ ['Hermione are very clever.', 'Hermione is very clever.'],
+ ['Harry and Ron is best friends.', 'Harry and Ron are best friends.'],
+ ["My parents isn't at home.", "My parents aren't at home."],
+ ['She not is a teacher.', 'She is not a teacher.'],
+ ["We aren't not late.", "We aren't late."],
+ ['Is they in the library?', 'Are they in the library?'],
+ ['You are ready for the lesson?', 'Are you ready for the lesson?'],
+ ['Where you are from?', 'Where are you from?'],
+ ['Are Hermione a student? Yes, she are.', 'Is Hermione a student? Yes, she is.'],
+ ["Is Harry and Ron in the classroom? No, they isn't.", "Are Harry and Ron in the classroom? No, they aren't."],
+ ["Are you tired? Yes, I'm.", 'Are you tired? Yes, I am.'],
+].map(([text,expected],i)=>({id:String(i+1).padStart(2,'0'),text,expected}));
 export const affirmativeRows=[['I am',"I'm"],['He is',"He's"],['She is',"She's"],['It is',"It's"],['You are',"You're"],['We are',"We're"],['They are',"They're"]];
 export const negativeRows=[['I am not',"I'm not"],['He is not',"He isn't / He's not"],['She is not',"She isn't / She's not"],['It is not',"It isn't / It's not"],['You are not',"You aren't / You're not"],['We are not',"We aren't / We're not"],['They are not',"They aren't / They're not"]];
 export const questionRows=[['Am I...?','Yes, I am.','No, I am not.'],['Is he...?','Yes, he is.',"No, he isn't."],['Is she...?','Yes, she is.',"No, she isn't."],['Is it...?','Yes, it is.',"No, it isn't."],['Are you...?','Yes, you are.',"No, you aren't."],['Are we...?','Yes, we are.',"No, we aren't."],['Are they...?','Yes, they are.',"No, they aren't."]];
 export function toBeSummary(state:LessonState) {
  const text=(key:string)=>typeof state.answers[key]==='string' && !!(state.answers[key] as string).trim();
- const list=(prefix:string,items:SourceItem[])=>items.every(item=>text(`${prefix}:${item.id}`));
+ const list=(prefix:string,items:{id:string}[])=>items.every(item=>text(`${prefix}:${item.id}`));
  const theory=[0,1,2,3,4,12].filter(i=>state.answers[`seen:${i}`]===true).length;
- const tasks=[list('complete',completeItems),list('negative',transformationItems),list('question',transformationItems),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems),Array.from({length:7},(_,i)=>text(`profile:${i}`)).every(Boolean)].filter(Boolean).length;
+ const tasks=[list('mistake',mistakeItems),list('complete',completeItems),list('negative',transformationItems),list('question',transformationItems),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems),Array.from({length:7},(_,i)=>text(`profile:${i}`)).every(Boolean)].filter(Boolean).length;
  const done=theory+tasks;
- return {percent:Math.round(done/12*100),status:done===12?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 12 доступных частей · задание на ошибки в источнике не найдено`};
+ return {percent:Math.round(done/13*100),status:done===13?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 13 частей`};
 }

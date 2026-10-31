@@ -32,7 +32,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await expect(page.locator('.tb-task')).toHaveCount(6);
  await page.getByLabel('I am a pupil.',{exact:true}).fill('I no pupil.\n');
  await toStage(page,7);await page.getByLabel('I am a pupil.',{exact:true}).fill('Am I a pupil??');
- await toStage(page,8);await expect(page.getByText(/не найдено/)).toBeVisible();await expect(page.locator('.tb-panel input,.tb-panel textarea')).toHaveCount(0);
+ await toStage(page,8);await expect(page.locator('.tb-panel textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
  await toStage(page,9);await expect(page.locator('.tb-reading input')).toHaveCount(8);await page.getByLabel('Пропуск 1',{exact:true}).fill('am');
  await toStage(page,10);await expect(page.locator('.tb-task')).toHaveCount(6);
  await toStage(page,11);await expect(page.getByText('Авторское задание — не из учебника.')).toBeVisible();await expect(page.locator('.tb-panel textarea')).toHaveCount(7);await page.getByLabel('Утверждение 1',{exact:true}).fill('  I is Vika.\n ');
@@ -65,4 +65,21 @@ for(const width of [390,768,1024,1366]) test(`question panel is larger and No si
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
  await page.screenshot({path:`work/question-answers-${width}.png`,fullPage:true});
+});
+
+test('correction cards save all original drafts without revealing answers or grading',async({page})=>{
+ await page.goto('/#/lessons/lesson-0');await toStage(page,8);
+ await expect(page.getByText('Find the mistake in each sentence. Write the correct sentence.',{exact:true})).toBeVisible();
+ await expect(page.locator('.tb-task')).toHaveCount(12);
+ await expect(page.locator('.tb-panel select')).toHaveCount(0);
+ const drafts=Array.from({length:12},(_,i)=>`  my own wrong answer ${i+1}.\n `);
+ for(let i=0;i<12;i++)await page.locator('.tb-panel textarea').nth(i).fill(drafts[i]);
+ await page.reload();
+ for(let i=0;i<12;i++)await expect(page.locator('.tb-panel textarea').nth(i)).toHaveValue(drafts[i]);
+ await expect(page.locator('.tb-panel')).not.toContainText('I am eleven years old.');
+ await expect(page.locator('.tb-panel')).not.toContainText(/Correct!|Try again!|не найдено/);
+ await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'← Back',exact:true}).click();
+ await expect(page.locator('.tb-panel textarea').first()).toHaveValue(drafts[0]);
+ await page.getByRole('link',{name:'Главное меню',exact:true}).click();
+ await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('2 из 13 частей');
 });

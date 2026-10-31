@@ -342,3 +342,19 @@ test('Lesson 0 exact answers restore across devices; offline conflict preserves 
   const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep trial');expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Keep homework');expect(saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers.grammarNotes).toBe('Keep Lesson1');
  }finally{await second.close();}
 });
+
+test('all twelve correction responses sync verbatim and preserve existing To Be work',async({page,context,browser})=>{
+ await rpc({}, {id:'before-corrections',fields:{'answers:diary':'Trial unchanged','answers:@vika/lesson/lesson-0':{version:1,data:{...initial,step:8,answers:{'negative:157-5':'Keep negative draft'}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-0');
+ const drafts=Array.from({length:12},(_,i)=>`  my incorrect answer ${i+1}!\n `);
+ for(let i=0;i<12;i++)await page.locator('.tb-panel textarea').nth(i).fill(drafts[i]);await sync(page);
+ const second=await browser.newContext();await route(second);
+ try {
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-0');
+  for(let i=0;i<12;i++)await expect(other.locator('.tb-panel textarea').nth(i)).toHaveValue(drafts[i]);
+  await other.reload();await expect(other.locator('.tb-panel textarea').nth(11)).toHaveValue(drafts[11]);
+  const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Trial unchanged');const record=saved.fields['answers:@vika/lesson/lesson-0'].value.data;
+  expect(record.answers['negative:157-5']).toBe('Keep negative draft');
+  for(let i=0;i<12;i++)expect(record.answers[`mistake:${String(i+1).padStart(2,'0')}`]).toBe(drafts[i]);
+ } finally {await second.close();}
+});

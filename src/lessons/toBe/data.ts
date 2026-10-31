@@ -61,7 +61,8 @@ export const affirmativeItems:SourceItem[]=[
  ['gg3-p4-gran','Авторское · лексика Go Getter 3, стр. 4',"Bertie ... Emma's gran."],
  ['gg3-p4-helmet','Авторское · лексика Go Getter 3, стр. 4','The helmet ... on the chair.'],
 ].map(([id,source,text])=>({id,source,text}));
-export const negativeItems:SourceItem[]=[
+// Retained for completion compatibility; historical responses are never removed.
+export const previousNegativeItems:SourceItem[]=[
  ['gg3-p5-cafe','Авторское · лексика Go Getter 3, стр. 5','The café is open.'],
  ['gg3-p5-park','Авторское · лексика Go Getter 3, стр. 5','The park is quiet.'],
  ['gg3-p5-cinema','Авторское · лексика Go Getter 3, стр. 5','The cinema is near our school.'],
@@ -69,7 +70,16 @@ export const negativeItems:SourceItem[]=[
  ['gg3-p5-museum','Авторское · лексика Go Getter 3, стр. 5','The museum is busy.'],
  ['gg3-p5-restaurant','Авторское · лексика Go Getter 3, стр. 5','The restaurant is expensive.'],
 ].map(([id,source,text])=>({id,source,text}));
-export const questionItems:SourceItem[]=[
+// Two examples per form; changed prompts get new IDs to keep old answers separate.
+export const negativeItems:SourceItem[]=[
+ previousNegativeItems[0],
+ {id:'gg3-p5-i-park',source:'Авторское · лексика Go Getter 3, стр. 5',text:'I am in the park.'},
+ {id:'gg3-p5-friends-cinema',source:'Авторское · лексика Go Getter 3, стр. 5',text:'My friends are at the cinema.'},
+ {id:'gg3-p5-i-hotel',source:'Авторское · лексика Go Getter 3, стр. 5',text:'I am at the hotel.'},
+ {id:'gg3-p5-we-museum',source:'Авторское · лексика Go Getter 3, стр. 5',text:'We are in the museum.'},
+ previousNegativeItems[5],
+];
+export const previousQuestionItems:SourceItem[]=[
  ['gg3-p5-hospital-bank','Авторское · лексика Go Getter 3, стр. 5','The hospital is next to the bank.'],
  ['gg3-p5-stadium','Авторское · лексика Go Getter 3, стр. 5','The stadium is big.'],
  ['gg3-p5-theatre','Авторское · лексика Go Getter 3, стр. 5','The theatre is old.'],
@@ -77,6 +87,8 @@ export const questionItems:SourceItem[]=[
  ['gg3-p5-bus','Авторское · лексика Go Getter 3, стр. 5','The bus is red.'],
  ['gg3-p5-train','Авторское · лексика Go Getter 3, стр. 5','The train is fast.'],
 ].map(([id,source,text])=>({id,source,text}));
+// Simpler predicate; keep the previous prompt response under its original ID.
+export const questionItems:SourceItem[]=[{id:'gg3-p5-hospital-clean',source:'Авторское · лексика Go Getter 3, стр. 5',text:'The hospital is clean.'},...previousQuestionItems.slice(1)];
 export const shortAnswerItems:SourceItem[]=[
  ['gg3-p5-boat','Авторское · Go Getter 3, стр. 5 · Да','Is the boat on the river?'],
  ['gg3-p5-cars','Авторское · Go Getter 3, стр. 5 · Нет','Are the cars outside?'],
@@ -117,7 +129,7 @@ export function toBeSummary(state:LessonState) {
  const text=(key:string)=>typeof state.answers[key]==='string' && !!(state.answers[key] as string).trim();
  const list=(prefix:string,items:{id:string}[])=>items.every(item=>text(`${prefix}:${item.id}`));
  const theory=[0,1,2,3,4,12].filter(i=>state.answers[`seen:${i}`]===true).length;
- const tasks=[(list('affirmative',affirmativeItems)||list('affirmative',legacyAffirmativeItems)),(list('short',shortAnswerItems)||list('short',legacyShortAnswerItems)),list('mistake',mistakeItems),list('complete',completeItems),(list('negative',negativeItems)||list('negative',legacyTransformationItems)),(list('question',questionItems)||list('question',legacyTransformationItems)),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems)].filter(Boolean).length;
+ const tasks=[(list('affirmative',affirmativeItems)||list('affirmative',legacyAffirmativeItems)),(list('short',shortAnswerItems)||list('short',legacyShortAnswerItems)),list('mistake',mistakeItems),list('complete',completeItems),(list('negative',negativeItems)||list('negative',legacyTransformationItems)||list('negative',previousNegativeItems)),(list('question',questionItems)||list('question',legacyTransformationItems)||list('question',previousQuestionItems)),Array.from({length:8},(_,i)=>text(`reading:${i}`)).every(Boolean),list('mixed',mixedItems)].filter(Boolean).length;
  const done=theory+tasks;
  return {percent:Math.round(done/14*100),status:done===14?'completed' as const:state.step>0||Object.keys(state.answers).length?'in-progress' as const:'not-started' as const,detail:`${done} из 14 частей`};
 }

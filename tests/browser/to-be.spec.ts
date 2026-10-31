@@ -29,10 +29,10 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await toStage(page,5);
  await expect(page.locator('.tb-task')).toHaveCount(9);
  await page.getByLabel('I ... a pupil.',{exact:true}).fill('  is?  ');
- await toStage(page,6);await expect(page.getByText(/Авторское закрепление to be/)).toBeVisible();
+ await toStage(page,6);await expect(page.getByText(/Авторское закрепление to be/)).toHaveCount(0);
  await expect(page.locator('.tb-task')).toHaveCount(6);
  await page.getByLabel('The café is open.',{exact:true}).fill('The café no open.\n');
- await toStage(page,7);await page.getByLabel('The hospital is next to the bank.',{exact:true}).fill('Hospital is next to bank??');
+ await toStage(page,7);await page.getByLabel('The hospital is clean.',{exact:true}).fill('Hospital clean??');
  await toStage(page,8);await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea')).toHaveCount(12);await expect(page.locator('.tb-panel')).not.toContainText('не найдено');
  await toStage(page,9);await expect(page.locator('.tb-reading input')).toHaveCount(8);await page.getByLabel('Пропуск 1',{exact:true}).fill('am');
  await toStage(page,10);await expect(page.getByRole('region',{name:'Mixed Grammar Challenge',exact:true}).locator('.tb-task')).toHaveCount(6);
@@ -40,7 +40,7 @@ test('expanded To Be lesson preserves original answers, identifies adaptations a
  await page.reload();await expect(page.getByLabel('Is the boat on the river?',{exact:true})).toHaveValue('  Yes, it is.\n ');
  await toStage(page,5);await expect(page.getByLabel('I ... a pupil.',{exact:true})).toHaveValue('  is?  ');
  await toStage(page,6);await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('The café no open.\n');
- await toStage(page,7);await expect(page.getByLabel('The hospital is next to the bank.',{exact:true})).toHaveValue('Hospital is next to bank??');
+ await toStage(page,7);await expect(page.getByLabel('The hospital is clean.',{exact:true})).toHaveValue('Hospital clean??');
  await toStage(page,9);await expect(page.getByLabel('Пропуск 1',{exact:true})).toHaveValue('am');
  await expect(page.getByText(/Correct!|Try again!/)).toHaveCount(0);
  await toStage(page,12);await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
@@ -112,4 +112,19 @@ test('old profile position redirects to summary and old answers never appear und
  await expect(page.getByLabel('George ... fourteen years old.',{exact:true})).toHaveValue('New George answer');
  const answers=await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).state.answers['@vika/lesson/lesson-0'].data.answers);
  expect(answers['profile:0']).toBe('Old personal answer');expect(answers['affirmative:157-5']).toBe('Old pupil answer');expect(answers['negative:157-5']).toBe('Old negative answer');
+});
+
+test('source annotations appear only in active teacher mode; short answer directions stay visible',async({page})=>{
+ await page.goto('/#/lessons/lesson-0');
+ for(const stage of [0,1,2,3,4,8]){
+  await toStage(page,stage);
+  await expect(page.locator('.tb-panel')).not.toContainText(/Авторское|Go Getter|Голицынский|Упр\.|Упражнение 157|В оригинале/);
+ }
+ await toStage(page,4);
+ await expect(page.locator('.tb-task small').filter({hasText:/^(Да|Нет)$/})).toHaveCount(6);
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();
+ await expect(page.locator('.tb-panel')).toContainText('Go Getter 3');
+ await toStage(page,0);await expect(page.locator('.tb-panel')).toContainText('Голицынский');
+ await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();
+ await expect(page.locator('.tb-panel')).not.toContainText('Голицынский');
 });

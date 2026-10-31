@@ -40,6 +40,24 @@ for(const width of [390,768,1024,1366]) test(`grammar and pending stages fit ${w
   await page.setViewportSize({width,height:950});await page.goto(route);await stage(page,1,width);
   for(let i=0;i<6;i++) {
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    for(const word of await page.locator('.ps-highlight').all()){
+      await expect(word).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+      await expect(word).toHaveCSS('padding','0px');
+      await expect(word).toHaveCSS('font-weight','800');
+    }
+    if(i===4){
+      const answers=page.locator('.ps-short-answers p');
+      for(const offset of [0,2]){
+        const yes=await answers.nth(offset).boundingBox(),no=await answers.nth(offset+1).boundingBox();
+        expect(Math.abs(yes!.x-no!.x)).toBeLessThan(1);
+        expect(no!.y).toBeGreaterThanOrEqual(yes!.y+yes!.height);
+      }
+    }
+    if(i===5){
+      await expect(page.locator('.ps-cheat-head')).toHaveCSS('background-color','rgb(229, 237, 219)');
+      await expect(page.locator('.ps-cheat-row').first()).toHaveCSS('background-color','rgb(255, 249, 231)');
+      await expect(page.locator('.ps-cheat-row').last()).toHaveCSS('background-color','rgb(245, 240, 231)');
+    }
     if(i<5) await page.getByRole('button',{name:'Next slide →',exact:true}).click();
   }
   await page.screenshot({path:`work/present-simple-${width}.png`,fullPage:true});

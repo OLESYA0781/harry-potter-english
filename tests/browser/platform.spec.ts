@@ -23,7 +23,11 @@ test('root opens classroom; trial resumes old answers and all twelve remaining c
   await expect(page.locator('.classroom-home')).not.toContainText('Каждая попытка');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR NEXT CHAPTER');
   await expect(page.locator('.classroom-home')).not.toContainText('Твоё путешествие продолжается');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 0 — To Be · Ещё не начат', 'Lesson 1 — Present Simple · Ещё не начат', 'Trial Lesson']);
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 1 — Present Simple · Ещё не начат', 'Lesson 0 — To Be · Ещё не начат', 'Trial Lesson']);
+  await expect(page.locator('.lesson-card h3')).toHaveText(['Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
+  await page.getByText('Уроки',{exact:true}).click();
+  await expect(page.locator('.lesson-menu li strong')).toHaveText(['Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
+  await page.getByText('Уроки',{exact:true}).click();
   await page.getByLabel('Выбери своё приключение').selectOption('trial');
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');

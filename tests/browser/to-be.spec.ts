@@ -1,7 +1,8 @@
 import {test,expect} from '@playwright/test';
 for(const width of [390,768,1024,1366]) test(`one To Be slide has three connected branches at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:1000});await page.goto('/');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 0 — To Be · Ещё не начат','Lesson 1 — Present Simple · Ещё не начат','Trial Lesson · Ещё не начат']);
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(['Lesson 1 — Present Simple · Ещё не начат','Lesson 0 — To Be · Ещё не начат','Trial Lesson · Ещё не начат']);
+  await page.getByLabel('Выбери своё приключение').selectOption('lesson-0');
   await page.getByRole('button',{name:'Начать урок',exact:true}).click();
   await expect(page).toHaveURL(/#\/lessons\/lesson-0$/);
   await expect(page.getByRole('heading',{name:'TO BE — Am / Is / Are',exact:true})).toHaveCount(1);

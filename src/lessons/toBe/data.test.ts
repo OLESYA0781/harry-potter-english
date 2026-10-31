@@ -1,6 +1,6 @@
 import {expect,it} from 'vitest';
 import {initial} from '../../data';
-import {toBeBlocks,toBeBlockIndex,affirmativeItems,shortAnswerItems,completeItems,mixedItems,mistakeItems,toBeSummary,negativeItems,questionItems,legacyTransformationItems,legacyAffirmativeItems,legacyShortAnswerItems} from './data';
+import {toBeBlocks,toBeBlockIndex,affirmativeItems,shortAnswerItems,completeItems,mixedItems,mistakeItems,toBeSummary,previousNegativeItems,negativeItems,questionItems,legacyTransformationItems,legacyAffirmativeItems,legacyShortAnswerItems} from './data';
 import {toBeLesson,trialLesson,presentSimpleLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 it('counts filled work and viewed theory without judging grammar, including the correction task',()=>{
@@ -52,4 +52,17 @@ it('visible practice uses distinct source IDs and sentence contexts',()=>{
  const items=lists.flat();expect(new Set(items.map(item=>item.id)).size).toBe(items.length);
  const stems=items.map(item=>item.text.toLowerCase().replace(/\b(am|is|are)\b|\.\.\./g,'').replace(/[^a-zа-яё0-9 ]/g,'').replace(/\s+/g,' ').trim());
  expect(new Set(stems).size).toBe(items.length);
+});
+
+it('negative practice has six sentences with two examples of each to be form',()=>{
+ expect(negativeItems).toHaveLength(6);
+ for(const form of ['am','is','are'])expect(negativeItems.filter(item=>item.text.split(' ').includes(form))).toHaveLength(2);
+});
+
+it('preserves completion and responses from the previous negative practice',()=>{
+ const answers=Object.fromEntries(previousNegativeItems.map(item=>[`negative:${item.id}`,'  saved draft  ']));
+ const state={...initial,answers};
+ expect(toBeSummary(state).detail).toBe('1 из 14 частей');
+ expect(state.answers['negative:gg3-p5-park']).toBe('  saved draft  ');
+ expect(state.answers['negative:gg3-p5-i-park']).toBeUndefined();
 });

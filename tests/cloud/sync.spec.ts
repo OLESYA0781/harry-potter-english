@@ -313,7 +313,7 @@ test('rebuilt Lesson 1 restores new responses and resolves offline conflicts whi
  const legacy={version:1,data:{step:8,name:'Vika',answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Old book draft'},scores:{},ratings:{}}};
  await rpc({}, {id:'existing-lesson-pupil',fields:{'answers:diary':'Keep old lesson','ratings:reading':2,'answers:@vika/lesson/trial-homework/day':'Old homework draft','answers:@vika/lesson/lesson-1':legacy}});
  await route(context);await login(page,'/#/lessons/lesson-1');
- await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(6).click();
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Negative Sentences/}).click();
  await page.getByRole('button',{name:'Next →',exact:true}).click();
  const field=page.locator('.ps2-task textarea').first(),draft='  I no play.\nMy own answer!  ';
  await expect(field).toHaveValue('');await field.fill(draft);await sync(page);
@@ -390,17 +390,20 @@ test('reordered To Be topics restore legacy reading position and sync new practi
 
 test('Lesson 1 stable matching and writing IDs restore after reload and on a second device',async({page,context,browser})=>{
  await route(context);await login(page,'/#/lessons/lesson-1');
- await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(2).click();
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();
  await page.getByRole('button',{name:'Next →',exact:true}).click();
- await page.locator('.ps2-task select').first().selectOption('банк');
- await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(3).click();
+ await page.getByRole('button',{name:'Next →',exact:true}).click();
+ await page.locator('.ps2-task select').first().selectOption('bike');
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Vocabulary: Places in Town/}).click();
+ await page.getByRole('button',{name:'Next →',exact:true}).click();
  await page.getByRole('button',{name:'Next →',exact:true}).click();
  const draft='  My sentence stays.\n ';await page.locator('.ps2-task textarea').first().fill(draft);await sync(page);
  const second=await browser.newContext();await route(second);
  try{
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
-  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(2).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
-  await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');await other.reload();await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');
+  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
+  await other.getByRole('button',{name:'Next →',exact:true}).click();
+  await expect(other.locator('.ps2-task select').first()).toHaveValue('bike');await other.reload();await expect(other.locator('.ps2-task select').first()).toHaveValue('bike');
  }finally{await second.close();}
 });
 

@@ -330,7 +330,7 @@ test('Lesson 1 restores on a second device, preserves Trial/Homework and resolve
 test('Lesson 0 exact answers restore across devices; offline conflict preserves other lessons',async({page,context,browser})=>{
  await rpc({}, {id:'before-expanded-to-be',fields:{'answers:diary':'Keep trial','answers:@vika/lesson/trial-homework/day':'Keep homework','answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{grammarNotes:'Keep Lesson1'}}}}});
  await route(context);await login(page,'/#/lessons/lesson-0');
- await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(11).click();
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button',{name:/My Hogwarts Profile/}).click();
  const original='  am?\n ';
  await page.getByLabel('Утверждение 1',{exact:true}).fill(original);await sync(page);
  const second=await browser.newContext();await route(second);
@@ -357,4 +357,27 @@ test('all twelve correction responses sync verbatim and preserve existing To Be 
   expect(record.answers['negative:157-5']).toBe('Keep negative draft');
   for(let i=0;i<12;i++)expect(record.answers[`mistake:${String(i+1).padStart(2,'0')}`]).toBe(drafts[i]);
  } finally {await second.close();}
+});
+
+test('reordered To Be topics restore legacy reading position and sync new practice by stable keys',async({page,context,browser})=>{
+ const old={...initial,step:9,answers:{'reading:0':'  is?  ','negative:157-5':'Old negative','mistake:01':'Old correction','seen:0':true,'seen:1':true}};
+ await rpc({}, {id:'before-topic-order',fields:{'answers:@vika/lesson/lesson-0':{version:1,data:old},'answers:diary':'Keep trial'}});
+ await route(context);await login(page,'/#/lessons/lesson-0');
+ await expect(page.locator('.tb-heading h1')).toHaveText('Mixed Practice');
+ await expect(page.getByLabel('Пропуск 1',{exact:true})).toHaveValue('  is?  ');
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button',{name:/Affirmative Sentences/}).click();
+ await page.getByLabel('I ... a pupil.',{exact:true}).fill('  I am a pupil.\n ');
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button',{name:/Short Answers/}).click();
+ await page.getByLabel('Are you an engineer?',{exact:true}).fill('  Yes, I am.\n ');await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-0');
+  await expect(other.locator('.tb-heading h1')).toHaveText('Short Answers');
+  await expect(other.getByLabel('Are you an engineer?',{exact:true})).toHaveValue('  Yes, I am.\n ');
+  await other.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button',{name:/Mixed Practice/}).click();
+  await expect(other.getByLabel('Пропуск 1',{exact:true})).toHaveValue('  is?  ');
+  await other.reload();await expect(other.locator('.tb-heading h1')).toHaveText('Mixed Practice');
+  const saved=await rpc();const answers=saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers;
+  expect(answers['negative:157-5']).toBe('Old negative');expect(answers['mistake:01']).toBe('Old correction');expect(answers['reading:0']).toBe('  is?  ');expect(answers['seen:0']).toBe(true);expect(answers['seen:1']).toBe(true);expect(answers['affirmative:157-5']).toBe('  I am a pupil.\n ');expect(saved.fields['answers:diary'].value).toBe('Keep trial');
+ }finally{await second.close();}
 });

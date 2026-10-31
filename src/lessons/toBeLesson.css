@@ -31,3 +31,5 @@
   .tb-question-table .tb-table-row > div:not(:first-child) { font-size: 20px; }
   .tb-question-table .tb-cell-label { font-size: 16px; }
 }
+.tb-part + .tb-part { margin-top: 34px; padding-top: 30px; border-top: 2px solid #e6dcc4; }
+.tb-part > h2 { margin-bottom: 20px; }

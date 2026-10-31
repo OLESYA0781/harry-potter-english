@@ -5,6 +5,7 @@ import ToBeTheory from './toBe/Theory';
 import {completeItems,mistakeItems,readingText,toBeStages,toBeBlocks,toBeBlockIndex,legacyPartTitles,affirmativeItems,shortAnswerItems,negativeItems,questionItems} from './toBe/data';
 import type {SourceItem} from './toBe/data';
 import './toBeLesson.css';
+import { WhoIsThis, MysteriousRoom, FalseFacts, MagicTown } from './toBe/Speaking';
 
 export default function ToBeLesson({state,setState,canTeach=false}:LessonProps) {
  const [teacherRequested,setTeacherRequested]=useState(false);
@@ -15,12 +16,16 @@ export default function ToBeLesson({state,setState,canTeach=false}:LessonProps) 
  const block=toBeBlocks[activeIndex];
  const theoryPart=block.parts.find(part=>[0,1,2,3,4,12].includes(part));
  useEffect(()=>{if(theoryPart!==undefined && state.answers[`seen:${theoryPart}`]!==true) setState(previous=>({...previous,answers:{...previous.answers,[`seen:${theoryPart}`]:true}}));},[theoryPart,state.answers,setState]);
- const save=(key:string,value:string)=>setState(previous=>({...previous,answers:{...previous.answers,[key]:value}}));
+ const save=(key:string,value:string|boolean)=>setState(previous=>({...previous,answers:{...previous.answers,[key]:value}}));
  const value=(key:string)=>typeof state.answers[key]==='string'?state.answers[key] as string:'';
  const navigate=(next:number)=>{const target=toBeBlocks[next];setState(previous=>({...previous,step:target.legacyStep,answers:{...previous.answers,toBeActiveBlock:target.id}}));window.scrollTo({top:0});};
  const field=(key:string,label:string,small=false)=><label className="tb-answer" key={key}><span id={`tb-label-${key}`}>{label}</span>{small?<input aria-labelledby={`tb-label-${key}`} value={value(key)} onChange={e=>save(key,e.target.value)} spellCheck={false} autoCorrect="off" autoCapitalize="off" />:<textarea aria-labelledby={`tb-label-${key}`} rows={3} value={value(key)} onChange={e=>save(key,e.target.value)} spellCheck={false} autoCorrect="off" autoCapitalize="off" />}</label>;
  const exercises=(prefix:string,items:SourceItem[],short=false)=><div className="tb-tasks">{items.map(item=><article className="tb-task" key={item.id}>{teacher && <small>{item.source}</small>}{!teacher && prefix==='short' && <small>{item.source.split(' · ').at(-1)}</small>}{field(`${prefix}:${item.id}`,item.text,short)}</article>)}</div>;
  const renderPart=(step:number)=><>
+ {step===15 && <MagicTown state={state} teacher={teacher} save={save}/>}
+ {step===16 && <WhoIsThis state={state} teacher={teacher} save={save}/>}
+ {step===17 && <MysteriousRoom teacher={teacher}/>}
+ {step===18 && <FalseFacts state={state} teacher={teacher} save={save}/>}
  {step===0 && <ToBeDiagram />}
  {[1,2,3,4,12].includes(step) && <ToBeTheory step={step} />}
  {step===5 && <><h2>Complete the sentences</h2><p>Вставь am, is или are.</p>{sourceNote('Голицынский: «Вставьте глагол to be в Present Simple».')}{exercises('complete',completeItems,true)}</>}

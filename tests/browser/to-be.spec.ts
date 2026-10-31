@@ -88,7 +88,7 @@ test('correction cards save all original drafts without revealing answers or gra
 
 test('seven topics alternate theory and practice without duplicating old sections',async({page})=>{
  await page.goto('/#/lessons/lesson-0');
- const layout=[['TO BE','Complete the sentences'],['Affirmative','Make affirmative sentences'],['Negative','Make negative sentences'],['Questions','Make questions'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete'],['To Be Cheat Sheet']];
+ const layout=[['TO BE','Complete the sentences','Hogwarts Magic Town — Look and Say'],['Affirmative','Make affirmative sentences','Who is this?'],['Negative','Make negative sentences','Find the False Facts'],['Questions','Make questions','The Mysterious Hogwarts Room'],['Short Answers','Write short answers'],['Correct the mistakes','Read and complete'],['To Be Cheat Sheet']];
  const actual:string[]=[];
  for(let i=0;i<7;i++){
   await expect(page.locator('.tb-part')).toHaveCount(layout[i].length);
@@ -98,7 +98,7 @@ test('seven topics alternate theory and practice without duplicating old section
   if(i===4){await expect(page.getByRole('region',{name:'Write short answers',exact:true}).locator('textarea')).toHaveCount(6);await page.getByRole('region',{name:'Write short answers',exact:true}).getByLabel('Is the boat on the river?',{exact:true}).fill('  Yes, it is!\n ');}
   if(i<6)await page.getByRole('button',{name:'Next →',exact:true}).click();
  }
- expect(new Set(actual).size).toBe(13);
+ expect(new Set(actual).size).toBe(17);
  await page.reload();await expect(page.locator('.tb-heading h1')).toHaveText('Grammar Summary');
  await toStage(page,1);await expect(page.getByLabel('George ... fourteen years old.',{exact:true})).toHaveValue('  George is fourteen.\n ');
  await toStage(page,4);await expect(page.getByLabel('Is the boat on the river?',{exact:true})).toHaveValue('  Yes, it is!\n ');
@@ -128,4 +128,51 @@ test('source annotations appear only in active teacher mode; short answer direct
  await toStage(page,0);await expect(page.locator('.tb-panel')).toContainText('Голицынский');
  await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();
  await expect(page.locator('.tb-panel')).not.toContainText('Голицынский');
+});
+
+async function loadedPictures(region:import('@playwright/test').Locator){
+ const imgs=region.locator('img');
+ for(const img of await imgs.all()){
+  await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+ }
+}
+test('visual speaking scenes, false facts and twenty revealable words work without pupil questions or recording',async({page})=>{
+ test.setTimeout(90000);
+ await page.goto('/#/lessons/lesson-0');
+ await toStage(page,1);
+ const who=page.getByRole('region',{name:'Who is this?',exact:true});await expect(who.getByRole('button',{name:/Картинка/})).toHaveCount(4);
+ for(let i=0;i<4;i++){await who.getByRole('button',{name:`Картинка ${i+1}`,exact:true}).click();await loadedPictures(who);}
+ await expect(who.getByText('Who are they?',{exact:true})).toHaveCount(0);
+ await expect(who.locator('input,textarea,audio,video')).toHaveCount(0);
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(who.getByText('Who are they?',{exact:true})).toBeVisible();
+ await who.getByText('Teacher’s questions',{exact:true}).click();await expect(who.getByText('Who are they?',{exact:true})).not.toBeVisible();
+ await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();
+ await toStage(page,2);
+ const facts=page.getByRole('region',{name:'Find the False Facts',exact:true});await expect(facts.getByRole('button',{name:/Картинка/})).toHaveCount(3);
+ for(let i=0;i<3;i++){await facts.getByRole('button',{name:`Картинка ${i+1}`,exact:true}).click();await loadedPictures(facts);await expect(facts.locator('.tb-false-facts li')).toHaveCount(3);}
+ await expect(facts.getByText('Варианты исправлений для учителя')).toHaveCount(0);
+ await toStage(page,3);const room=page.getByRole('region',{name:'The Mysterious Hogwarts Room',exact:true});await loadedPictures(room);await expect(room.locator('.tb-speaking-teacher')).toHaveCount(0);
+ await toStage(page,0);const town=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});
+ for(const group of ['Places','Transport']){
+  await town.getByRole('button',{name:group,exact:true}).click();await expect(town.locator('.tb-town-word')).toHaveCount(10);
+  for(let i=0;i<10;i++){const card=town.locator('.tb-town-word').nth(i);await card.getByRole('button',{name:`Открыть слово ${i+1}`,exact:true}).click();await expect(card.locator('h3')).toBeVisible();await loadedPictures(card);}
+ }
+ await page.reload();await expect(town.getByRole('button',{name:'Transport',exact:true})).toHaveAttribute('aria-pressed','true');await expect(town.getByRole('heading',{name:'underground',exact:true})).toBeVisible();
+ await toStage(page,1);await expect(who.getByRole('button',{name:'Картинка 4',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByRole('button',{name:/микрофон|record|microphone/i})).toHaveCount(0);
+});
+
+for(const width of [390,768,1024,1366])test(`oral illustrations and teacher panels fit ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:1000});await page.goto('/#/lessons/lesson-0');
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();
+ for(const [stage,title] of [[1,'Who is this?'],[2,'Find the False Facts'],[3,'The Mysterious Hogwarts Room']] as const){
+  await toStage(page,stage,width);
+  const region=page.getByRole('region',{name:title,exact:true});await loadedPictures(region);
+  await region.scrollIntoViewIfNeeded();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  const picture=region.locator('.tb-speaking-picture,.tb-room-picture').first();const bounds=await picture.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(width);
+  if(stage===2){await region.getByRole('button',{name:'Картинка 2',exact:true}).click();await loadedPictures(region);await expect(region.getByText('The room is empty.',{exact:true})).toBeVisible();}
+  await region.screenshot({path:`work/to-be-oral-${stage}-${width}.png`});
+ }
 });

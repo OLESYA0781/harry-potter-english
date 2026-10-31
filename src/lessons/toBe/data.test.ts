@@ -32,7 +32,7 @@ it('requires all twelve nonblank correction responses, not correctness',()=>{
 it('maps every legacy position into exactly one stable topic and preserves earned theory flags',()=>{
  const expected=[0,1,2,3,4,0,2,3,5,5,5,6,6];
  expected.forEach((index,step)=>expect(toBeBlockIndex({...initial,step})).toBe(index));
- expect(toBeBlocks.flatMap(block=>block.parts).slice().sort((a,b)=>a-b)).toEqual(Array.from({length:15},(_,i)=>i).filter(i=>i!==10 && i!==11));
+ expect(toBeBlocks.flatMap(block=>block.parts).slice().sort((a,b)=>a-b)).toEqual(Array.from({length:19},(_,i)=>i).filter(i=>i!==10 && i!==11));
  expect(new Set(toBeBlocks.map(block=>block.id)).size).toBe(7);
  expect(toBeBlockIndex({...initial,step:12,answers:{toBeActiveBlock:'summary'}})).toBe(6);
  // An old client may change only numeric step, leaving a stale new-client marker.
@@ -72,4 +72,9 @@ it('retired mixed drafts remain intact but do not count toward completion',()=>{
  expect(toBeSummary({...initial,answers}).detail).toBe('0 из 13 частей');
  expect(toBeBlockIndex({...initial,step:10,answers})).toBe(5);
  expect(answers['mixed:157-7']).toBe('  Old dialogue draft  ');
+});
+
+it('oral visuals never reset or inflate the existing written completion',()=>{
+ const state={...initial,answers:{'negative:gg3-p5-cafe':'Keep draft','visual:v1:who:scene':'harry-draco','visual:v1:town:reveal:bank':true}};
+ expect(toBeSummary(state)).toEqual(toBeSummary({...state,answers:{'negative:gg3-p5-cafe':'Keep draft'}}));
 });

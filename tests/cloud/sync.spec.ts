@@ -244,6 +244,12 @@ test('Teacher mode is hidden for ddarya.rr, stays hidden after reload and resets
   await page.locator('.nav-item').nth(11).click();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
   await expect(page.locator('.teacher-panel')).toHaveCount(0);
+  await page.goto('/#/lessons/lesson-0');
+  await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(1).click();
+  await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('region',{name:'Who is this?',exact:true}).locator('.tb-speaking-teacher')).toHaveCount(0);
+  await page.reload();await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);
+  await page.goto('/#/lessons/trial');
   if (!await page.getByRole('button', { name: 'Выйти', exact: true }).isVisible()) await page.getByText(/Облачное сохранение ·/).first().click();
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toBeVisible();
@@ -395,5 +401,23 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(2).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
   await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');await other.reload();await expect(other.locator('.ps2-task select').first()).toHaveValue('банк');
+ }finally{await second.close();}
+});
+
+test('Lesson 0 oral scene and vocabulary choices sync without changing written progress or other lessons',async({page,context,browser})=>{
+ const lesson={version:1,data:{step:1,name:'Vika',answers:{toBeActiveBlock:'affirmative','affirmative:gg3-p4-george-age':'  Old full sentence.\n '},scores:{},ratings:{}}};
+ await rpc({}, {id:'oral-scenes-pupil',fields:{'answers:@vika/lesson/lesson-0':lesson,'answers:diary':'Keep Trial','answers:@vika/lesson/trial-homework/day':'Keep Homework','answers:@vika/lesson/lesson-1':{version:1,data:{step:0,name:'',scores:{},ratings:{},answers:{'present-simple:v2':{schemaVersion:2,activePage:'welcome/everyday-book',seen:['welcome'],responses:{'final-story':'Keep Lesson 1'}}}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-0');
+ const who=page.getByRole('region',{name:'Who is this?',exact:true});await who.getByRole('button',{name:'Картинка 2',exact:true}).click();
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(0).click();
+ const town=page.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});await town.getByRole('button',{name:'Transport',exact:true}).click();await town.getByRole('button',{name:'Открыть слово 4',exact:true}).click();await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-0');
+  const otherTown=other.getByRole('region',{name:'Hogwarts Magic Town — Look and Say',exact:true});await expect(otherTown.getByRole('heading',{name:'car',exact:true})).toBeVisible();
+  await other.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(1).click();await expect(other.getByRole('region',{name:'Who is this?',exact:true}).getByRole('button',{name:'Картинка 2',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(other.getByLabel('George ... fourteen years old.',{exact:true})).toHaveValue('  Old full sentence.\n ');
+  const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep Trial');expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Keep Homework');
+  expect(saved.fields['answers:@vika/lesson/lesson-1'].value).toMatchObject({data:{answers:{'present-simple:v2':{responses:{'final-story':'Keep Lesson 1'}}}}});
  }finally{await second.close();}
 });

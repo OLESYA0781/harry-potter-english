@@ -35,3 +35,21 @@ Source labels, page numbers and adaptation notes are visible only while Teacher 
 Negative practice retains six sentences: two with am, two with is and two with are. Reworded prompts use new IDs; previously completed six-item versions still count.
 
 The retired Mixed Grammar Challenge (legacy step 10) opens Mixed Practice, containing only correction and reading. It no longer contributes to completion; `mixed:*` responses are retained unchanged.
+
+
+## Visual oral practice (Lesson 0 only)
+
+The original seven-topic navigation and all thirteen graded-by-completion written/theory parts remain intact. Four new visual sections are inserted after related existing reinforcement:
+
+- Forms: existing diagram and nine gaps, then compact **Hogwarts Magic Town — Look and Say** (ten places and ten transport words).
+- Affirmative: original theory and written sentences, then **Who is this?** (four paired character pictures, displayed one at a time).
+- Negative: original theory and written negatives, then **Find the False Facts** (exactly three independent scenes, three false statements each).
+- Questions: original theory and written questions, then **The Mysterious Hogwarts Room** (one full illustration).
+
+No microphone, recording, recognition, pronunciation scoring, mandatory written field or manual completion checkbox is added. Oral practice does not inflate or reset existing completion percentages. Teacher questions and optional false-fact corrections are rendered only in active Teacher mode using the existing access policy; question panels can be collapsed independently. Student false statements remain visible for oral correction.
+
+Scene selection and vocabulary reveal state have stable `visual:v1:*` keys inside the existing Lesson 0 record; they reuse the local queue and Supabase RPC/CAS. All existing answers, theory flags, scores and ratings are preserved. No shared storage/schema/auth changes and no changes to Lesson 1 or Trial.
+
+Artwork is original generated illustration, matched to the existing Trial Lesson character and common-room references. Finished scenes are stored locally in `public/art/lesson-0/`; CSS displays independent cells of the character and vocabulary atlases without changing the originals. The room and library are separate full landscape images; the Harry/Draco rivalry illustration is reused consistently between oral tasks. After the classroom generation failed, the owner explicitly approved reusing the existing Trial common-room illustration as the second false-fact scene. Its three statements and teacher corrections refer to the room rather than a classroom. Vocabulary words are the exact Go Getter 3 p.5 lists; the new speaking scenes and questions are author-created to-be practice.
+
+The room was visually inspected against all eleven questions: books and wand on the desk; owl by the window; exactly three ordinary chairs plus a separate armchair; cat by the fireplace; a bright room with park/café/museum, bus and train outside. The vocabulary art must keep bus/tram distinct, car blue, two pedal bikes, café beside park, boat beside park and underground below street level so teacher prompts match the scene.

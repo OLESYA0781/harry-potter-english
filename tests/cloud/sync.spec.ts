@@ -326,3 +326,19 @@ test('Lesson 1 restores on a second device, preserves Trial/Homework and resolve
     const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep old lesson');expect(saved.fields['ratings:reading'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Old homework draft');
   } finally {await second.close();}
 });
+
+test('Lesson 0 exact answers restore across devices; offline conflict preserves other lessons',async({page,context,browser})=>{
+ await rpc({}, {id:'before-expanded-to-be',fields:{'answers:diary':'Keep trial','answers:@vika/lesson/trial-homework/day':'Keep homework','answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{grammarNotes:'Keep Lesson1'}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-0');
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(11).click();
+ const original='  am?\n ';
+ await page.getByLabel('Утверждение 1',{exact:true}).fill(original);await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-0');await expect(other.getByLabel('Утверждение 1',{exact:true})).toHaveValue(original);
+  await context.setOffline(true);await page.getByLabel('Утверждение 1',{exact:true}).fill('Offline answer');await other.getByLabel('Утверждение 1',{exact:true}).fill('Other device answer');await sync(other);
+  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-0» изменено/)).toBeVisible();
+  await expect(page.getByLabel('Утверждение 1',{exact:true})).toHaveValue('Offline answer');await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();await expect(page.getByLabel('Утверждение 1',{exact:true})).toHaveValue('Other device answer');await page.reload();await expect(page.getByLabel('Утверждение 1',{exact:true})).toHaveValue('Other device answer');
+  const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep trial');expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Keep homework');expect(saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers.grammarNotes).toBe('Keep Lesson1');
+ }finally{await second.close();}
+});

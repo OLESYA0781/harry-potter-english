@@ -381,3 +381,24 @@ test('reordered To Be topics restore legacy reading position and sync new practi
   expect(answers['negative:157-5']).toBe('Old negative');expect(answers['mistake:01']).toBe('Old correction');expect(answers['reading:0']).toBe('  is?  ');expect(answers['seen:0']).toBe(true);expect(answers['seen:1']).toBe(true);expect(answers['affirmative:gg3-p4-george-age']).toBe('  George is fourteen.\n ');expect(saved.fields['answers:diary'].value).toBe('Keep trial');
  }finally{await second.close();}
 });
+
+test('Lesson 1 textbook drafts and busy days restore across devices without losing old notes',async({page,context,browser})=>{
+ await route(context);await login(page,'/#/lessons/lesson-1');
+ const draft='  Original pupil response.\nDo not correct it.  ';
+ await page.locator('.ps-book-task textarea').first().fill(draft);
+ await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
+ await page.getByLabel('Мои заметки по грамматике').fill('Existing notes');
+ await page.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(2).click();
+ await page.getByRole('button',{name:'Monday',exact:true}).click();
+ await page.locator('.ps-book-task textarea').first().fill(draft);await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
+  await expect(other.getByRole('button',{name:'Monday',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(other.locator('.ps-book-task textarea').first()).toHaveValue(draft);
+  await other.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(0).click();
+  await expect(other.locator('.ps-book-task textarea').first()).toHaveValue(draft);
+  await other.getByRole('navigation',{name:'Lesson 1 stages'}).getByRole('button').nth(1).click();
+  await expect(other.getByLabel('Мои заметки по грамматике')).toHaveValue('Existing notes');
+ }finally{await second.close();}
+});

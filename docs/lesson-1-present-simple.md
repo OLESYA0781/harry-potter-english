@@ -1,38 +1,41 @@
 # Lesson 1 — Present Simple
 
-The production catalog registers `lesson-1` before `trial`, using the existing date-based newest-first ordering. Route: `/#/lessons/lesson-1`. Trial Lesson and Homework are unchanged.
+Route: `/#/lessons/lesson-1`. Catalog order is explicitly Lesson 1, Lesson 0, Trial Lesson. Existing grammar, Trial Lesson, Homework and Lesson 0 are unchanged.
 
-## What is ready
+## Source and tasks
 
-Nine stages: welcome, Grammar Room, then Exercises 3–9. The omitted role-play stage has not been recreated. Six interactive grammar slides implement the supplied explanation, examples, frequency scale, sentence patterns, endings, negatives, questions and cheat sheet. Stage and slide navigation restore from saved progress. Optional grammar notes preserve the pupil's original text without correction or grading.
+The supplied `go_getter_3_student_s_book.pdf` (116 pages) was read and visually checked at printed/PDF pages 4–5. The site transcribes these pages; it does not publish the full PDF. Existing filled-in annotations in the PDF are not included as pupil answers. Source notes appear only in Teacher mode.
 
-## What is missing
+| Stage | Implementation |
+| --- | --- |
+| Welcome, p. 4 Ex. 1 | Original George/Harry/Emma/Poppy/Gran dialogue and all four comprehension questions |
+| Grammar Room | Existing six Present Simple grammar slides and saved notes |
+| Ex. 3 | Original six sentences, including the two printed worked examples; four response fields; interactive busy-day calendar and free-day response |
+| Ex. 4 | Original ten places; personal response to “Which places do you visit for fun?” |
+| Ex. 5 | Original five sentences; worked stadium example and four empty response fields |
+| Ex. 6 | Original ten transport words, original page-4 photograph and a response field identifying visible transport |
+| Ex. 7 | Original numbered transport illustrations, worked Emma/bus dialogue and four question/answer dialogue fields in original order |
+| Ex. 8 | Original page-4 dialogue shown again; seven fields for its seven sentences containing frequency adverbs |
+| Ex. 9 | Five personal sentences; original model and vocabulary from both boxes |
 
-No original Go Getter 3 pages, audio or video were present in the repository. No textbook exercise is represented as implemented, and no dialogue, characters or comprehension questions have been invented. No textbook media is connected or replaced with speech synthesis.
+Exercise 2 (pair role play) is intentionally omitted per the original task specification. Teacher mode is local UI state using the existing access policy. It is never persisted in pupil progress.
 
-Please supply:
+## Media availability
 
-- Go Getter 3 Student’s Book page 4: Exercise 1, complete dialogue and character information (scan/PDF or exact original text).
-- Student’s Book page 5: complete original instructions, items and answer-choice material for Exercises 3–9 (scan/PDF or exact original text).
-- Intro Video 0.1.
-- Audio 1.2, Audio 1.3 and Audio 1.4.
+The attached PDF contains no usable original audio/video. The owner supplied the Yandex Disk folder `https://disk.yandex.ru/d/eQvibNgP2JDQkg/Go%20getter%203`. Fetching its public API from the managed environment fails with `URLError: <urlopen error Tunnel connection failed: 403 Forbidden>`; the web tool also reports the folder inaccessible. A supported network-permission grant was obtained and the API retried, but the sidecar still denies the domain. Environment policy is restricted and enforced. Original media files cannot yet be inspected or downloaded; no file URLs are guessed.
 
-The welcome and textbook stages explicitly state that originals are awaited. They cannot become completed just by visiting the page. “Lesson 1 Complete!” only appears after all six grammar slides and the eight original textbook units (welcome + seven exercises) are complete. With originals absent, maximum available progress is 6/14 (43%). This is completion progress, not answer accuracy.
+Intro Video 0.1 and audio 1.2, 1.3, 1.4 remain null in `materials.ts` until actual files are available. No synthetic replacements are used. Missing media is stated briefly; all text-based tasks can be read and completed with a teacher. A media playback event is never treated as evidence that a response was completed. To connect media, allow `cloud-api.yandex.net`, `disk.yandex.ru` and the actual returned download host in the environment’s outbound policy, or attach the four original files directly.
 
-## Connecting supplied originals
+The two local WebP illustrations are cropped from the supplied PDF: the page-4 photograph needed by Ex. 6 and numbered page-5 transport pictures needed by Ex. 7. Alt text provides equivalent visual information.
 
-Use `src/lessons/presentSimple/materials.ts` as the single integration manifest. Keep all absent resources `null` rather than inventing URLs. Add the supplied files to a local folder such as `public/lessons/lesson-1/`, then set the manifest entries to the actual local URLs. Page scans/PDFs open as references; audio/video uses native repeatable player controls, no autoplay or synthetic replacement.
+## Saving and completion
 
-Transcribe the supplied dialogue into `introduction.dialogue`. Only then author comprehension prompts strictly supported by that dialogue in `introduction.comprehension`. For each Exercise 3–9, use its exact instruction and ordered items in `exercises`. The renderer supports original text-answer items and choice items. If the original exercise needs matching, ordering or a different interaction, add the corresponding UI after inspecting the source; do not recast an unknown exercise as an invented text exercise. Stable item IDs form saved-answer keys and must not be renamed after publication.
+Responses and the busy-day array use stable `intro:p4-1-*` and `exerciseN:p5-N-*` keys inside the existing version-1 `@vika/lesson/lesson-1` record. Grammar notes and previously saved fields are preserved. Drafts are stored verbatim, without grading, automatic correction or answer disclosure. Printed worked examples are not editable and do not count as required response fields.
 
-No correctness messages or answer keys are shown. Exercise completion is based on nonblank original response fields, not grades.
+All nonblank response fields and the selected-day calendar are required for Exercise 3; the other tasks require their nonblank responses. Six viewed grammar slides and eight completed textbook tasks yield 14/14 and the existing finish screen. Correctness is not a completion requirement.
 
-## Saving
-
-The existing `readLesson`/`updateLesson` adapter stores this module at root answer key `@vika/lesson/lesson-1`, version 1. It uses the existing authenticated Supabase RPC, local write-ahead queue, revision checks and explicit conflict resolution. Trial root fields and the reserved Homework fields are preserved. No migration, environment-variable change or production database edit is required.
-
-The module is one existing RPC conflict unit: concurrent edits to the same lesson on different devices require the existing explicit choice; they do not silently replace one another. Progress does not use local-only component state.
+No change to Supabase Auth, RPC/CAS, local queue, conflict resolution, SQL or environment variables. The lesson remains one whole-record conflict unit. No production pupil data is read or modified.
 
 ## Verification
 
-Production build, module tests, browser navigation through all nine stages and six grammar slides, note restoration, missing-resource states, responsive grammar tables/diagrams at 390/768/1024/1366px, unchanged Trial/Homework, and isolated Supabase integration tests. The real migration runs in PGlite with mocked Auth/PostgREST transport; the new two-device case covers exact notes, offline conflict choices and preservation of existing Trial/Homework fields. No production pupil data is read or modified.
+Production build, unit coverage of completion and printed-example exclusion, browser coverage of all nine stages, six slides, original task counts, calendar/draft reload, teacher-only annotations, full completion and responsive layouts at 390/768/1024/1366px. Isolated cloud integration checks verify new responses/calendar and existing notes restoring on another device, plus existing offline conflict behavior and preservation of other lessons.

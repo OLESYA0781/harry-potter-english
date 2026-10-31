@@ -2,10 +2,10 @@ import type {LessonState} from '../../data';
 // Transcribed from golicynskij.pdf: PDF 127 table; printed 127–129 exercises 157–160.
 // Stable topic IDs are independent of menu order. legacyStep preserves old-client compatibility.
 export const toBeBlocks = [
- {id:'forms',title:'TO BE — Am / Is / Are',legacyStep:0,parts:[0,5]},
- {id:'affirmative',title:'Affirmative Sentences',legacyStep:1,parts:[1,13]},
- {id:'negative',title:'Negative Sentences',legacyStep:2,parts:[2,6]},
- {id:'questions',title:'Questions',legacyStep:3,parts:[3,7]},
+ {id:'forms',title:'TO BE — Am / Is / Are',legacyStep:0,parts:[0,5,15]},
+ {id:'affirmative',title:'Affirmative Sentences',legacyStep:1,parts:[1,13,16]},
+ {id:'negative',title:'Negative Sentences',legacyStep:2,parts:[2,6,18]},
+ {id:'questions',title:'Questions',legacyStep:3,parts:[3,7,17]},
  {id:'short-answers',title:'Short Answers',legacyStep:4,parts:[4,14]},
  {id:'mixed',title:'Mixed Practice',legacyStep:8,parts:[8,9]},
  {id:'summary',title:'Grammar Summary',legacyStep:12,parts:[12]},
@@ -17,7 +17,7 @@ export function toBeBlockIndex(state:LessonState) {
  const legacy=toBeBlocks.findIndex(block=>block.parts.includes(state.step));
  return legacy>=0?legacy:state.step===10?toBeBlocks.findIndex(block=>block.id==='mixed'):state.step===11?toBeBlocks.findIndex(block=>block.id==='summary'):0;
 }
-export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers'];
+export const legacyPartTitles=['TO BE','Affirmative','Negative','Questions','Short Answers','Complete the sentences','Make negative sentences','Make questions','Correct the mistakes','Read and complete','Mixed Grammar Challenge','My Hogwarts Profile','To Be Cheat Sheet','Make affirmative sentences','Write short answers','Hogwarts Magic Town — Look and Say','Who is this?','The Mysterious Hogwarts Room','Find the False Facts'];
 
 export type SourceItem={id:string; source:string; text:string};
 export const completeItems:SourceItem[]=[

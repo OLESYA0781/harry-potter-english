@@ -428,3 +428,23 @@ test('Lesson 0 oral scene and town choices sync without changing written progres
   expect(saved.fields['answers:@vika/lesson/lesson-1'].value).toMatchObject({data:{answers:{'present-simple:v2':{responses:{'final-story':'Keep Lesson 1'}}}}});
  }finally{await second.close();}
 });
+
+test('unreachable Supabase does not block lessons or lose locally queued answers after reload',async({page,context})=>{
+ await route(context);await login(page,'/#/lessons/lesson-0');
+ // Simulate only the API being blocked: same-origin HTML/JS/images remain reachable.
+ await context.route('https://supabase.test/**',request=>request.abort('failed'));
+ await page.getByRole('navigation',{name:'Lesson 0 stages'}).getByRole('button').nth(3).click();
+ const field=page.getByLabel('The hospital is clean.',{exact:true}),draft='  Local pupil draft.\nKeep this original answer.  ';
+ await field.fill(draft);await page.reload();await expect(field).toHaveValue(draft);
+ await expect.poll(()=>page.evaluate(()=>{
+  const journal=JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!);
+  return Object.keys(journal.pending).length+Object.keys(localStorage).filter(key=>key.startsWith('hogwarts-outbox:')).length;
+ })).toBeGreaterThan(0);
+ if(!await page.getByRole('button',{name:'Синхронизировать',exact:true}).isVisible())await page.getByText(/Облачное сохранение ·/).first().click();
+ await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
+ await expect(page.getByRole('status').filter({hasText:/Синхронизация недоступна/})).toBeVisible();
+ await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'The Magic of Everyday Life',exact:true})).toBeVisible();
+ await page.goto('/#/lessons/trial');await expect(page.getByRole('heading',{name:'Welcome to Hogwarts!',exact:true})).toBeVisible();
+ // The API failure has not been disguised as successful cloud synchronization.
+ const stored=await rpc();expect(stored.fields['answers:@vika/lesson/lesson-0']?.value?.data?.answers?.['question:gg3-p5-hospital-clean']).not.toBe(draft);
+});

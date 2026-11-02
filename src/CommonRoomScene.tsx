@@ -1,3 +1,4 @@
+import { assetUrl } from './assetUrl';
 import { useState } from "react";
 import { people } from "./data";
 const areas = [
@@ -41,7 +42,7 @@ export default function CommonRoomScene({
       >
         <div className={`room-scene ${zoomed ? "zoomed" : ""}`}>
           <img
-            src="/art/common-room.webp"
+            src={assetUrl('/art/common-room.webp')}
             width="1536"
             height="1024"
             alt="Six friends together in one cosy common room: Harry is drinking tea, Hermione is reading a book, Ron is eating a sandwich, Draco is playing with a ball, Hagrid is sleeping on a sofa and Dumbledore is writing a letter."

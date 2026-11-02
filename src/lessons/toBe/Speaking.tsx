@@ -1,9 +1,10 @@
+import { assetUrl } from '../../assetUrl';
 import type { LessonState } from '../../data';
 import { describeFrames, describeScenes, falseScenes, oralKeys, sceneIndex, townPlaces, townTransport, whoScenes } from './speaking';
 import type { Scene } from './speaking';
 import './speaking.css';
 // Original generated atlases, with independent illustrations displayed as equal cells.
-const assets={pairs:{src:'/art/lesson-0/pairs.webp',cols:2,rows:2,ratio:1.5},places:{src:'/art/lesson-0/places.webp',cols:2,rows:5,ratio:5/3},transport:{src:'/art/lesson-0/transport.webp',cols:2,rows:5,ratio:5/3}};
+const assets={pairs:{src:assetUrl('/art/lesson-0/pairs.webp'),cols:2,rows:2,ratio:1.5},places:{src:assetUrl('/art/lesson-0/places.webp'),cols:2,rows:5,ratio:5/3},transport:{src:assetUrl('/art/lesson-0/transport.webp'),cols:2,rows:5,ratio:5/3}};
 type Atlas=keyof typeof assets;
 export function SpeakingPicture({atlas,index,alt}:{atlas:Atlas;index:number;alt:string}){
  const art=assets[atlas];
@@ -16,7 +17,7 @@ type Props={state:LessonState;teacher:boolean;save:(key:string,value:string|bool
 function SceneCards({scenes,atlas,state,teacher,save,answerKey}:{scenes:Scene[];atlas:'pairs'|'false';answerKey:string}&Props){
  const index=sceneIndex(scenes,state.answers[answerKey]);
  const scene=scenes[index];
- return <div className="tb-speaking-scenes"><div className="tb-scene-picker" role="group" aria-label="Выбери картинку">{scenes.map((entry,i)=><button className="btn" key={entry.id} aria-pressed={i===index} onClick={()=>save(answerKey,entry.id)}>Картинка {i+1}</button>)}</div><figure>{scene.picture?<SpeakingPicture atlas={scene.picture.atlas} index={scene.picture.index} alt={scene.alt}/>:atlas==='false' && index===2?<img className="tb-scene-full" src="/art/lesson-0/library.webp" alt={scene.alt} loading="lazy" decoding="async"/>:<SpeakingPicture atlas="pairs" index={atlas==='false'?1:index} alt={scene.alt}/> }<figcaption>Picture {index+1} / {scenes.length}</figcaption></figure>
+ return <div className="tb-speaking-scenes"><div className="tb-scene-picker" role="group" aria-label="Выбери картинку">{scenes.map((entry,i)=><button className="btn" key={entry.id} aria-pressed={i===index} onClick={()=>save(answerKey,entry.id)}>Картинка {i+1}</button>)}</div><figure>{scene.picture?<SpeakingPicture atlas={scene.picture.atlas} index={scene.picture.index} alt={scene.alt}/>:atlas==='false' && index===2?<img className="tb-scene-full" src={assetUrl('/art/lesson-0/library.webp')} alt={scene.alt} loading="lazy" decoding="async"/>:<SpeakingPicture atlas="pairs" index={atlas==='false'?1:index} alt={scene.alt}/> }<figcaption>Picture {index+1} / {scenes.length}</figcaption></figure>
  {scene.facts && <ol className="tb-false-facts">{scene.facts.map(fact=><li key={fact}>{fact}</li>)}</ol>}
  {teacher && scene.questions && <TeacherQuestions questions={scene.questions}/>}
  {teacher && scene.answers && <details className="tb-speaking-teacher"><summary>Варианты исправлений для учителя</summary><ol>{scene.answers.map(answer=><li key={answer}>{answer}</li>)}</ol></details>}

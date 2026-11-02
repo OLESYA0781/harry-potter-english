@@ -1,3 +1,4 @@
+import { assetUrl } from '../../assetUrl';
 import { useEffect, useRef, useState } from 'react';
 import { Volume2, BookOpen, X } from 'lucide-react';
 import type { LessonProps } from '../types';
@@ -50,7 +51,7 @@ export default function PresentSimpleLesson({state,setState,canTeach=false}:Less
  {unit.words==='places' && cards(places)}{unit.words==='transport' && cards(transport)}{unit.words==='all' && vocabulary()}
  </>}
  {!page.first && unit.text && <p>{unit.text}</p>}
- {unit.townScene && <figure className="ps2-town-scene"><div className="ps2-town-art"><img src="/art/lesson-0/places.webp" alt={unit.townScene.alt} loading="lazy" style={{left:`${-(unit.townScene.index%2)*100}%`,top:`${-Math.floor(unit.townScene.index/2)*100}%`}}/></div><figcaption>Время открытия: <strong>{unit.townScene.opens}</strong></figcaption></figure>}
+ {unit.townScene && <figure className="ps2-town-scene"><div className="ps2-town-art"><img src={assetUrl('/art/lesson-0/places.webp')} alt={unit.townScene.alt} loading="lazy" style={{left:`${-(unit.townScene.index%2)*100}%`,top:`${-Math.floor(unit.townScene.index/2)*100}%`}}/></div><figcaption>Время открытия: <strong>{unit.townScene.opens}</strong></figcaption></figure>}
  {teacher && unit.teacherHints && <details className="ps2-source"><summary>Подсказки для учителя</summary><ul>{unit.teacherHints.map(hint=><li key={hint}>{hint}</li>)}</ul></details>}
  <div className="ps2-tasks">{page.tasks.map(task=><article className="ps2-task" key={task.id}>{task.art && <WordArt name={task.art} label={transport.find(word=>word.art===task.art)?.ru||'Транспорт'}/>}<label><span id={`ps2-label-${task.id}`}>{task.prompt}</span>{task.options?<select aria-label={task.prompt} value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)}><option value="">Выбери соответствие</option>{task.options.map(option=><option value={option} key={option}>{option}</option>)}</select>:<textarea aria-labelledby={`ps2-label-${task.id}`} rows={task.long?8:3} spellCheck={false} autoCorrect="off" value={course.responses[task.id]||''} onChange={event=>save(task.id,event.target.value)} />}</label></article>)}</div>
  {page.topicId==='final' && page.unit.id==='final-story' && lesson1Summary(state).status==='completed' && <p className="ps2-finish">Lesson 1 Complete! ✦</p>}

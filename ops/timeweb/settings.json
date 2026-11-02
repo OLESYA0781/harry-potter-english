@@ -1,0 +1,13 @@
+{
+  "description": "Reference for manual App Platform setup; not an automatically imported Timeweb manifest",
+  "repository": "OLESYA0781/harry-potter-english",
+  "initialBranch": "timeweb-test-hosting-config",
+  "framework": "React",
+  "nodeVersion": "22",
+  "projectDirectory": ".",
+  "buildCommand": "npm ci --include=dev && node ops/timeweb/build.mjs",
+  "outputDirectory": "dist",
+  "entryPoint": "index.html",
+  "ssr": false,
+  "requiredBuildVariables": ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"]
+}

@@ -87,3 +87,7 @@ npm run test:cloud
 ## Облачное сохранение Supabase
 
 Настройка единственной учётной записи, RLS, SQL-миграция, переменные Cloudflare Pages и безопасный перенос localStorage: [docs/SUPABASE.md](docs/SUPABASE.md). Без конфигурации Supabase сохраняется локальная работа. Проверки синхронизации: `npm run test:sql` и `npm run test:cloud`.
+
+## Диагностика доступа без VPN
+
+Текущее состояние, ограничения проверок и план независимого тестового адреса: [docs/AVAILABILITY_RU.md](docs/AVAILABILITY_RU.md). Не менять домен, DNS, хостинг или базу без согласования с владельцем. Утилита для запуска на затронутой сети: `python scripts/check_availability.py --label ru-no-vpn --output report.json`. Успешная локальная сборка не подтверждает доступность из России.

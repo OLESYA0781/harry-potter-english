@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-02",
+  "production_ref": "c5a3390eec2d75ee860b6945a39a8de733a61152",
+  "russia_without_vpn_verified": false,
+  "managed_probe": {
+    "utc": "2026-11-02T11:53:25.364926+00:00",
+    "network_label": "managed-environment",
+    "location_verified": false,
+    "proxy_in_use": true,
+    "scope": "Public DNS/HTTPS/static bytes only. No login, student data or synchronization writes.",
+    "dns": {
+      "error": "gaierror: [Errno -3] Temporary failure in name resolution"
+    },
+    "tls": {
+      "inspected": false,
+      "reason": "An environment proxy is configured. Direct TLS probing is skipped; HTTPS GET uses the configured proxy and TLS trust."
+    },
+    "home": {
+      "url": "https://vika-english.pages.dev/",
+      "method": "GET",
+      "error": "URLError: <urlopen error Tunnel connection failed: 403 Forbidden>",
+      "complete_body": false,
+      "redirects": [],
+      "seconds": 0.005
+    },
+    "assets": [],
+    "external_entry_assets": [],
+    "static_download_check_passed": false,
+    "warning": "A passing byte-download check does not prove Russian access, browser execution or authenticated cross-device synchronization."
+  },
+  "local_build_probe": {
+    "utc": "2026-11-02T11:55:42.805988+00:00",
+    "network_label": "local-production-build",
+    "location_verified": false,
+    "proxy_in_use": false,
+    "scope": "Public DNS/HTTPS/static bytes only. No login, student data or synchronization writes.",
+    "dns": {
+      "A": [
+        "127.0.0.1"
+      ],
+      "AAAA": [],
+      "note": "OS resolver results from this machine; not an authoritative DNS-zone inspection."
+    },
+    "tls": {
+      "inspected": false,
+      "reason": "The requested origin uses HTTP."
+    },
+    "home": {
+      "url": "http://127.0.0.1:5192/",
+      "method": "GET",
+      "status": 200,
+      "final_url": "http://127.0.0.1:5192/",
+      "headers": {
+        "Content-Type": "text/html",
+        "Content-Length": "616",
+        "Server": "SimpleHTTP/0.6 Python/3.12.14"
+      },
+      "bytes": 616,
+      "read_capped": false,
+      "sha256": "d62fca9914a79f2b04d63513dd9decbf1005999d82b396bc16835803fc4535ea",
+      "complete_body": true,
+      "https_transport_succeeded": false,
+      "redirects": [],
+      "seconds": 0.004
+    },
+    "assets": [
+      {
+        "url": "http://127.0.0.1:5192/assets/index-DQ_PCSRo.js",
+        "method": "GET",
+        "status": 200,
+        "final_url": "http://127.0.0.1:5192/assets/index-DQ_PCSRo.js",
+        "headers": {
+          "Content-Type": "text/javascript",
+          "Content-Length": "665010",
+          "Server": "SimpleHTTP/0.6 Python/3.12.14"
+        },
+        "bytes": 665010,
+        "read_capped": false,
+        "sha256": "bc537bba71cdff8ad99c7f5f68d177f8095cfa964bbf0ad99f45d4df5208cf9f",
+        "complete_body": true,
+        "https_transport_succeeded": false,
+        "redirects": [],
+        "seconds": 0.003
+      },
+      {
+        "url": "http://127.0.0.1:5192/assets/index-CpMELdHJ.css",
+        "method": "GET",
+        "status": 200,
+        "final_url": "http://127.0.0.1:5192/assets/index-CpMELdHJ.css",
+        "headers": {
+          "Content-Type": "text/css",
+          "Content-Length": "98224",
+          "Server": "SimpleHTTP/0.6 Python/3.12.14"
+        },
+        "bytes": 98224,
+        "read_capped": false,
+        "sha256": "9145f0cf1bf1a6a6393e5d7adc256cbedf295d1493876f30e218fb9b591f765d",
+        "complete_body": true,
+        "https_transport_succeeded": false,
+        "redirects": [],
+        "seconds": 0.002
+      },
+      {
+        "url": "http://127.0.0.1:5192/art/common-room.webp",
+        "method": "GET",
+        "status": 200,
+        "final_url": "http://127.0.0.1:5192/art/common-room.webp",
+        "headers": {
+          "Content-Type": "image/webp",
+          "Content-Length": "504374",
+          "Server": "SimpleHTTP/0.6 Python/3.12.14"
+        },
+        "bytes": 504374,
+        "read_capped": false,
+        "sha256": "be9e14537f36d7e50c0aa6b94d41ee4f39669164723186eaadc4a4e4836beb06",
+        "complete_body": true,
+        "https_transport_succeeded": false,
+        "redirects": [],
+        "seconds": 0.001
+      }
+    ],
+    "external_entry_assets": [],
+    "entry_asset_count": 2,
+    "static_download_check_passed": true,
+    "warning": "A passing byte-download check does not prove Russian access, browser execution or authenticated cross-device synchronization."
+  }
+}

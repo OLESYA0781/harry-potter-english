@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronDown, Cloud, LogIn } from 'lucide-react';
 import type { useProgress } from './useProgress';
 import { cloudConfigured, readSession, signIn, signOut, supabase } from './supabase';
 export default function CloudProgress({ progress }: { progress: ReturnType<typeof useProgress> }) {
@@ -18,7 +19,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return <details className="panel cloud-progress" aria-label="Облачное сохранение">
-    <summary>Облачное сохранение · {session ? (progress.conflicts.length ? 'Есть конфликт' : Object.keys(progress.journal.pending).length ? 'Есть несинхронизированные изменения' : progress.status || 'Подключение…') : 'Войти'}</summary>
+    <summary><span className="cloud-entry-icon" aria-hidden="true">{session ? <Cloud size={30} /> : <LogIn size={30} />}</span><span className="cloud-entry-copy"><strong>{session ? 'Облачное сохранение' : 'Войти'}</strong><span>{session ? (progress.conflicts.length ? 'Есть конфликт' : Object.keys(progress.journal.pending).length ? 'Есть несинхронизированные изменения' : progress.status || 'Подключение…') : 'Облачное сохранение'}</span></span><ChevronDown className="cloud-entry-chevron" size={24} aria-hidden="true" /></summary>
     {!session ? <form onSubmit={async e => {
       e.preventDefault(); setBusy(true); setMessage('');
       try { setSession(await signIn(email, password)); setPassword(''); await progress.sync(); }
@@ -28,7 +29,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
       <p>Войдите в заранее созданную учётную запись ученицы для сохранения между устройствами.</p>
       <label>Email <input type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required /></label>
       <label>Пароль <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required /></label>
-      <button className="btn small" disabled={busy}>Войти</button>
+      <button className="btn cloud-signin-button" disabled={busy}><LogIn size={23} aria-hidden="true" />{busy ? 'Входим…' : 'Войти'}</button>
     </form> : <>
       <p>{session.user.email}</p>
       <p role="status">{progress.status}</p>

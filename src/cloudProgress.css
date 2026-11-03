@@ -1,0 +1,72 @@
+.platform-shell .platform-cloud .cloud-progress {
+  background: #fffdf5;
+  border: 2px solid #c8b980;
+  border-radius: 22px;
+  box-shadow: 0 5px 0 #ddd5b9;
+  padding: 0;
+  overflow-wrap: anywhere;
+  font: 18px/1.5 system-ui, sans-serif;
+}
+.platform-shell .platform-cloud .cloud-progress > summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 96px;
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: #2b5143;
+  color: #fff7d9;
+  list-style: none;
+}
+.cloud-progress > summary::-webkit-details-marker { display: none; }
+.cloud-entry-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 58px;
+  height: 58px;
+  border-radius: 17px;
+  background: #f1d580;
+  color: #294a3c;
+  box-shadow: 0 4px 0 #b99e56;
+}
+.cloud-entry-copy { flex: 1; min-width: 0; }
+.cloud-entry-copy strong { display: block; font-size: 26px; line-height: 1.3; }
+.cloud-entry-copy > span { display: block; margin-top: 4px; font-size: 16px; color: #dfebd9; }
+.cloud-entry-chevron { flex-shrink: 0; }
+.cloud-progress[open] .cloud-entry-chevron { transform: rotate(180deg); }
+.cloud-progress > summary:focus-visible { outline: 4px solid #a88cc9; outline-offset: -4px; }
+.platform-shell .platform-cloud .cloud-progress > :not(summary) { margin-left: 24px; margin-right: 24px; }
+.platform-shell .platform-cloud .cloud-progress > :last-child { margin-bottom: 24px; }
+.cloud-progress form { padding-top: 6px; }
+.platform-shell .platform-cloud .cloud-progress input {
+  width: 100%;
+  min-height: 56px;
+  font-size: 20px;
+  border: 2px solid #a8bea6;
+  border-radius: 14px;
+  background: #fffefa;
+  box-sizing: border-box;
+}
+.cloud-progress .cloud-signin-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-width: 180px;
+  min-height: 60px;
+  background: #f1d580;
+  color: #294a3c;
+  border: 2px solid #b99e56;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #b99e56;
+  font-size: 22px;
+  font-weight: 750;
+}
+.cloud-progress .cloud-signin-button:disabled { opacity: .7; }
+@media (max-width: 600px) {
+  .platform-shell .platform-cloud .cloud-progress > summary { gap: 12px; padding: 16px; }
+  .cloud-entry-copy strong { font-size: 23px; }
+  .cloud-entry-copy > span { font-size: 14px; }
+  .cloud-entry-icon { flex-basis: 48px; height: 48px; }
+  .platform-shell .platform-cloud .cloud-progress > :not(summary) { margin-left: 16px; margin-right: 16px; }
+}

@@ -4,7 +4,7 @@ for(const viewport of [{width:390,height:844},{width:768,height:1024},{width:102
   test(`letter stays readable and unobstructed at ${viewport.width}x${viewport.height}`,async({page})=>{
     await page.setViewportSize(viewport);
     await page.goto('/#/lessons/trial');
-    await page.getByRole('tab',{name:'Homework',exact:true}).click();
+    await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
     if(viewport.width<=600) await page.getByLabel('Choose homework section').selectOption('2');
     else await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
     await page.getByRole('button',{name:'Открыть письмо',exact:true}).click();
@@ -31,7 +31,7 @@ for(const viewport of [{width:390,height:844},{width:768,height:1024},{width:102
 }
 test('light letter and text appear quickly when motion is allowed',async({page})=>{
   await page.emulateMedia({reducedMotion:'no-preference'});
-  await page.goto('/#/lessons/trial');await page.getByRole('tab',{name:'Homework',exact:true}).click();await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
+  await page.goto('/#/lessons/trial');await page.getByRole('tab',{name:'Homework 1',exact:true}).click();await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
   await page.getByRole('button',{name:'Открыть письмо',exact:true}).click();
   await expect(page.locator('.magic-letter-text')).toHaveCSS('opacity','1');
   const animations=await page.locator('.magic-letter-card').evaluate(e=>getComputedStyle(e).animationDuration);
@@ -39,7 +39,7 @@ test('light letter and text appear quickly when motion is allowed',async({page})
 });
 
 test('owl post opens and closes without altering written answers',async({page})=>{
-  await page.goto('/#/lessons/trial');await page.getByRole('tab',{name:'Homework',exact:true}).click();await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
+  await page.goto('/#/lessons/trial');await page.getByRole('tab',{name:'Homework 1',exact:true}).click();await page.getByRole('button',{name:'3. The Secret Letter',exact:true}).click();
   const letter=page.getByRole('article',{name:'Hermione’s letter'});
   await expect(letter).toBeHidden();
   await page.locator('.hw-field textarea').first().fill('  My own answer.\n ');

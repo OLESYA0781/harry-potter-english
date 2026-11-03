@@ -22,16 +22,26 @@ export const gapTasks = [
   ] },
 ] as const;
 export const translationSentences = [
-  'Мой велосипед чистый.', 'Мои родители в ресторане.', 'Самолёт большой.',
-  'Моя комната чистая.', 'Это банк? Нет, это отель.', 'Рон и Гарри в трамвае.',
-  'Трамвай быстрый.', 'Гермиона не в больнице. Она в школе.',
-  'Книги на полу, а картина на стене.', 'Она пишет письма друзьям после школы.',
+  { id: 'clean-bike', text: 'Мой велосипед чистый.' },
+  { id: 'parents-restaurant', text: 'Мои родители в ресторане.' },
+  { id: 'big-plane', text: 'Самолёт большой.' },
+  { id: 'clean-room', text: 'Моя комната чистая.' },
+  { id: 'bank-hotel', text: 'Это банк? Нет, это отель.' },
+  { id: 'friends-tram', text: 'Рон и Гарри в трамвае.' },
+  { id: 'fast-tram', text: 'Трамвай быстрый.' },
+  { id: 'hermione-school', text: 'Гермиона не в больнице. Она в школе.' },
+  { id: 'books-picture', text: 'Книги на полу, а картина на стене.' },
+  { id: 'letters-after-school', text: 'Она пишет письма друзьям после школы.' },
 ] as const;
 export const translationDialogues = [
-  '— Где Гарри? — Он в Хогвартсе.', '— Рон устал? — Да, он устал.',
-  '— Драко богатый? — Да, он богатый.', '— Где Гермиона? — Она в музее.',
-  '— Кот на диване? — Нет, он на полу.',
+  { id: 'harry-hogwarts', text: '— Где Гарри? — Он в Хогвартсе.' },
+  { id: 'ron-tired', text: '— Рон устал? — Да, он устал.' },
+  { id: 'draco-rich', text: '— Драко богатый? — Да, он богатый.' },
+  { id: 'hermione-museum', text: '— Где Гермиона? — Она в музее.' },
+  { id: 'cat-floor', text: '— Кот на диване? — Нет, он на полу.' },
 ] as const;
+export const writtenKey = (task: 'translations' | 'dialogues' | 'profile', id = 'hogwarts') =>
+  `${homeworkZeroPrefix}written/${task}/${id}`;
 // Independent per-gap keys reuse the root answer journal/RPC and never overwrite
 // Lesson 0's versioned record or historical Trial homework answers.
 export const gapKey = (taskId: string, sentenceId: string, gap: number) =>

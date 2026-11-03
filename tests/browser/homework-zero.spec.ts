@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000]]) {
-  test(`Homework 0 inline drafts and notebook tasks at ${width}px`, async ({ page }) => {
+  test(`Homework 0 inline gaps and written answers at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height });
     await page.addInitScript(() => {
       if (!localStorage.getItem('hogwarts-english-v1')) localStorage.setItem('hogwarts-english-v1', JSON.stringify({ version: 3, data: {step:0,name:'',answers:{
@@ -19,7 +19,11 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(page.getByLabel('Task 1, sentence 8, gap 1', {exact:true})).toHaveValue('');
     await expect(page.getByLabel('Task 4, sentence 6, gap 1', {exact:true})).toHaveValue('');
     for (let i = 0; i < 25; i++) await fields.nth(i).fill(`draft ${i}`);
+    const written = page.locator('.hw0-written');
+    await expect(written).toHaveCount(16);
+    for (let i = 0; i < 16; i++) await written.nth(i).fill(`  Written answer ${i}\nSecond line.  `);
     await page.reload();
+    for (let i = 0; i < 16; i++) await expect(written.nth(i)).toHaveValue(`  Written answer ${i}\nSecond line.  `);
     for (let i = 0; i < 25; i++) await expect(fields.nth(i)).toHaveValue(`draft ${i}`);
     const answers = await page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).state.answers);
     expect(answers['@vika/lesson/lesson-0-homework/magic-sentences/bank/0']).toBe('old bank answer');
@@ -28,11 +32,11 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(page.getByLabel('Task 1, sentence 10, gap 1', { exact: true })).toHaveValue('draft 10');
     await expect(page.getByLabel('Task 1, sentence 10, gap 2', { exact: true })).toHaveValue('draft 11');
     await expect(page.locator('.hw0-task').filter({ has: page.locator('#hw0-title-2') })).not.toContainText(/near(?: to)?/i);
-    await expect(page.locator('.hw0-notebook')).toHaveCount(3);
-    for (const number of [2, 3, 5]) {
+    await expect(page.locator('.hw0-notebook')).toHaveCount(0);
+    for (const [number, count] of [[2, 10], [3, 5], [5, 1]]) {
       const task = page.locator('.hw0-task').filter({ has: page.locator(`#hw0-title-${number}`) });
-      await expect(task.locator('input,textarea')).toHaveCount(0);
-      await expect(task).toContainText('письменно в тетради');
+      await expect(task.locator('textarea')).toHaveCount(count);
+      await expect(task).not.toContainText('письменно в тетради');
     }
     await expect(page.locator('.hw0-homework select')).toHaveCount(0);
     await expect(page.locator('.hw0-homework')).not.toContainText(/Correct!|Try again!/);
@@ -46,5 +50,6 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(page.getByRole('heading', { name: 'TO BE — Am / Is / Are', exact: true })).toBeVisible();
     await page.goto('/#/homework/0');
     await expect(fields.first()).toHaveValue('draft 0');
+    await expect(written.last()).toHaveValue('  Written answer 15\nSecond line.  ');
   });
 }

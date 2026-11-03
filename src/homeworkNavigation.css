@@ -16,6 +16,15 @@
   .platform-home-link { grid-column: 1 / -1; }
   .homework-menu > summary { gap: 5px; }
   .homework-menu > summary > svg:first-child { width: 18px; }
+  .homework-menu > ul {
+    left: 0;
+    right: auto;
+    margin: 8px 0 0;
+    max-height: min(65vh, calc(100dvh - var(--platform-height) - 24px));
+  }
+  .homework-menu > ul a { min-height: 76px; }
+  .homework-menu > ul strong { font-size: 20px; }
+  .homework-menu > ul .lesson-translation { font-size: 14px; color: #59634f; margin-bottom: 0; }
 }
 
 .homework-empty .platform-cloud { margin-left: auto; }

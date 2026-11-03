@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { ImagePlus, Paperclip, Upload } from 'lucide-react';
+import { ImagePlus, Paperclip, Trash2, Upload } from 'lucide-react';
 import type { LessonProps } from '../types';
 import { readSession, supabase } from '../../supabase';
-import { isPhoto, localPhotos, photoBucket, photoPath, photoPrefix, saveLocalPhoto, validatePhoto } from './photoStore';
+import { deleteLocalPhoto, isDeletedPhoto, isMissingPhoto, isPhoto, localPhotos, photoBucket, photoPath, photoPrefix, saveLocalPhoto, validatePhoto } from './photoStore';
 import type { LocalPhoto, Photo } from './photoStore';
 
 function PhotoPreview({ local, cloud }: { local?: LocalPhoto; cloud?: Photo }) {
@@ -40,10 +40,16 @@ export default function PhotoAttachments({ state, setState }: LessonProps) {
   }, []);
   const owner = session?.user.id;
   const cloud = Object.entries(state.answers).filter(([key, value]) => key.startsWith(photoPrefix) && isPhoto(value)).map(([, value]) => value as Photo).filter(photo => photo.owner === owner);
-  const visibleLocal = local.filter(photo => !photo.owner || photo.owner === owner);
+  const visibleLocal = local.filter(photo => (!photo.owner || photo.owner === owner) && !isDeletedPhoto(state.answers[photoPrefix + photo.id]));
   const ids = [...new Set([...cloud.map(p => p.id), ...visibleLocal.map(p => p.id)])];
+  useEffect(() => {
+    // A synced deletion must also remove the cached Blob on another device.
+    for (const photo of local) if (photo.owner === owner && isDeletedPhoto(state.answers[photoPrefix + photo.id])) {
+      void deleteLocalPhoto(photo.id).then(() => { if (mounted.current) setLocal(previous => previous.filter(item => item.id !== photo.id)); }).catch(e => { if (mounted.current) setError(e.message); });
+    }
+  }, [local, owner, state.answers]);
   const upload = async (photo: LocalPhoto) => {
-    if (!supabase || !owner || uploading.current.has(photo.id)) return;
+    if (!supabase || !owner || photo.deleteRequested || isDeletedPhoto(state.answers[photoPrefix + photo.id]) || uploading.current.has(photo.id)) return;
     uploading.current.add(photo.id); setBusy(previous => [...previous, photo.id]); setError('');
     try {
       // Bind before uploading: another signed-in user must never inherit this queue.
@@ -58,9 +64,40 @@ export default function PhotoAttachments({ state, setState }: LessonProps) {
       if (signed.error) throw signed.error;
       if (!mounted.current || readSession()?.user.id !== owner) return;
       const metadata: Photo = { id: photo.id, owner, path, name: photo.name, mime: photo.mime, createdAt: photo.createdAt };
-      setState(previous => ({ ...previous, answers: { ...previous.answers, [photoPrefix + photo.id]: metadata } }));
+      setState(previous => isDeletedPhoto(previous.answers[photoPrefix + photo.id]) ? previous : ({ ...previous, answers: { ...previous.answers, [photoPrefix + photo.id]: metadata } }));
     } catch {
       if (mounted.current) setError('Облачная загрузка не завершена. Фото сохранено в этом браузере — попробуй отправить снова. Если ошибка повторяется, проверь настройку закрытого хранилища Supabase.');
+    } finally {
+      uploading.current.delete(photo.id);
+      if (mounted.current) setBusy(previous => previous.filter(id => id !== photo.id));
+    }
+  };
+  const remove = async (own?: LocalPhoto, remote?: Photo) => {
+    const photo = own || remote;
+    if (!photo || uploading.current.has(photo.id) || !window.confirm(`Удалить фотографию «${photo.name}»?`)) return;
+    uploading.current.add(photo.id); setBusy(previous => [...previous, photo.id]); setError('');
+    try {
+      if (remote || own?.owner) {
+        if (!supabase || !owner || photo.owner !== owner) throw new Error('Для удаления облачного фото войди в свой аккаунт.');
+        // Persist the intent before Storage: reloads and lost replies remain retryable.
+        const pending: LocalPhoto = { ...photo, owner, file: own?.file || new Blob(), deleteRequested: true };
+        await saveLocalPhoto(pending);
+        if (mounted.current) setLocal(previous => [...previous.filter(item => item.id !== photo.id), pending]);
+        const path = remote?.path || photoPath(owner, photo.id, photo.mime);
+        const result = await supabase.storage.from(photoBucket).remove([path]);
+        if (result.error) throw new Error('Не удалось подтвердить удаление в облаке. Проверь подключение и повтори.');
+        // Storage may return success with an empty result when DELETE RLS denies it.
+        // Do not hide the photo unless the object is confirmed absent.
+        const check = await supabase.storage.from(photoBucket).createSignedUrl(path, 600);
+        if (!isMissingPhoto(check.error)) throw new Error('Удаление не подтверждено. Проверь подключение и настройку удаления в Supabase, затем повтори.');
+        if (readSession()?.user.id !== owner) return;
+        // An explicit marker survives expand(), which omits generic null tombstones.
+        setState(previous => ({ ...previous, answers: { ...previous.answers, [photoPrefix + photo.id]: { deleted: true, id: photo.id, owner } } }));
+      }
+      await deleteLocalPhoto(photo.id);
+      if (mounted.current) setLocal(previous => previous.filter(item => item.id !== photo.id));
+    } catch (e) {
+      if (mounted.current) setError(e instanceof Error ? e.message : 'Не удалось удалить фото. Попробуй снова.');
     } finally {
       uploading.current.delete(photo.id);
       if (mounted.current) setBusy(previous => previous.filter(id => id !== photo.id));
@@ -91,7 +128,8 @@ export default function PhotoAttachments({ state, setState }: LessonProps) {
     <div className="hw0-photo-grid">{ids.map(id => {
       const own = visibleLocal.find(photo => photo.id === id);
       const remote = cloud.find(photo => photo.id === id);
-      return <article className="hw0-photo" key={id}><PhotoPreview local={own} cloud={remote} /><p>{(own || remote)!.name}</p><p role="status">{busy.includes(id) ? 'Отправляем…' : remote ? 'Файл загружен. Облачный статус — в панели входа.' : 'Сохранено на этом устройстве'}</p>{own && !remote && owner && <button type="button" className="btn" disabled={busy.includes(id)} onClick={() => void upload(own)}><Upload size={22} aria-hidden="true" />Отправить в облако</button>}</article>;
+      return <article className="hw0-photo" key={id}><PhotoPreview local={own?.file.size ? own : undefined} cloud={remote} /><p>{(own || remote)!.name}</p><p role="status">{busy.includes(id) ? own?.deleteRequested ? 'Удаляем…' : 'Отправляем…' : own?.deleteRequested ? 'Удаление не завершено — можно повторить' : remote ? 'Файл загружен. Облачный статус — в панели входа.' : 'Сохранено на этом устройстве'}</p>{own && !remote && owner && !own.deleteRequested && <button type="button" className="btn" disabled={busy.includes(id)} onClick={() => void upload(own)}><Upload size={22} aria-hidden="true" />Отправить в облако</button>}<button type="button" className="btn hw0-delete-photo" disabled={busy.includes(id)} aria-label={`Удалить фото ${photoName(own, remote)}`} onClick={() => void remove(own, remote)}><Trash2 size={22} aria-hidden="true" />{own?.deleteRequested ? 'Повторить удаление' : 'Удалить фото'}</button></article>;
     })}</div>
   </section>;
 }
+const photoName = (local?: LocalPhoto, cloud?: Photo) => (local || cloud)?.name || '';

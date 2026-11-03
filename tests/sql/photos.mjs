@@ -34,5 +34,20 @@ try {
   await db.exec('reset role');
   assert.equal((await db.query("select public from storage.buckets where id='homework-photos'")).rows[0].public,false);
   assert.equal((await db.query('select * from storage.objects')).rows.length,2);
-  console.log('Photo Storage SQL policies passed: private bucket, authorized owner only, no anonymous/nonmember/cross-user access, immutable objects. Storage API MIME/size enforcement requires real Supabase verification.');
+  await db.exec(await readFile('supabase/migrations/202611030002_homework_photos_delete.sql', 'utf8'));
+  await role('', 'anon');
+  assert.equal((await db.query('delete from storage.objects returning *')).rows.length,0);
+  await role(b);
+  assert.equal((await db.query('delete from storage.objects where name=$1 returning *',[`${a}/homework-0/page.jpg`])).rows.length,0);
+  assert.equal((await db.query('delete from storage.objects returning *')).rows.length,1);
+  await db.exec(`reset role; delete from public.lesson_students where user_id='${a}';`);
+  await role(a);
+  assert.equal((await db.query('delete from storage.objects returning *')).rows.length,0);
+  await db.exec(`reset role; insert into public.lesson_students values('${a}');`);
+  await role(a);
+  assert.equal((await db.query('update storage.objects set name=name returning *')).rows.length,0);
+  assert.equal((await db.query('delete from storage.objects returning *')).rows.length,1);
+  await db.exec('reset role');
+  assert.equal((await db.query('select * from storage.objects')).rows.length,0);
+  console.log('Photo Storage SQL policies passed: private bucket, owner/member-only read/insert/delete; anonymous/cross-user/nonmember denied; updates remain denied.');
 } finally { await db.close(); }

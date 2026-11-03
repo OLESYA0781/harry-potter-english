@@ -3,7 +3,7 @@ import type { Page, BrowserContext } from '@playwright/test';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 const user = '00000000-0000-0000-0000-000000000001';
-const authKey = 'hogwarts-auth:https://supabase.test';
+const authKey = `hogwarts-auth:${process.env.TEST_SUPABASE_URL || 'https://supabase.test'}`;
 let db: PGlite;
 let lostReply = false;
 let refreshes = 0;

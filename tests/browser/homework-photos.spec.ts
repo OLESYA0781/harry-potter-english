@@ -1,0 +1,20 @@
+import { test, expect } from '@playwright/test';
+const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jp9sAAAAASUVORK5CYII=', 'base64');
+for (const width of [390, 820, 1440]) test(`photos persist locally after reload at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 1000 });
+  await page.goto('/#/homework/0');
+  await expect(page.getByText('Проверяет преподаватель.', { exact: false })).toHaveCount(0);
+  await page.getByLabel('Task 1, sentence 1, gap 1', { exact: true }).fill('is');
+  const input = page.getByLabel('Выбрать фотографии домашней работы', { exact: true });
+  await input.setInputFiles([{ name: 'page-1.png', mimeType: 'image/png', buffer: png }, { name: 'page-2.png', mimeType: 'image/png', buffer: png }]);
+  await expect(page.locator('.hw0-photo')).toHaveCount(2);
+  await expect(page.getByText('Сохранено на этом устройстве', { exact: true })).toHaveCount(2);
+  await page.reload();
+  await expect(page.locator('.hw0-photo img')).toHaveCount(2);
+  await expect(page.getByLabel('Task 1, sentence 1, gap 1', { exact: true })).toHaveValue('is');
+  await expect.poll(() => page.locator('.hw0-photo img').first().evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1);
+  await input.setInputFiles({ name: 'unsafe.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>') });
+  await expect(page.getByRole('alert')).toContainText('Выбери фотографию JPG, PNG или WebP');
+  await expect(page.locator('.hw0-photo')).toHaveCount(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});

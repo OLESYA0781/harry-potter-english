@@ -1,9 +1,10 @@
 import { BookOpen, NotebookPen, Sparkles } from 'lucide-react';
+import PhotoAttachments from './PhotoAttachments';
 import type { LessonProps } from '../types';
 import { gapKey, gapTasks, translationDialogues, translationSentences } from './data';
 
 export default function HomeworkZero({ state, setState }: LessonProps) {
-  const notebook = <p className="hw0-notebook"><NotebookPen size={25} aria-hidden="true" />Выполни это задание письменно в тетради. Проверяет преподаватель.</p>;
+  const notebook = <p className="hw0-notebook"><NotebookPen size={25} aria-hidden="true" />Выполни это задание письменно в тетради.</p>;
   const gapTask = (task: typeof gapTasks[number]) => <section className="hw0-task" id={`hw0-task-${task.number}`} aria-labelledby={`hw0-title-${task.number}`}>
     <h2 id={`hw0-title-${task.number}`}><span className="hw0-number">{task.number}</span><span>Task {task.number}. {task.title}</span></h2>
     <p className="hw0-instruction" lang="en">{task.instruction}</p>
@@ -20,5 +21,6 @@ export default function HomeworkZero({ state, setState }: LessonProps) {
     <section className="hw0-task" aria-labelledby="hw0-title-3"><h2 id="hw0-title-3"><span className="hw0-number">3</span><span>Task 3. Translate the Dialogues</span></h2><p className="hw0-instruction" lang="en">Translate the dialogues into English.</p>{notebook}<ol className="hw0-sentences" lang="ru">{translationDialogues.map(text => <li key={text}>{text}</li>)}</ol></section>
     {gapTask(gapTasks[1])}
     <section className="hw0-task" aria-labelledby="hw0-title-5"><h2 id="hw0-title-5"><span className="hw0-number">5</span><span>Task 5. My Hogwarts Profile</span></h2><p className="hw0-instruction" lang="en">Write 5 sentences about yourself as a pupil at Hogwarts.</p>{notebook}<p>Напиши пять самостоятельных предложений о своей воображаемой жизни в Хогвартсе.</p><ul><li>Используй am / is / are.</li><li>Используй минимум 5 слов из My Vocabulary.</li><li>Добавь хотя бы одно отрицательное предложение.</li></ul></section>
+    <PhotoAttachments state={state} setState={setState} />
   </main>;
 }

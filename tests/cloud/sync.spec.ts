@@ -458,3 +458,43 @@ test('Homework 0 gaps sync independently across devices without changing lesson 
   expect(journal.state.answers['@vika/lesson/trial-homework/old']).toBe('Keep old homework');
  }finally{await second.close();}
 });
+
+test('private homework photos upload, sync metadata and open on another device; failed uploads retain files',async({page,context,browser})=>{
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jp9sAAAAASUVORK5CYII=','base64');
+ const objects=new Set<string>(); let unavailable=true;
+ const storage=async(ctx:BrowserContext)=>ctx.route('https://supabase.test/storage/v1/**',async route=>{
+  const req=route.request(),url=new URL(req.url());
+  const headers={'access-control-allow-origin':'*','access-control-allow-headers':'*','content-type':'application/json'};
+  if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
+  if(unavailable)return route.fulfill({status:404,headers,json:{message:'Bucket not found',statusCode:'404'}});
+  if(url.pathname.includes('/object/sign/')){
+   const key=url.pathname.split('/object/sign/')[1];
+   if(!objects.has(key))return route.fulfill({status:404,headers,json:{message:'Not found'}});
+   if(req.method()==='GET')return route.fulfill({headers:{...headers,'content-type':'image/png'},body:png});
+   return route.fulfill({headers,json:{signedURL:`/object/sign/${key}?token=test-only`}});
+  }
+  if(req.method()==='POST'){
+   expect(req.headers().authorization).toMatch(/^Bearer /);
+   const key=url.pathname.split('/object/')[1];expect(key).toContain(`homework-photos/${user}/homework-0/`);
+   objects.add(key);return route.fulfill({headers,json:{Key:key}});
+  }
+  return route.fulfill({status:404,headers,json:{message:'Not found'}});
+ });
+ await route(context);await storage(context);await login(page);await page.goto('/#/homework/0');
+ await page.getByLabel('Выбрать фотографии домашней работы').setInputFiles({name:'notebook.png',mimeType:'image/png',buffer:png});
+ await expect(page.getByRole('alert')).toContainText('Облачная загрузка не завершена');
+ await expect(page.locator('.hw0-photo')).toHaveCount(1);
+ await page.reload();await expect(page.locator('.hw0-photo')).toHaveCount(1);
+ unavailable=false;await page.getByRole('button',{name:'Отправить в облако',exact:true}).click();
+ await expect(page.locator('.hw0-photo')).toContainText('Файл загружен.');await sync(page);
+ const second=await browser.newContext();await route(second);await storage(second);
+ try{
+  const other=await second.newPage();await login(other);await other.goto('/#/homework/0');
+  await expect(other.locator('.hw0-photo')).toContainText('notebook.png');
+  await expect.poll(()=>other.locator('.hw0-photo img').evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBe(1);
+  const journal=await other.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+  const keys=Object.keys(journal.state.answers).filter(k=>k.startsWith('@vika/lesson/lesson-0-homework/photo/'));
+  expect(keys).toHaveLength(1);expect(journal.state.answers[keys[0]].owner).toBe(user);
+  expect(JSON.stringify(journal.state.answers[keys[0]])).not.toContain('data:image');
+ }finally{await second.close();}
+});

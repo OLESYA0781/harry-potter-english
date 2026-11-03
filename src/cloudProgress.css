@@ -70,3 +70,5 @@
   .cloud-entry-icon { flex-basis: 48px; height: 48px; }
   .platform-shell .platform-cloud .cloud-progress > :not(summary) { margin-left: 16px; margin-right: 16px; }
 }
+
+.cloud-progress .cloud-backup-icon { display: inline-grid; place-items: center; min-width: 48px; min-height: 48px; margin-top: 16px; border: 1px solid #c8b980; border-radius: 12px; color: #2b5143; }

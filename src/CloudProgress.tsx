@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Cloud, LogIn } from 'lucide-react';
+import { ChevronDown, Cloud, Download, LogIn } from 'lucide-react';
 import type { useProgress } from './useProgress';
 import { cloudConfigured, readSession, signIn, signOut, supabase } from './supabase';
 export default function CloudProgress({ progress }: { progress: ReturnType<typeof useProgress> }) {
@@ -26,8 +26,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
       catch (e) { setMessage(e instanceof Error ? e.message : 'Вход недоступен. Попробуйте снова.'); }
       finally { setBusy(false); }
     }}>
-      <p>Войдите в заранее созданную учётную запись ученицы для сохранения между устройствами.</p>
-      <label>Email <input type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required /></label>
+      <label><input aria-label="Email" type="email" autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} required /></label>
       <label>Пароль <input type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required /></label>
       <button className="btn cloud-signin-button" disabled={busy}><LogIn size={23} aria-hidden="true" />{busy ? 'Входим…' : 'Войти'}</button>
     </form> : <>
@@ -49,7 +48,6 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
       <button className="pill" onClick={() => progress.choose(key, 'cloud')}>Использовать облачную версию</button>{' '}
       <button className="pill" onClick={() => progress.choose(key, 'local')}>Сохранить локальную версию в облако</button>
     </div>)}
-    <p>При отсутствии сети изменения остаются в этом браузере. Перед сменой устройства дождитесь синхронизации. Для новой сессии после истечения входа потребуется интернет.</p>
-    <button className="text-btn" onClick={backup}>Скачать резервную копию прогресса</button>
+    <button className="text-btn cloud-backup-icon" aria-label="Скачать резервную копию прогресса" title="Скачать резервную копию прогресса" onClick={backup}><Download size={23} aria-hidden="true" /></button>
   </details>;
 }

@@ -14,11 +14,11 @@ export const gapTasks = [
   ] },
   { id: 'mystery', number: 4, title: 'Hogwarts Mystery', instruction: "Complete the dialogues with am, is, are, isn't or aren't.", sentences: [
     { id: 'hermione', text: 'Where ___ Hermione? — She ___ at the museum.' },
-    { id: 'ron', text: '___ Ron tired? — Yes, he ___.' },
+    { id: 'ron', text: '___ Ron happy? — Yes, he ___.' },
     { id: 'harry-draco', text: 'Where ___ Harry and Draco? — They ___ at Hogwarts.' },
     { id: 'books', text: '___ the books on the floor? — No, they ___. They ___ on the table.' },
     { id: 'pupil', text: '___ you a pupil? — Yes, I ___.' },
-    { id: 'friends', text: '___ Harry and Ron friends? — Yes, they ___.' },
+    { id: 'ron-teacher', text: '___ Ron a teacher? — No, he ___.' },
   ] },
 ] as const;
 export const translationSentences = [

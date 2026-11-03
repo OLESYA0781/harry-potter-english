@@ -461,7 +461,7 @@ test('Homework 0 gaps sync independently across devices without changing lesson 
 
 test('private homework photos upload, sync metadata and open on another device; failed uploads retain files',async({page,context,browser})=>{
  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jp9sAAAAASUVORK5CYII=','base64');
- const objects=new Set<string>(); let unavailable=true;
+ const objects=new Set<string>(); let unavailable=true; let allowDelete=false;
  const storage=async(ctx:BrowserContext)=>ctx.route('https://supabase.test/storage/v1/**',async route=>{
   const req=route.request(),url=new URL(req.url());
   const headers={'access-control-allow-origin':'*','access-control-allow-headers':'*','content-type':'application/json'};
@@ -469,9 +469,14 @@ test('private homework photos upload, sync metadata and open on another device; 
   if(unavailable)return route.fulfill({status:404,headers,json:{message:'Bucket not found',statusCode:'404'}});
   if(url.pathname.includes('/object/sign/')){
    const key=url.pathname.split('/object/sign/')[1];
-   if(!objects.has(key))return route.fulfill({status:404,headers,json:{message:'Not found'}});
+   if(!objects.has(key))return route.fulfill({status:400,headers,json:{message:'Object not found',statusCode:'400'}});
    if(req.method()==='GET')return route.fulfill({headers:{...headers,'content-type':'image/png'},body:png});
    return route.fulfill({headers,json:{signedURL:`/object/sign/${key}?token=test-only`}});
+  }
+  if(req.method()==='DELETE'){
+   const removed=[];
+   for(const path of req.postDataJSON().prefixes) if(allowDelete && objects.delete(`homework-photos/${path}`)) removed.push({name:path});
+   return route.fulfill({headers,json:removed});
   }
   if(req.method()==='POST'){
    expect(req.headers().authorization).toMatch(/^Bearer /);
@@ -496,5 +501,19 @@ test('private homework photos upload, sync metadata and open on another device; 
   const keys=Object.keys(journal.state.answers).filter(k=>k.startsWith('@vika/lesson/lesson-0-homework/photo/'));
   expect(keys).toHaveLength(1);expect(journal.state.answers[keys[0]].owner).toBe(user);
   expect(JSON.stringify(journal.state.answers[keys[0]])).not.toContain('data:image');
+  other.once('dialog',dialog=>dialog.accept());
+  await other.getByRole('button',{name:'Удалить фото notebook.png',exact:true}).click();
+  await expect(other.getByRole('alert')).toContainText('Удаление не подтверждено');
+  await expect(other.locator('.hw0-photo')).toHaveCount(1);
+  await other.reload();
+  await expect(other.getByRole('button',{name:'Удалить фото notebook.png',exact:true})).toHaveText('Повторить удаление');
+  allowDelete=true;other.once('dialog',dialog=>dialog.accept());
+  await other.getByRole('button',{name:'Удалить фото notebook.png',exact:true}).click();
+  await expect(other.locator('.hw0-photo')).toHaveCount(0);await sync(other);
+  await sync(page);await expect(page.locator('.hw0-photo')).toHaveCount(0);
+  await page.reload();await expect(page.locator('.hw0-photo')).toHaveCount(0);
+  const remaining=await page.evaluate(async()=>new Promise(resolve=>{const r=indexedDB.open('vika-homework-photos',1);r.onsuccess=()=>{const db=r.result,t=db.transaction('photos','readonly'),q=t.objectStore('photos').getAll();t.oncomplete=()=>{resolve(q.result.length);db.close();};};}));
+  expect(remaining).toBe(0);
+
  }finally{await second.close();}
 });

@@ -16,5 +16,15 @@ for (const width of [390, 820, 1440]) test(`photos persist locally after reload 
   await input.setInputFiles({ name: 'unsafe.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>') });
   await expect(page.getByRole('alert')).toContainText('Выбери фотографию JPG, PNG или WebP');
   await expect(page.locator('.hw0-photo')).toHaveCount(2);
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.getByRole('button', {name:'Удалить фото page-1.png',exact:true}).click();
+  await expect(page.locator('.hw0-photo')).toHaveCount(2);
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', {name:'Удалить фото page-1.png',exact:true}).click();
+  await expect(page.locator('.hw0-photo')).toHaveCount(1);
+  await page.reload();
+  await expect(page.locator('.hw0-photo')).toHaveCount(1);
+  await expect(page.locator('.hw0-photo')).toContainText('page-2.png');
+  await expect(page.getByLabel('Task 1, sentence 1, gap 1', {exact:true})).toHaveValue('is');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

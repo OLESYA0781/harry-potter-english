@@ -24,6 +24,7 @@ jobs:
       - name: Build with existing Supabase configuration
         run: node scripts/build-pages.mjs
         env:
+          PAGES_VERIFY_SUPABASE: 'true'
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL || secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v3

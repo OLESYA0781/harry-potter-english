@@ -39,7 +39,7 @@ for (const [name, width, height] of [
       await page.reload();
       await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
-      await page.getByRole('link', { name: 'Главное меню', exact: true }).click();
+      await page.getByRole('link', { name: 'Main Menu', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     }
     await page.goto('./#/vocabulary');

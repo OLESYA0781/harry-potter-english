@@ -31,7 +31,7 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(page.locator('.vocab-entry')).toHaveCount(42);
     await page.reload();
     await expect(page.locator('.vocab-entry')).toHaveCount(42);
-    await page.getByRole('link', { name: 'Главное меню', exact: true }).click();
+    await page.getByRole('link', { name: 'Main Menu', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     await page.locator('.vocabulary-nav-link').click();
     await expect(page.locator('.vocab-entry')).toHaveCount(42);

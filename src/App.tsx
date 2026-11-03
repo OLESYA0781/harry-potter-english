@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BookOpen, ChevronDown, Home, Sparkles } from 'lucide-react';
 import { useProgress } from './useProgress';
 import { useTeacherAccess } from './useTeacherAccess';
@@ -26,8 +26,15 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const [route, setRoute] = useState(routeLesson);
   const [trialTab, setTrialTab] = useState<'lesson' | 'homework'>(window.location.hash === '#/homework/1' ? 'homework' : 'lesson');
   const [selected, setSelected] = useState(catalog[0].id);
+  const [menu, setMenu] = useState<'lessons' | 'homework' | null>(null);
+  const navigation = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const change = () => { setRoute(routeLesson()); setTrialTab(window.location.hash === '#/homework/1' ? 'homework' : 'lesson'); window.scrollTo({ top: 0 }); };
+    const outside = (event: PointerEvent) => { if (!navigation.current?.contains(event.target as Node)) setMenu(null); };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, []);
+  useEffect(() => {
+    const change = () => { setRoute(routeLesson()); setMenu(null); setTrialTab(window.location.hash === '#/homework/1' ? 'homework' : 'lesson'); window.scrollTo({ top: 0 }); };
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
@@ -45,17 +52,17 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const homeworkZero = route === 'homework-0';
   const vocabularyOpen = route === 'vocabulary';
   return <div className={`platform-shell ${active ? 'lesson-open' : ''} ${active?.id === 'trial' && trialTab === 'homework' ? 'homework-open homework-empty' : ''}`}>
-    <nav className="platform-bar" aria-label="Навигация по урокам">
+    <nav className="platform-bar" aria-label="Main navigation">
       <a href="#/" className="platform-brand"><Sparkles size={25} /><span>VIKA ENGLISH</span></a>
-      <div className="platform-links"><a className="platform-home-link" aria-label="Главное меню" href="#/" aria-current={!route ? 'page' : undefined}><Home size={22} /><span>Главное меню</span></a>
-        <details className="lesson-menu" key={route || 'home'}>
-          <summary>Уроки <ChevronDown size={22} /></summary>
+      <div className="platform-links" ref={navigation} onClick={event => { if ((event.target as Element).closest('a')) setMenu(null); }} onKeyDown={event => { if (event.key === 'Escape') { navigation.current?.querySelector<HTMLElement>('.lesson-menu[open] > summary')?.focus(); setMenu(null); } }}><a className="platform-home-link" aria-label="Main Menu" href="#/" aria-current={!route ? 'page' : undefined}><Home size={22} /><span>Main Menu</span></a>
+        <details className="lesson-menu" key={route || 'home'} open={menu === 'lessons'}>
+          <summary aria-expanded={menu === 'lessons'} onClick={event => { event.preventDefault(); setMenu(previous => previous === 'lessons' ? null : 'lessons'); }}>Lessons <ChevronDown size={22} /></summary>
           <ul>{items.map(({ lesson, summary }) => <li key={lesson.id}><a href={`#/lessons/${lesson.id}`} aria-current={active?.id === lesson.id ? 'page' : undefined}>
             <strong>{lesson.title}</strong><span className="lesson-translation" lang="ru">{lesson.subtitle}</span><span>{summary.status !== 'in-progress' ? `${statusLabels[summary.status]} · ` : ''}{summary.percent}%</span>{lesson.description && <small>{lesson.description}</small>}
           </a></li>)}</ul>
         </details>
-        <details className="lesson-menu homework-menu" key={`homework-${route}-${trialTab}`}><summary><BookOpen size={20} aria-hidden="true" />Homework<ChevronDown size={22} aria-hidden="true" /></summary><ul><li><a href="#/homework/0" aria-current={homeworkZero ? 'page' : undefined}><strong>Homework 0</strong><span className="lesson-translation" lang="ru">Домашнее задание 0</span></a></li><li><a href="#/homework/1" aria-current={active?.id === 'trial' && trialTab === 'homework' ? 'page' : undefined}><strong>Homework 1</strong><span className="lesson-translation" lang="ru">Домашнее задание 1</span></a></li></ul></details>
-        <a className="vocabulary-nav-link" href="#/vocabulary" aria-current={vocabularyOpen ? 'page' : undefined}><BookOpen size={22} aria-hidden="true" /><span>My Vocabulary<small lang="ru">Мой словарь</small></span></a>
+        <details open={menu === 'homework'} className="lesson-menu homework-menu" key={`homework-${route}-${trialTab}`}><summary aria-expanded={menu === 'homework'} onClick={event => { event.preventDefault(); setMenu(previous => previous === 'homework' ? null : 'homework'); }}><BookOpen size={20} aria-hidden="true" />Homework<ChevronDown size={22} aria-hidden="true" /></summary><ul><li><a href="#/homework/0" aria-current={homeworkZero ? 'page' : undefined}><strong>Homework 0</strong><span className="lesson-translation" lang="ru">Домашнее задание 0</span></a></li><li><a href="#/homework/1" aria-current={active?.id === 'trial' && trialTab === 'homework' ? 'page' : undefined}><strong>Homework 1</strong><span className="lesson-translation" lang="ru">Домашнее задание 1</span></a></li></ul></details>
+        <a className="vocabulary-nav-link" href="#/vocabulary" aria-current={vocabularyOpen ? 'page' : undefined}><BookOpen size={22} aria-hidden="true" /><span>My Vocabulary</span></a>
       </div>
     </nav>
     <div className="platform-cloud"><CloudProgress progress={progress} /></div>
@@ -63,7 +70,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     {route && !active && !homeworkZero && !vocabularyOpen && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
     {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework 1</button></div>}
     {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
-      : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Главное меню</a></main>
+      : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Main Menu</a></main>
       : vocabularyOpen ? <MyVocabulary /> : homeworkZero ? <HomeworkZero state={progress.state} setState={progress.setState} /> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;
 }

@@ -184,7 +184,7 @@ test('lesson modules synchronize independently across devices and survive scoped
   await page.getByRole('button', { name: 'Начать урок', exact: true }).click();
   await page.getByLabel('Ответ нового урока').fill('Cloud word answer');
   await page.getByRole('button', { name: 'Проверить новый урок' }).click(); await sync(page);
-  await page.getByText('Уроки', { exact: true }).click();
+  await page.getByText('Lessons', { exact: true }).click();
   await page.locator('.lesson-menu').getByRole('link', { name: /Волшебное чтение/ }).click();
   await page.getByLabel('Ответ нового урока').fill('Independent reading draft'); await sync(page);
   const second = await browser.newContext(); await route(second);
@@ -197,7 +197,7 @@ test('lesson modules synchronize independently across devices and survive scoped
   expect(result.fields['ratings:reading'].value).toBe(2);
   expect(result.fields['answers:@vika/lesson/reading-quest'].value.data.answers.draft).toBe('Independent reading draft');
   expect(result.fields['answers:@vika/lesson/word-quest'].value.data.answers).toEqual({});
-  await page.getByText('Уроки', { exact: true }).click();
+  await page.getByText('Lessons', { exact: true }).click();
   await page.locator('.lesson-menu').getByRole('link', { name: /Пробное занятие/ }).click();
   await expect(page.locator('.section-heading h1')).toHaveText('Grammar spells');
   await page.getByRole('button', { name: 'Restart', exact: true }).click();

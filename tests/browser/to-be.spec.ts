@@ -83,7 +83,7 @@ test('correction cards save all original drafts without revealing answers or gra
  await expect(page.locator('.tb-panel')).not.toContainText(/Correct!|Try again!|не найдено/);
  await page.getByRole('button',{name:'Next →',exact:true}).click();await page.getByRole('button',{name:'← Back',exact:true}).click();
  await expect(page.getByRole('region',{name:'Correct the mistakes',exact:true}).locator('textarea').first()).toHaveValue(drafts[0]);
- await page.getByRole('link',{name:'Главное меню',exact:true}).click();
+ await page.getByRole('link',{name:'Main Menu',exact:true}).click();
  await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 0 — To Be',exact:true})})).toContainText('3 из 13 частей');
 });
 

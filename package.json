@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run src",
     "test:e2e": "playwright test",
-    "test:sql": "node tests/sql/run.mjs",
+    "test:sql": "node tests/sql/run.mjs && node tests/sql/photos.mjs",
     "test:cloud": "playwright test --config playwright.cloud.config.ts"
   },
   "dependencies": {

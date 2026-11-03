@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+const db = new PGlite();
+try {
+  await db.exec(`create role anon; create role authenticated; create schema auth; create table auth.users(id uuid primary key);
+    create function auth.uid() returns uuid language sql stable as 'select nullif(current_setting(''request.jwt.claim.sub'', true), '''')::uuid';
+    grant usage on schema auth,public to anon,authenticated;
+    create schema storage;
+    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+    create table storage.objects(bucket_id text references storage.buckets(id),name text,primary key(bucket_id,name));
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to anon,authenticated;
+    grant select,insert,update,delete on storage.objects to anon,authenticated;`);
+  await db.exec(await readFile('supabase/migrations/202610260001_lesson_sync.sql', 'utf8'));
+  await db.exec(await readFile('supabase/migrations/202611030001_homework_photos.sql', 'utf8'));
+  const a='00000000-0000-0000-0000-000000000001',b='00000000-0000-0000-0000-000000000002';
+  await db.exec(`insert into auth.users values ('${a}'),('${b}'); insert into public.lesson_students values('${a}');`);
+  const role = async (id, name='authenticated') => db.exec(`reset role; set role ${name}; select set_config('request.jwt.claim.sub','${id}',false);`);
+  const insert = path => db.query('insert into storage.objects values ($1,$2)', ['homework-photos',path]);
+  await role(a); await insert(`${a}/homework-0/page.jpg`);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,1);
+  await assert.rejects(insert(`${b}/homework-0/stolen.jpg`));
+  await assert.rejects(insert(`${a}/other-homework/page.jpg`));
+  assert.equal((await db.query('update storage.objects set name=name returning *')).rows.length,0);
+  assert.equal((await db.query('delete from storage.objects returning *')).rows.length,0);
+  await role(b); assert.equal((await db.query('select * from storage.objects')).rows.length,0);
+  await assert.rejects(insert(`${b}/homework-0/page.jpg`));
+  await db.exec(`reset role; insert into public.lesson_students values('${b}');`);
+  await role(b); await insert(`${b}/homework-0/page.jpg`);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,1);
+  await role('', 'anon'); assert.equal((await db.query('select * from storage.objects')).rows.length,0);
+  await assert.rejects(insert(`${a}/homework-0/anon.jpg`));
+  await db.exec('reset role');
+  assert.equal((await db.query("select public from storage.buckets where id='homework-photos'")).rows[0].public,false);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,2);
+  console.log('Photo Storage SQL policies passed: private bucket, authorized owner only, no anonymous/nonmember/cross-user access, immutable objects. Storage API MIME/size enforcement requires real Supabase verification.');
+} finally { await db.close(); }

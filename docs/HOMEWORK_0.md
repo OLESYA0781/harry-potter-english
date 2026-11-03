@@ -33,3 +33,5 @@ offline-изменений с сохранением старых записей
 и Pages regression. Chromium не заменяет настоящую проверку iPhone Safari.
 
 Task 1: swimming pool — big; pictures — on the wall; №7 — It ___ a train. It ___ a tram.; №8 — A plane ___ fast. Для новых №7/8 используются новые id train-tram и plane-fast; старые ответы bank/cafe сохраняются в журнале без подстановки в новые предложения.
+
+Task 4: Ron happy? — Yes, he ___; последний диалог — ___ Ron a teacher? — No, he ___. Для замены friends используется новый id ron-teacher, исторические ответы friends не меняются.

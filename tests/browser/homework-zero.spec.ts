@@ -6,6 +6,7 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
       if (!localStorage.getItem('hogwarts-english-v1')) localStorage.setItem('hogwarts-english-v1', JSON.stringify({ version: 3, data: {step:0,name:'',answers:{
         '@vika/lesson/lesson-0-homework/magic-sentences/bank/0':'old bank answer',
         '@vika/lesson/lesson-0-homework/magic-sentences/cafe/0':'old cafe answer',
+        '@vika/lesson/lesson-0-homework/mystery/friends/0':'old friends answer',
       },scores:{},ratings:{}} }));
     });
     await page.goto('/#/lessons/lesson-0');
@@ -16,12 +17,14 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(fields).toHaveCount(25);
     await expect(page.getByLabel('Task 1, sentence 7, gap 1', {exact:true})).toHaveValue('');
     await expect(page.getByLabel('Task 1, sentence 8, gap 1', {exact:true})).toHaveValue('');
+    await expect(page.getByLabel('Task 4, sentence 6, gap 1', {exact:true})).toHaveValue('');
     for (let i = 0; i < 25; i++) await fields.nth(i).fill(`draft ${i}`);
     await page.reload();
     for (let i = 0; i < 25; i++) await expect(fields.nth(i)).toHaveValue(`draft ${i}`);
     const answers = await page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).state.answers);
     expect(answers['@vika/lesson/lesson-0-homework/magic-sentences/bank/0']).toBe('old bank answer');
     expect(answers['@vika/lesson/lesson-0-homework/magic-sentences/cafe/0']).toBe('old cafe answer');
+    expect(answers['@vika/lesson/lesson-0-homework/mystery/friends/0']).toBe('old friends answer');
     await expect(page.getByLabel('Task 1, sentence 10, gap 1', { exact: true })).toHaveValue('draft 10');
     await expect(page.getByLabel('Task 1, sentence 10, gap 2', { exact: true })).toHaveValue('draft 11');
     await expect(page.locator('.hw0-task').filter({ has: page.locator('#hw0-title-2') })).not.toContainText(/near(?: to)?/i);

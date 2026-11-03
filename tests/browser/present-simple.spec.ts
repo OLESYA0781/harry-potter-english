@@ -41,7 +41,7 @@ test('all new practice pages save original responses and allow completion withou
  }
  expect(answered).toBe(allTasks.length);
  await expect(page.getByRole('button',{name:'Next →',exact:true})).toBeDisabled();
- await page.getByRole('link',{name:'Главное меню',exact:true}).click();
+ await page.getByRole('link',{name:'Main Menu',exact:true}).click();
  await expect(page.locator('.lesson-card').filter({has:page.getByRole('heading',{name:'Lesson 1 — Present Simple',exact:true})})).toContainText('100%');
  await page.goto(route);await topic(page,'negative');await page.getByRole('button',{name:'Next →',exact:true}).click();
  await expect(page.locator('.ps2-task textarea').first()).toHaveValue(/Pupil draft/);

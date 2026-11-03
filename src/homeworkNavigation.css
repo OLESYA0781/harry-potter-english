@@ -1,4 +1,6 @@
 .homework-menu > summary { background: #f1d580; border-color: #f6dfa0; color: #294a3c; }
+.platform-links .lesson-menu[open] { z-index: 2; }
+.platform-links .lesson-menu > ul { z-index: 3; }
 .homework-menu > summary:hover, .homework-menu[open] > summary { background: #ffe6a1; }
 .homework-zero { max-width: 1240px; margin: 28px auto; padding: 0 24px; }
 .homework-zero .panel { border-radius: 24px; background: #fffdf5; border: 2px solid #c8b980; box-shadow: 0 5px 0 #ddd5b9; padding: 32px; }
@@ -29,3 +31,17 @@
 
 .homework-empty .platform-cloud { margin-left: auto; }
 .homework-empty .trial-tabs { margin-left: 0; }
+
+@media (max-width: 1300px) {
+  /* Anchor both lists below the complete two-row navigation, not row one. */
+  .platform-links { position: relative; }
+  .platform-links > .lesson-menu { position: static; }
+  .platform-links > .lesson-menu > ul {
+    top: 100%;
+    left: 0;
+    right: auto;
+    width: 100%;
+    margin: 8px 0 0;
+    max-height: min(65vh, calc(100dvh - var(--platform-height) - 24px));
+  }
+}

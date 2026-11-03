@@ -4,7 +4,8 @@ import { useProgress } from './useProgress';
 import { useTeacherAccess } from './useTeacherAccess';
 import CloudProgress from './CloudProgress';
 import LessonHome from './LessonHome';
-import Homework from './lessons/Homework';
+import './lessons/homework.css';
+import './lessons/homeworkGame.css';
 import { lessons } from './lessons/registry';
 import { readLesson, updateLesson } from './lessons/progress';
 import { statusLabels } from './lessons/types';
@@ -39,7 +40,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const open = (id: string) => { setSelected(id); window.location.hash = `/lessons/${id}`; };
   const Component = active?.Component;
   const homeworkZero = route === 'homework-0';
-  return <div className={`platform-shell ${active ? 'lesson-open' : ''} ${active?.id === 'trial' && trialTab === 'homework' ? 'homework-open' : ''}`}>
+  return <div className={`platform-shell ${active ? 'lesson-open' : ''} ${active?.id === 'trial' && trialTab === 'homework' ? 'homework-open homework-empty' : ''}`}>
     <nav className="platform-bar" aria-label="Навигация по урокам">
       <a href="#/" className="platform-brand"><Sparkles size={25} /><span>VIKA ENGLISH</span></a>
       <div className="platform-links"><a className="platform-home-link" aria-label="Главное меню" href="#/" aria-current={!active ? 'page' : undefined}><Home size={22} /><span>Главное меню</span></a>
@@ -56,7 +57,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     {progress.error && <p role="alert" className="platform-error">{progress.error}</p>}
     {route && !active && !homeworkZero && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
     {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework 1</button></div>}
-    {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <Homework state={progress.state} setState={progress.setState} /> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
+    {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
       : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Главное меню</a></main>
       : homeworkZero ? <main className="homework-zero"><section className="panel"><h1>Homework 0</h1><p>Задания появятся здесь.</p></section></main> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;

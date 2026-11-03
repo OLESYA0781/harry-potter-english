@@ -10,8 +10,6 @@
 .hw0-number { flex: 0 0 54px; display: grid; place-items: center; height: 54px; background: #f1d580; border-radius: 16px; box-shadow: 0 4px 0 #b99e56; }
 .hw0-task p { color: #405b46; }
 .hw0-instruction { font-size: 23px; }
-.hw0-notebook { display: flex; align-items: flex-start; gap: 12px; border-radius: 15px; padding: 16px; background: #edf1e3; font-size: 20px; }
-.hw0-notebook svg { flex-shrink: 0; margin-top: 3px; }
 .hw0-sentences { padding-left: 34px; margin-bottom: 0; }
 .hw0-sentences li { padding: 18px 4px 18px 8px; border-bottom: 1px solid #e6dfcc; }
 .hw0-sentences li:last-child { border-bottom: 0; }
@@ -44,3 +42,8 @@
 .hw0-attachments [role=alert] { color: #8a3f2e; }
 
 .hw0-attachments .hw0-delete-photo { margin-top: 14px; background: #fff4e7; border-color: #bf9d79; color: #7a3d2c; }
+
+.hw0-written { display: block; width: 100%; min-height: 132px; margin-top: 16px; padding: 16px; border: 2px solid #91ad91; border-radius: 14px; background: #fffffb; color: #29483a; font: 22px/1.6 system-ui, sans-serif; resize: vertical; box-sizing: border-box; }
+.hw0-written[rows="8"] { min-height: 300px; }
+.hw0-written:focus { outline: 3px solid #e3cb83; outline-offset: 2px; }
+@media (max-width: 600px) { .hw0-written { font-size: 21px; padding: 14px; } }

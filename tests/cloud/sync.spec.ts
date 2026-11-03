@@ -275,37 +275,24 @@ test('an old cloud position in a removed chapter keeps its answers and revisions
   expect(result.fields['ratings:reading'].value).toBe(2);
 });
 
-test('homework sync preserves exact drafts across devices and independent offline edits', async ({ page, context, browser }) => {
-  await rpc({}, {id:'old-trial',fields:{'answers:diary':'Existing lesson answer', 'ratings:reading':2}});
-  await route(context); await login(page);
-  await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
-  await page.getByLabel('Переведи «обычно» на английский.').fill('usualy');
-  await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
+test('hidden Homework 1 retains existing cloud drafts across devices', async ({ page, context, browser }) => {
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
-  await page.locator('.hw-field textarea').first().fill(draft); await sync(page);
-  const second = await browser.newContext(); await route(second);
+  const key = '@vika/lesson/trial-homework/mistake-0';
+  await rpc({}, {id:'old-homework',fields:{['answers:'+key]:draft,'answers:diary':'Existing lesson answer','ratings:reading':2}});
+  await route(context); await login(page);
+  await page.goto('/#/homework/1');
+  await expect(page.getByRole('heading',{name:'Homework 1',exact:true})).toBeVisible();
+  await expect(page.locator('.hw-field, .hw-words')).toHaveCount(0);
+  await page.reload(); await sync(page);
+  const second=await browser.newContext(); await route(second);
   try {
-    const other = await second.newPage(); await login(other);
-    await other.getByRole('tab',{name:'Homework 1',exact:true}).click();
-    await expect(other.getByLabel('Переведи «обычно» на английский.')).toHaveValue('usualy');
-    await other.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
-    await expect(other.locator('.hw-field textarea').first()).toHaveValue(draft);
-    await context.setOffline(true);
-    await page.locator('.hw-field textarea').nth(1).fill('  Ron is sit.\n ');
-    await other.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
-    await other.getByLabel('My magical day').fill('I has owl.');
-    await sync(other);
-    await context.setOffline(false); await sync(page);
-    await page.reload(); await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
-    await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
-    await expect(page.locator('.hw-field textarea').first()).toHaveValue(draft);
-    await expect(page.locator('.hw-field textarea').nth(1)).toHaveValue('  Ron is sit.\n ');
-    await page.getByRole('button',{name:'4. A Day at Hogwarts'}).click();
-    await expect(page.getByLabel('My magical day')).toHaveValue('I has owl.');
-    await expect(page.getByLabel('Mark as completed')).toHaveCount(0);
-    const journal = await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
-    expect(journal.state.answers.diary).toBe('Existing lesson answer');
-    expect(journal.state.ratings.reading).toBe(2);
+    const other=await second.newPage(); await login(other);
+    for(const current of [page,other]) {
+      const journal=await current.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+      expect(journal.state.answers[key]).toBe(draft);
+      expect(journal.state.answers.diary).toBe('Existing lesson answer');
+      expect(journal.state.ratings.reading).toBe(2);
+    }
   } finally { await second.close(); }
 });
 

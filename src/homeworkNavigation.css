@@ -17,3 +17,6 @@
   .homework-menu > summary { gap: 5px; }
   .homework-menu > summary > svg:first-child { width: 18px; }
 }
+
+.homework-empty .platform-cloud { margin-left: auto; }
+.homework-empty .trial-tabs { margin-left: 0; }

@@ -435,3 +435,26 @@ test('unreachable Supabase does not block lessons or lose locally queued answers
  // The API failure has not been disguised as successful cloud synchronization.
  const stored=await rpc();expect(stored.fields['answers:@vika/lesson/lesson-0']?.value?.data?.answers?.['question:gg3-p5-hospital-clean']).not.toBe(draft);
 });
+
+test('Homework 0 gaps sync independently across devices without changing lesson records', async ({page,context,browser})=>{
+ const lesson={version:1,data:{step:5,name:'Vika',answers:{'complete:old':'Keep my lesson answer'},scores:{},ratings:{}}};
+ await rpc({}, {id:'existing-lesson',fields:{'answers:@vika/lesson/lesson-0':lesson,'answers:@vika/lesson/trial-homework/old':'Keep old homework'}});
+ await route(context);await login(page);await page.goto('/#/homework/0');
+ await page.getByLabel('Task 1, sentence 1, gap 1',{exact:true}).fill('  IS?  ');
+ await page.getByLabel('Task 4, sentence 4, gap 2',{exact:true}).fill("aren't");await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other);await other.goto('/#/homework/0');
+  await expect(other.getByLabel('Task 1, sentence 1, gap 1',{exact:true})).toHaveValue('  IS?  ');
+  await expect(other.getByLabel('Task 4, sentence 4, gap 2',{exact:true})).toHaveValue("aren't");
+  await context.setOffline(true);
+  await page.getByLabel('Task 1, sentence 10, gap 1',{exact:true}).fill('my offline draft');
+  await other.getByLabel('Task 1, sentence 10, gap 2',{exact:true}).fill('my other draft');await sync(other);
+  await context.setOffline(false);await sync(page);await page.reload();
+  await expect(page.getByLabel('Task 1, sentence 10, gap 1',{exact:true})).toHaveValue('my offline draft');
+  await expect(page.getByLabel('Task 1, sentence 10, gap 2',{exact:true})).toHaveValue('my other draft');
+  const journal=await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+  expect(journal.state.answers['@vika/lesson/lesson-0']).toEqual(lesson);
+  expect(journal.state.answers['@vika/lesson/trial-homework/old']).toBe('Keep old homework');
+ }finally{await second.close();}
+});

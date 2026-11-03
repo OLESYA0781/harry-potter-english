@@ -5,6 +5,7 @@ import { useTeacherAccess } from './useTeacherAccess';
 import CloudProgress from './CloudProgress';
 import LessonHome from './LessonHome';
 import MyVocabulary from './vocabulary/MyVocabulary';
+import HomeworkZero from './lessons/homeworkZero/HomeworkZero';
 import './lessons/homework.css';
 import './lessons/homeworkGame.css';
 import { lessons } from './lessons/registry';
@@ -63,6 +64,6 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework 1</button></div>}
     {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
       : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Главное меню</a></main>
-      : vocabularyOpen ? <MyVocabulary /> : homeworkZero ? <main className="homework-zero"><section className="panel"><h1>Homework 0</h1><p>Задания появятся здесь.</p></section></main> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
+      : vocabularyOpen ? <MyVocabulary /> : homeworkZero ? <HomeworkZero state={progress.state} setState={progress.setState} /> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;
 }

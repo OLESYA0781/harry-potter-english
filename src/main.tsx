@@ -5,6 +5,7 @@ import "./style.css";
 import "./cloudProgress.css";
 import "./homeworkNavigation.css";
 import "./vocabulary/vocabulary.css";
+import "./lessons/homeworkZero/homeworkZero.css";
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

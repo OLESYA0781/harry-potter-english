@@ -277,7 +277,7 @@ test('an old cloud position in a removed chapter keeps its answers and revisions
 
 test('hidden Homework 1 retains existing cloud drafts across devices', async ({ page, context, browser }) => {
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
-  const key = 'homework1:mistake-0';
+  const key = '@vika/lesson/trial-homework/mistake-0';
   await rpc({}, {id:'old-homework',fields:{['answers:'+key]:draft,'answers:diary':'Existing lesson answer','ratings:reading':2}});
   await route(context); await login(page);
   await page.goto('/#/homework/1');

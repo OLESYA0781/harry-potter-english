@@ -44,7 +44,7 @@ async function route(context: BrowserContext) {
 }
 async function login(page: Page, location = '/#/lessons/trial') {
   await page.goto(location);
-  await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
+  await page.locator('.cloud-progress > summary').click();
   await page.getByLabel('Email', { exact: true }).fill('learner@example.test');
   await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
@@ -52,7 +52,7 @@ async function login(page: Page, location = '/#/lessons/trial') {
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).migrated)).toBe(true);
 }
 async function sync(page: Page) {
-  if (!await page.getByRole('button', { name: 'Синхронизировать', exact: true }).isVisible()) await page.getByText(/Облачное сохранение ·/).first().click();
+  if (!await page.getByRole('button', { name: 'Синхронизировать', exact: true }).isVisible()) await page.locator('.cloud-progress > summary').click();
   await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
   await expect.poll(() => page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).pending).length + Object.keys(localStorage).filter(key => key.startsWith('hogwarts-outbox:')).length)).toBe(0);
 }
@@ -98,7 +98,7 @@ test('offline edits survive immediate reload; stale same-field changes require a
   // loads the app and the durable queue, then detects the remote conflict.
   await other.getByPlaceholder('Your name', { exact: true }).fill('Other device name'); await sync(other);
   await context.setOffline(false); await page.goto('/#/lessons/trial');
-  await page.getByText(/Облачное сохранение ·/).first().click();
+  await page.locator('.cloud-progress > summary').click();
   await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
   await expect(page.getByText(/Поле «name» изменено/)).toBeVisible();
   await expect(page.getByPlaceholder('Your name', { exact: true })).toHaveValue('Offline name');
@@ -153,7 +153,7 @@ test('two tabs retain independent edits while the shared journal is locked', asy
 
 test('failed login and logout preserve progress and do not expose registration', async ({ page, context }) => {
   await route(context); await page.goto('/#/lessons/trial');
-  await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
+  await page.locator('.cloud-progress > summary').click();
   await page.getByLabel('Email', { exact: true }).fill('learner@example.test');
   await page.getByLabel('Пароль', { exact: true }).fill('wrong-password');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
@@ -231,7 +231,7 @@ test('Teacher mode is hidden for ddarya.rr, stays hidden after reload and resets
   await page.goto('/#/lessons/trial');
   await page.getByRole('button', { name: 'Teacher mode', exact: true }).click();
   await expect(page.locator('.teacher-panel')).toBeVisible();
-  await page.getByText('Облачное сохранение · Войти', { exact: true }).click();
+  await page.locator('.cloud-progress > summary').click();
   await page.getByLabel('Email', { exact: true }).fill('ddarya.rr@gmail.com');
   await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
@@ -250,7 +250,7 @@ test('Teacher mode is hidden for ddarya.rr, stays hidden after reload and resets
   await expect(page.getByRole('region',{name:'Who is this?',exact:true}).locator('.tb-speaking-teacher')).toHaveCount(0);
   await page.reload();await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);
   await page.goto('/#/lessons/trial');
-  if (!await page.getByRole('button', { name: 'Выйти', exact: true }).isVisible()) await page.getByText(/Облачное сохранение ·/).first().click();
+  if (!await page.getByRole('button', { name: 'Выйти', exact: true }).isVisible()) await page.locator('.cloud-progress > summary').click();
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toBeVisible();
   await expect(page.locator('.teacher-panel')).toHaveCount(0);
@@ -278,7 +278,7 @@ test('an old cloud position in a removed chapter keeps its answers and revisions
 test('homework sync preserves exact drafts across devices and independent offline edits', async ({ page, context, browser }) => {
   await rpc({}, {id:'old-trial',fields:{'answers:diary':'Existing lesson answer', 'ratings:reading':2}});
   await route(context); await login(page);
-  await page.getByRole('tab',{name:'Homework',exact:true}).click();
+  await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
   await page.getByLabel('Переведи «обычно» на английский.').fill('usualy');
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
@@ -286,7 +286,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
   const second = await browser.newContext(); await route(second);
   try {
     const other = await second.newPage(); await login(other);
-    await other.getByRole('tab',{name:'Homework',exact:true}).click();
+    await other.getByRole('tab',{name:'Homework 1',exact:true}).click();
     await expect(other.getByLabel('Переведи «обычно» на английский.')).toHaveValue('usualy');
     await other.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
     await expect(other.locator('.hw-field textarea').first()).toHaveValue(draft);
@@ -296,7 +296,7 @@ test('homework sync preserves exact drafts across devices and independent offlin
     await other.getByLabel('My magical day').fill('I has owl.');
     await sync(other);
     await context.setOffline(false); await sync(page);
-    await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
+    await page.reload(); await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
     await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
     await expect(page.locator('.hw-field textarea').first()).toHaveValue(draft);
     await expect(page.locator('.hw-field textarea').nth(1)).toHaveValue('  Ron is sit.\n ');
@@ -440,7 +440,7 @@ test('unreachable Supabase does not block lessons or lose locally queued answers
   const journal=JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!);
   return Object.keys(journal.pending).length+Object.keys(localStorage).filter(key=>key.startsWith('hogwarts-outbox:')).length;
  })).toBeGreaterThan(0);
- if(!await page.getByRole('button',{name:'Синхронизировать',exact:true}).isVisible())await page.getByText(/Облачное сохранение ·/).first().click();
+ if(!await page.getByRole('button',{name:'Синхронизировать',exact:true}).isVisible())await page.locator('.cloud-progress > summary').click();
  await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
  await expect(page.getByRole('status').filter({hasText:/Синхронизация недоступна/})).toBeVisible();
  await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'The Magic of Everyday Life',exact:true})).toBeVisible();

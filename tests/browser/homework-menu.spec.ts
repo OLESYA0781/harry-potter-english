@@ -1,0 +1,21 @@
+import { test, expect } from '@playwright/test';
+test('Homework 1 menu opens the existing homework and keeps drafts after reload', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('.homework-menu > summary').click();
+  await page.getByRole('link', { name: /Homework 1/ }).click();
+  await expect(page).toHaveURL(/#\/homework\/1$/);
+  const answer = page.getByLabel('Переведи «обычно» на английский.');
+  await answer.fill('my existing draft');
+  await page.reload();
+  await expect(answer).toHaveValue('my existing draft');
+  await page.getByRole('tab', { name: 'Lesson', exact: true }).click();
+  await page.getByRole('tab', { name: 'Homework 1', exact: true }).click();
+  await expect(answer).toHaveValue('my existing draft');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  await page.locator('.homework-menu > summary').click();
+  await page.getByRole('link', { name: /Homework 0/ }).click();
+  await expect(page.getByRole('heading', { name: 'Homework 0', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Homework 0', exact: true })).toBeVisible();
+});

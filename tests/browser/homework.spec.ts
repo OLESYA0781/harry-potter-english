@@ -6,7 +6,7 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
     Object.defineProperty(window, 'speechSynthesis', {value:{cancel(){}, getVoices(){return [{lang:'en-GB'}];}, speak(u: SpeechSynthesisUtterance){(window as any).spoken.push(u.text);}}});
   });
   await page.goto('/#/lessons/trial');
-  await page.getByRole('tab', {name:'Homework',exact:true}).click();
+  await page.getByRole('tab', {name:'Homework 1',exact:true}).click();
   await expect(page.getByRole('heading',{name:'New Words',exact:true})).toBeVisible();
   await expect(page.locator('.hw-words article')).toHaveCount(17);
   await page.getByRole('button',{name:'Listen: Usually',exact:true}).click();
@@ -17,7 +17,7 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
   const drafts = ['  Hermione drink.\n','Ron sit!!','Harry write','There is book','She no like'];
   for (let i=0;i<5;i++) await page.locator('.hw-field textarea').nth(i).fill(drafts[i]);
   await expect(page.locator('.hw-quest-progress, .hw-mission-path')).toHaveCount(0);
-  await page.reload(); await page.getByRole('tab',{name:'Homework',exact:true}).click();
+  await page.reload(); await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
   await expect(page.getByLabel('Переведи «обычно» на английский.')).toHaveValue('  usualy\n ');
   await expect(page.getByLabel('Выучено',{exact:true})).toHaveCount(0);
   await page.getByRole('button',{name:"2. Найди и исправь ошибки"}).click();
@@ -49,7 +49,7 @@ test('five sections, exact drafts, speech, completion and responsive layout', as
 
 test('missing speech support shows notice', async ({page}) => {
   await page.addInitScript(() => { delete (window as any).SpeechSynthesisUtterance; });
-  await page.goto('/#/lessons/trial'); await page.getByRole('tab',{name:'Homework',exact:true}).click();
+  await page.goto('/#/lessons/trial'); await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
   await page.getByRole('button',{name:'Listen: Usually',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('недоступно');
 });
@@ -58,7 +58,7 @@ for (const width of [390, 768, 1280]) test(`trial tabs remain visible and clicka
   await page.setViewportSize({width,height:900});
   await page.goto('/#/lessons/trial');
   const lesson = page.getByRole('tab',{name:'Lesson',exact:true});
-  const homework = page.getByRole('tab',{name:'Homework',exact:true});
+  const homework = page.getByRole('tab',{name:'Homework 1',exact:true});
   for (let i=0;i<2;i++) {
     await homework.click();
     await expect(page.getByRole('heading',{name:'New Words',exact:true})).toBeVisible();
@@ -90,7 +90,7 @@ test('study cards and writing tasks remain usable without helper blocks', async 
     await page.setViewportSize({width,height:1000});
     await page.goto('/');
     await page.goto('/#/lessons/trial');
-    await page.getByRole('tab',{name:'Homework',exact:true}).click();
+    await page.getByRole('tab',{name:'Homework 1',exact:true}).click();
     const cards=page.locator('.hw-word-card');
     await expect(cards).toHaveCount(17);
     if(width<=1100) {

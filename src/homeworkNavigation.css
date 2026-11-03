@@ -1,0 +1,19 @@
+.homework-menu > summary { background: #f1d580; border-color: #f6dfa0; color: #294a3c; }
+.homework-menu > summary:hover, .homework-menu[open] > summary { background: #ffe6a1; }
+.homework-zero { max-width: 1240px; margin: 28px auto; padding: 0 24px; }
+.homework-zero .panel { border-radius: 24px; background: #fffdf5; border: 2px solid #c8b980; box-shadow: 0 5px 0 #ddd5b9; padding: 32px; }
+.homework-zero h1 { color: #2b5143; font-size: clamp(28px, 5vw, 40px); }
+.homework-zero p { font-size: 21px; }
+@media (min-width: 601px) and (max-width: 1100px) {
+  .platform-shell { --platform-height: 128px; }
+  .platform-bar { flex-wrap: wrap; align-content: center; gap: 12px; }
+  .platform-brand { width: 100%; }
+  .platform-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 16px; }
+  .platform-links .lesson-menu, .platform-home-link { width: 100%; min-width: 0; }
+}
+@media (max-width: 600px) {
+  .platform-shell { --platform-height: 180px; }
+  .platform-home-link { grid-column: 1 / -1; }
+  .homework-menu > summary { gap: 5px; }
+  .homework-menu > summary > svg:first-child { width: 18px; }
+}

@@ -42,6 +42,11 @@ for (const [name, width, height] of [
       await page.getByRole('link', { name: 'Главное меню', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     }
+    await page.goto('./#/vocabulary');
+    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await page.reload();
+    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
     expect(badResources).toEqual([]);
     expect(errors).toEqual([]);
   });

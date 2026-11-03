@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import { Castle } from './Art';
 import type { LessonDefinition, LessonSummary } from './lessons/types';
 import { statusLabels } from './lessons/types';
@@ -9,6 +9,7 @@ export default function LessonHome({ items, selected, onSelect, onOpen }: {
 }) {
   const current = items.find(item => item.lesson.id === selected) || items[0];
   return <main className="classroom-home">
+    <a href="#/vocabulary" className="vocabulary-home-card"><BookOpen size={38} aria-hidden="true" /><span><strong>My Vocabulary 📖</strong><small lang="ru">Мой словарь</small></span><ArrowRight size={24} aria-hidden="true" /></a>
     <section className="classroom-lessons" aria-labelledby="my-lessons-title">
       <div className="classroom-intro"><div className="classroom-intro-copy">
       <div className="classroom-section-title"><div><h1 id="my-lessons-title" lang="en">My Lessons</h1><span className="heading-translation" lang="ru">Мои занятия</span></div></div>

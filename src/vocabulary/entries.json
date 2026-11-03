@@ -1,0 +1,340 @@
+[
+  {
+    "id": "pupil",
+    "english": "pupil",
+    "russian": "ученик",
+    "example": "Harry is a pupil at Hogwarts.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "rich",
+    "english": "rich",
+    "russian": "богатый",
+    "example": "Malfoy is a rich boy.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "swimming-pool",
+    "english": "swimming pool",
+    "russian": "бассейн",
+    "example": "We swim in a swimming pool.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "clean",
+    "english": "clean",
+    "russian": "чистый",
+    "example": "My room is clean and comfortable.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "tired",
+    "english": "tired",
+    "russian": "уставший",
+    "example": "Ron is tired after school.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "to-paint",
+    "english": "to paint",
+    "russian": "рисовать, красить",
+    "example": "Hermione paints a picture of Hogwarts.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "wall",
+    "english": "wall",
+    "russian": "стена",
+    "example": "There is a beautiful picture on the wall.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "bank",
+    "english": "bank",
+    "russian": "банк",
+    "example": "The bank is next to the museum.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "café",
+    "english": "café",
+    "russian": "кафе",
+    "example": "We have lunch at a café after school.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "cinema",
+    "english": "cinema",
+    "russian": "кинотеатр",
+    "example": "Harry and Ron go to the cinema on Saturdays.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "hospital",
+    "english": "hospital",
+    "russian": "больница",
+    "example": "The hospital is near the park.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "hotel",
+    "english": "hotel",
+    "russian": "отель",
+    "example": "My family stays at a hotel on holiday.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "museum",
+    "english": "museum",
+    "russian": "музей",
+    "example": "Hermione visits the museum with her friends.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "park",
+    "english": "park",
+    "russian": "парк",
+    "example": "I walk in the park with my family.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "restaurant",
+    "english": "restaurant",
+    "russian": "ресторан",
+    "example": "We have dinner at a restaurant on Sundays.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "stadium",
+    "english": "stadium",
+    "russian": "стадион",
+    "example": "Harry plays Quidditch at the stadium.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "theatre",
+    "english": "theatre",
+    "russian": "театр",
+    "example": "We go to the theatre with our teacher.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
+    "id": "bike-bicycle",
+    "english": "bike / bicycle",
+    "russian": "велосипед",
+    "example": "I go to school by bike.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "boat",
+    "english": "boat",
+    "russian": "лодка",
+    "example": "The students travel across the lake by boat.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "bus",
+    "english": "bus",
+    "russian": "автобус",
+    "example": "I go to school by bus.",
+    "group": "transport",
+    "lessonSources": [
+      "src/lessons/presentSimple/course.ts"
+    ]
+  },
+  {
+    "id": "car",
+    "english": "car",
+    "russian": "машина",
+    "example": "My dad goes to work by car.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "taxi",
+    "english": "taxi",
+    "russian": "такси",
+    "example": "We go to the hotel by taxi.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "motorbike",
+    "english": "motorbike",
+    "russian": "мотоцикл",
+    "example": "My uncle goes to work by motorbike.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "plane",
+    "english": "plane",
+    "russian": "самолёт",
+    "example": "We travel to another country by plane.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "train",
+    "english": "train",
+    "russian": "поезд",
+    "example": "Harry goes to Hogwarts by train.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "tram",
+    "english": "tram",
+    "russian": "трамвай",
+    "example": "My friend goes to school by tram.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "underground",
+    "english": "underground",
+    "russian": "метро",
+    "example": "I go to the city centre by underground.",
+    "group": "transport",
+    "lessonSources": []
+  },
+  {
+    "id": "to-sleep",
+    "english": "to sleep",
+    "russian": "спать",
+    "example": "I sleep for eight hours every night.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-write-a-letter",
+    "english": "to write a letter",
+    "russian": "писать письмо",
+    "example": "Hermione writes a letter to her friend.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "usually",
+    "english": "usually",
+    "russian": "обычно",
+    "example": "I usually eat porridge for breakfast.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "after-school",
+    "english": "after school",
+    "russian": "после школы",
+    "example": "I play chess with my friends after school.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "sometimes",
+    "english": "sometimes",
+    "russian": "иногда",
+    "example": "I sometimes watch films with my family.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "porridge",
+    "english": "porridge",
+    "russian": "каша",
+    "example": "I eat porridge for breakfast every morning.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "language",
+    "english": "language",
+    "russian": "язык",
+    "example": "English is my favourite foreign language.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "literature",
+    "english": "literature",
+    "russian": "литература",
+    "example": "We study Russian language and literature at school.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-rest",
+    "english": "to rest",
+    "russian": "отдыхать",
+    "example": "I rest at home after school.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-spend-time-with-my-family",
+    "english": "to spend time with my family",
+    "russian": "проводить время с семьёй",
+    "example": "I spend time with my family at weekends.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-clean-my-room",
+    "english": "to clean my room",
+    "russian": "убирать свою комнату",
+    "example": "I clean my room every Saturday.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-drink",
+    "english": "to drink",
+    "russian": "пить",
+    "example": "I drink a cup of tea in the morning.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "a-cup-of-tea",
+    "english": "a cup of tea",
+    "russian": "чашка чая",
+    "example": "My mum drinks a cup of tea after breakfast.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "on-the-floor",
+    "english": "on the floor",
+    "russian": "на полу",
+    "example": "Our cat sleeps on the floor.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-sit",
+    "english": "to sit",
+    "russian": "сидеть",
+    "example": "Ron sits on the sofa.",
+    "group": "everyday",
+    "lessonSources": []
+  }
+]

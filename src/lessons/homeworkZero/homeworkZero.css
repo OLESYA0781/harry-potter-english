@@ -1,0 +1,33 @@
+.hw0-homework { max-width: 1140px; padding: 0 28px; margin: 32px auto 64px; color: #29483a; animation: none; }
+.hw0-heading { display: flex; align-items: center; gap: 22px; padding: 28px; border: 2px solid #cbb878; border-radius: 24px; background: #fff5d8; box-shadow: 0 5px 0 #e4dbc0; }
+.hw0-heading > svg { flex-shrink: 0; color: #9c7b29; }
+.hw0-heading h1 { font-size: clamp(28px, 3.3vw, 40px); line-height: 1.3; color: #29483a; margin: 0; }
+.hw0-heading p { margin: 0 0 9px; font-size: 17px; color: #6d725b; }
+.hw0-links { display: flex; flex-wrap: wrap; gap: 14px; margin: 24px 0; }
+.hw0-links a, .tb-homework-link { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 12px 20px; border: 2px solid #c6b782; border-radius: 15px; background: #f7ebc5; color: #29483a; font-size: 20px; font-weight: 700; text-decoration: none; box-shadow: 0 3px 0 #ded4b6; }
+.hw0-task { background: #fffdf5; border: 2px solid #d8d0b8; border-radius: 24px; padding: 28px; margin: 28px 0; box-shadow: 0 4px 0 #e4ddca; font-size: 22px; line-height: 1.6; }
+.hw0-task h2 { display: flex; align-items: center; gap: 18px; color: #29483a; font: 750 28px/1.35 system-ui, sans-serif; }
+.hw0-number { flex: 0 0 54px; display: grid; place-items: center; height: 54px; background: #f1d580; border-radius: 16px; box-shadow: 0 4px 0 #b99e56; }
+.hw0-task p { color: #405b46; }
+.hw0-instruction { font-size: 23px; }
+.hw0-notebook { display: flex; align-items: flex-start; gap: 12px; border-radius: 15px; padding: 16px; background: #edf1e3; font-size: 20px; }
+.hw0-notebook svg { flex-shrink: 0; margin-top: 3px; }
+.hw0-sentences { padding-left: 34px; margin-bottom: 0; }
+.hw0-sentences li { padding: 18px 4px 18px 8px; border-bottom: 1px solid #e6dfcc; }
+.hw0-sentences li:last-child { border-bottom: 0; }
+.hw0-sentences .hw0-gap { display: inline-block; vertical-align: baseline; width: 5.5ch; min-width: 88px; max-width: 100%; min-height: 54px; padding: 5px 9px; margin: 4px 5px; border: 2px solid #91ad91; border-radius: 12px; background: #fffffb; color: #29483a; font: 600 24px/1.4 system-ui, sans-serif; }
+.hw0-gap:focus { outline: 3px solid #e3cb83; outline-offset: 2px; }
+.hw0-task ul { padding-left: 28px; }
+.tb-homework-link { margin-bottom: 20px; }
+@media(max-width: 600px) {
+  .hw0-homework { padding: 0 16px; margin-top: 24px; }
+  .hw0-heading { padding: 22px 18px; gap: 12px; }
+  .hw0-heading > svg { width: 28px; }
+  .hw0-task { padding: 20px 16px; font-size: 21px; }
+  .hw0-task h2 { font-size: 24px; gap: 12px; }
+  .hw0-number { flex-basis: 42px; height: 46px; }
+  .hw0-instruction { font-size: 21px; }
+  .hw0-sentences { padding-left: 25px; }
+  .hw0-sentences li { padding-left: 2px; }
+  .hw0-sentences .hw0-gap { font-size: 22px; min-width: 82px; margin-inline: 3px; }
+}

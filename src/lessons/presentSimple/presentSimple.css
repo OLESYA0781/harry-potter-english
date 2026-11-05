@@ -58,3 +58,4 @@
 .ps2-sidebar > nav {flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#d7bd71 #243e35}
 .ps2-sidebar .ps2-subnav a {color:#e5e8d8}
 .ps2-sidebar .ps2-subnav a:hover,.ps2-sidebar .ps2-subnav a[aria-current] {color:#183e30}
+.ps2-sidebar .nav-item > .ps2-section-chevron {margin-left:auto;flex-shrink:0;color:#efd486;font-size:20px}

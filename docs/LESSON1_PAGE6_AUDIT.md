@@ -1,5 +1,7 @@
 # Lesson 1: Go Getter 3, page 6
 
+Current configuration after owner revisions: 130 required responses, 12 topics, no active Workshop or interview fields. Question Words is standalone after Frequency; Question Machine is standalone at the end. The original implementation audit below records PR 69 before the subsequent removals. Removed responses remain stored and do not count toward completion.
+
 ## Audit before editing
 
 Audited main at b026e6506f5a9a35e42223fa36e3825a53bc40c7. Printed page 6 of the supplied Go Getter 3 Student’s Book PDF was visually inspected, including exercises 1–6 and the Peter Nichols factfile.
@@ -44,3 +46,5 @@ Jobs: make negatives was also removed at the owner’s request. Its 15 answers r
 Question Words is now a standalone topic immediately after Adverbs of Frequency. All seven units and ten responses retain their original page and task IDs.
 
 Quick job answers was removed at the owner’s request; original short-answer practice remains. Historical job short answers are retained without counting toward progress, and their saved positions resume at Present Simple vs To Be.
+
+The entire Jobs Workshop was subsequently removed except The Question Machine, which is now independent. Saved machine page IDs and all answer IDs remain unchanged. Other retired Workshop positions safely resume at the machine.

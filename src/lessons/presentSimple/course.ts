@@ -1,4 +1,4 @@
-import {jobQuestions,jobFrequency,questionWordUnits,jobsLabUnits} from './jobsCourse';
+import {jobQuestions,jobFrequency,questionWordUnits,questionMachineUnit} from './jobsCourse';
 // Lesson 1 schema v2. Vocabulary lists: Go Getter 3 SB p. 5.
 // All practice below is author-created, not a transcription of book exercises.
 export type Word={en:string;ru:string;art:string};
@@ -90,16 +90,16 @@ const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(top
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:
  topic.id==='frequency'?{...topic,units:[...topic.units,jobFrequency,journeyPractice]}:topic);
 retainedTopics.push({id:'question-words',title:'Question Words',units:questionWordUnits});
-retainedTopics.push({id:'jobs-lab',title:'The Jobs Workshop',units:jobsLabUnits});
+retainedTopics.push({id:'question-machine',title:'The Question Machine',units:[questionMachineUnit]});
 // Frequency is block 7: its theory precedes the moved journeys practice.
-const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','jobs-lab'];
+const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine'];
 export const topics:Topic[]=topicOrder.map(id=>retainedTopics.find(topic=>topic.id===id)!);
 export type Page={id:string;topicId:string;unit:Unit;tasks:Task[];first:boolean};
 // Four tasks per screen keeps tablet and phone pages short. IDs never depend on slide numbers.
 export const pages:Page[]=topics.flatMap(topic=>topic.units.flatMap(unit=>{
  const list=unit.tasks||[];
  // Preserve existing translation and Question Words page IDs when moving units.
- const pageTopic=unit.id==='affirm-write'?'affirmative':unit.id.startsWith('qw-')?'questions':topic.id;
+ const pageTopic=unit.id==='affirm-write'?'affirmative':unit.id.startsWith('qw-')?'questions':unit.id==='question-machine'?'jobs-lab':topic.id;
  if(unit.jobInterview)return [{id:`${topic.id}/${unit.id}`,topicId:topic.id,unit,tasks:list,first:true}];
  if(!list.length)return [{id:`${pageTopic}/${unit.id}`,topicId:topic.id,unit,tasks:[],first:true}];
  return Array.from({length:Math.ceil(list.length/4)},(_,index)=>({id:`${pageTopic}/${unit.id}/${list[index*4].id}`,topicId:topic.id,unit,tasks:list.slice(index*4,index*4+4),first:index===0}));

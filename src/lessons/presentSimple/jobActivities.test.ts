@@ -4,14 +4,14 @@ import {allTasks,topics,pages} from './course';
 import {readChunks,readSelection,responseComplete} from './jobActivities';
 import {freshCourse,readCourse,updateCourse,lesson1Summary} from './model';
 import {initial} from '../../data';
-it('covers all fifteen professions in question and picture-description practice',()=>{
+it('covers all fifteen professions in retained question practice',()=>{
  expect(jobs).toHaveLength(15);
- for(const job of jobs)for(const prefix of ['jobs-question','gg6-guess','gg6-groups'])expect(allTasks.some(task=>task.id===`${prefix}-${job.id}`)).toBe(true);
- for(const id of ['emma-uncle','jobs-groups','harry-interview','peter-factfile','job-interview','question-machine'])expect(pages.some(page=>page.unit.id===id)).toBe(true);
+ for(const job of jobs)for(const prefix of ['jobs-question'])expect(allTasks.some(task=>task.id===`${prefix}-${job.id}`)).toBe(true);
+ for(const id of ['question-machine'])expect(pages.some(page=>page.unit.id===id)).toBe(true);
  expect(topics.find(topic=>topic.id==='question-words')!.units.filter(unit=>unit.id.startsWith('qw-'))).toHaveLength(7);
 });
-it('allows multiple job categories and counts participation rather than correctness',()=>{
- const task=allTasks.find(task=>task.id==='gg6-groups-vet')!;
+it('can still read historical category selections without mutating them',()=>{
+ const task={id:'retired-vet',prompt:'vet',categories:['Work outdoors','Work with animals']};
  const value=JSON.stringify(['Work outdoors','Work with animals']);
  expect(readSelection(value,task.categories!)).toHaveLength(2);expect(responseComplete(task,value)).toBe(true);
  expect(responseComplete(task,'[]')).toBe(false);expect(responseComplete(task,'["unknown"]')).toBe(false);

@@ -17,6 +17,7 @@ export function updateCourse(state:LessonState,action:(course:Course)=>Course):L
 export function pageIndex(course:Course){
  const exact=pages.findIndex(page=>page.id===course.activePage);
  if(exact>=0)return exact;
+ if(course.activePage==='jobs-lab'||course.activePage.startsWith('jobs-lab/'))return pages.findIndex(page=>page.topicId==='question-machine');
  if(/^(final|vocabulary)(\/|$)/.test(course.activePage))return pages.findIndex(page=>page.topicId==='to-be');
  // Every retired Places screen resumes at the next retained topic.
  if(course.activePage==='places' || course.activePage.startsWith('places/'))return pages.findIndex(page=>page.topicId==='affirmative');

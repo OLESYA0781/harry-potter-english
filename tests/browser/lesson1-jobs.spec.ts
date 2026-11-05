@@ -27,11 +27,6 @@ for(const width of [390,820,1180,1440])test(`page-six illustrated activities fit
  expect(seen).toEqual(jobs.map(job=>job.name));
  await navigate('qw-who');await expect(page.locator('.ps2-panel')).toContainText('Who works at a hospital?');
  await expect(page.locator('.ps2-panel')).toContainText('do / does не нужен');
- await navigate('jobs-groups');const group=page.locator('.ps2-job-categories').first();
- await group.getByLabel('Work outdoors',{exact:true}).check();await group.getByLabel('Work indoors',{exact:true}).check();
- await page.reload();await expect(group.getByLabel('Work outdoors',{exact:true})).toBeChecked();await expect(group.getByLabel('Work indoors',{exact:true})).toBeChecked();
- await navigate('peter-factfile',true);await expect(page.getByLabel('Peter Nichols factfile')).toContainText('Park Hill General Hospital');await expect(page.getByLabel('Peter Nichols factfile')).toContainText('usually at 8 a.m.');
- await page.getByLabel('How does he travel to work?',{exact:true}).fill('He travels to work by motorbike.');
  await navigate('question-machine');const machine=page.locator('.ps2-question-machine').first();
  await machine.locator('.ps2-chunk-bank button').nth(2).click();await machine.locator('.ps2-chunk-bank button').nth(3).click();
  await page.reload();await expect(machine.locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
@@ -41,16 +36,12 @@ for(const width of [390,820,1180,1440])test(`page-six illustrated activities fit
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`work/jobs-machine-${width}.png`,fullPage:true});
 });
-test('interview is teacher-only with two separate persistent empty factfiles',async({page})=>{
- await page.setViewportSize({width:390,height:1000});await page.goto('/#/lessons/lesson-1');await section(page,'job-interview');
- await expect(page.locator('.ps2-interview textarea')).toHaveCount(0);
- await page.getByRole('button',{name:'Teacher mode',exact:true}).click();
- await expect(page.locator('.ps2-interview textarea')).toHaveCount(5);
- for(const input of await page.locator('.ps2-interview textarea').all())await expect(input).toHaveValue('');
- await page.getByLabel('Interview job, round 1').selectOption('chef');await page.getByLabel('Interview round 1: Workplace',{exact:true}).fill('My magical café');
- await page.getByRole('button',{name:'Раунд 2: ученица спрашивает'}).click();await page.getByLabel('Interview round 2: Workplace',{exact:true}).fill('A farm');
- await page.reload();await expect(page.locator('.ps2-interview textarea')).toHaveCount(0);await page.getByRole('button',{name:'Teacher mode',exact:true}).click();
- await expect(page.getByLabel('Interview round 2: Workplace',{exact:true})).toHaveValue('A farm');
- await page.getByRole('button',{name:'Раунд 1: ученица отвечает'}).click();await expect(page.getByLabel('Interview round 1: Workplace',{exact:true})).toHaveValue('My magical café');
- await expect(page.getByLabel('Interview job, round 1')).toHaveValue('chef');
+
+test('retired workshop screens resume at the standalone machine without showing removed activities',async({page})=>{
+ await page.setViewportSize({width:390,height:1000});await page.goto('/#/lessons/lesson-1');
+ const options=page.getByLabel('Choose Lesson 1 topic').locator('option');
+ expect(await options.allTextContents()).not.toContain('The Jobs Workshop');
+ await section(page,'question-machine');await expect(page.locator('.ps2-heading h1')).toHaveText('The Question Machine');
+ await expect(page.getByLabel('Choose Lesson 1 section').locator('option')).toHaveCount(2);
+ await expect(page.locator('.ps2-interview,.ps2-dialogue,.ps2-factfile,.ps2-job-categories')).toHaveCount(0);
 });

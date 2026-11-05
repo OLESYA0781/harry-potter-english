@@ -6,7 +6,7 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','jobs-lab']);
+ expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
@@ -14,7 +14,7 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.filter(task=>!task.optional).map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4||page.unit.jobInterview)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)).length]));
- expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:28,'question-words':10,'to-be':8,'jobs-lab':56});
+ expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:28,'question-words':10,'to-be':8,'question-machine':5});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
@@ -68,7 +68,7 @@ it('all retired Places screens resume at Affirmative and preserve historical ans
  }
  expect(topics.some(topic=>topic.id==='places')).toBe(false);
  expect(pages.some(page=>page.topicId==='places')).toBe(false);
- expect(allTasks).toHaveLength(181);
+ expect(allTasks).toHaveLength(130);
 });
 
 it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{
@@ -137,4 +137,14 @@ it('retires Quick job answers without deleting its responses or original short-a
  expect(saved.responses['jobs-short-farmer']).toBe('Yes, he does.');
  expect(allTasks.some(task=>task.id.startsWith('jobs-short-'))).toBe(false);
  expect(allTasks.filter(task=>task.id.startsWith('short-'))).toHaveLength(8);
+});
+
+it('keeps Question Machine alone and preserves its page IDs while retiring the rest of Workshop',()=>{
+ expect(topics.some(topic=>topic.id==='jobs-lab')).toBe(false);
+ expect(topics.find(topic=>topic.id==='question-machine')!.units.map(unit=>unit.id)).toEqual(['question-machine']);
+ for(const activePage of ['jobs-lab/emma-uncle/gg6-reading-artist','jobs-lab/jobs-groups/gg6-groups-artist','jobs-lab/peter-factfile/gg6-peter-job','jobs-lab/job-interview'])expect(pages[pageIndex({...freshCourse(),activePage})].topicId).toBe('question-machine');
+ const machine=pages.find(page=>page.unit.id==='question-machine')!;
+ expect(machine.id).toBe('jobs-lab/question-machine/gg6-machine-where');
+ expect(pages[pageIndex({...freshCourse(),activePage:machine.id})].id).toBe(machine.id);
+ expect(allTasks.some(task=>/^gg6-(reading|groups|harry|peter|interview|guess)-/.test(task.id))).toBe(false);
 });

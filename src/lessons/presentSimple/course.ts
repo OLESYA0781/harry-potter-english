@@ -1,3 +1,4 @@
+import {jobAffirmative,jobNegative,jobQuestions,jobShort,jobFrequency,questionWordUnits,jobsLabUnits} from './jobsCourse';
 // Lesson 1 schema v2. Vocabulary lists: Go Getter 3 SB p. 5.
 // All practice below is author-created, not a transcription of book exercises.
 export type Word={en:string;ru:string;art:string};
@@ -5,8 +6,8 @@ export const places:Word[]=[['bank','банк'],['café','кафе'],['cinema','
 export const transport:Word[]=[['bike','велосипед'],['boat','лодка'],['bus','автобус'],['car','машина'],['motorbike','мотоцикл'],['plane','самолёт'],['taxi','такси'],['train','поезд'],['tram','трамвай'],['underground','метро']].map(([en,ru])=>({en,ru,art:en}));
 export const expressions=[['go to school','ходить в школу'],['play tennis','играть в теннис'],['hang out','проводить время вместе'],['by bike','на велосипеде'],['by bus','на автобусе'],['by car','на машине'],['by train','на поезде'],['on foot','пешком'],['every day','каждый день'],['always','всегда'],['usually','обычно'],['often','часто'],['sometimes','иногда'],['never','никогда']];
 export const categories=['Привычка','Факт','Чувство или состояние','Расписание'];
-export type Task={id:string;prompt:string;options?:string[];art?:string;long?:boolean;pair?:{id:string;question:string;part:'question'|'answer'}};
-export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all'|'jobs';visual?:'book'|'order'|'frequency'|'randomizer';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];tasks?:Task[];book?:string};
+export type Task={id:string;prompt:string;options?:string[];art?:string;long?:boolean;job?:string;categories?:string[];chunks?:string[];optional?:boolean;pair?:{id:string;question:string;part:'question'|'answer'}};
+export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all'|'jobs';visual?:'book'|'order'|'frequency'|'randomizer';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];dialogue?:string[][];factfile?:boolean;teacherOnly?:boolean;jobInterview?:boolean;tasks?:Task[];book?:string};
 export type Topic={id:string;title:string;units:Unit[]};
 const tasks=(prefix:string,prompts:string[],options?:string[]):Task[]=>prompts.map((prompt,i)=>({id:`${prefix}-${String(i+1).padStart(2,'0')}`,prompt,options}));
 const wordsMatch=(prefix:string,words:Word[],picture=false):Task[]=>words.map(word=>({id:`${prefix}-${word.en}`,prompt:picture?`Назови транспорт: ${word.ru}`:word.en,art:picture?word.art:undefined,options:picture?transport.map(w=>w.en).slice().reverse():places.map(w=>w.ru).slice().reverse()}));
@@ -84,11 +85,15 @@ const topicDefinitions:Topic[]=[
 ];
 // Retire the former third block without changing historical response IDs or dictionaries.
 const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(topic=>
- topic.id==='affirmative'?{...topic,units:[...topic.units.filter(unit=>unit.id!=='affirm-write'),topic.units.find(unit=>unit.id==='affirm-write')!]}:
+ topic.id==='affirmative'?{...topic,units:[...topic.units.filter(unit=>unit.id!=='affirm-write'),jobAffirmative,topic.units.find(unit=>unit.id==='affirm-write')!]}:
+ topic.id==='negative'?{...topic,units:[...topic.units,jobNegative]}:
+ topic.id==='questions'?{...topic,units:[...topic.units,jobQuestions,...questionWordUnits]}:
+ topic.id==='short-answers'?{...topic,units:[...topic.units,jobShort]}:
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:
- topic.id==='frequency'?{...topic,units:[...topic.units,journeyPractice]}:topic);
+ topic.id==='frequency'?{...topic,units:[...topic.units,jobFrequency,journeyPractice]}:topic);
+retainedTopics.push({id:'jobs-lab',title:'The Jobs Workshop',units:jobsLabUnits});
 // Frequency is block 7: its theory precedes the moved journeys practice.
-const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be'];
+const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be','jobs-lab'];
 export const topics:Topic[]=topicOrder.map(id=>retainedTopics.find(topic=>topic.id===id)!);
 export type Page={id:string;topicId:string;unit:Unit;tasks:Task[];first:boolean};
 // Four tasks per screen keeps tablet and phone pages short. IDs never depend on slide numbers.
@@ -96,7 +101,8 @@ export const pages:Page[]=topics.flatMap(topic=>topic.units.flatMap(unit=>{
  const list=unit.tasks||[];
  // Preserve existing translation page IDs as well as response IDs after moving the unit.
  const pageTopic=unit.id==='affirm-write'?'affirmative':topic.id;
+ if(unit.jobInterview)return [{id:`${topic.id}/${unit.id}`,topicId:topic.id,unit,tasks:list,first:true}];
  if(!list.length)return [{id:`${topic.id}/${unit.id}`,topicId:topic.id,unit,tasks:[],first:true}];
  return Array.from({length:Math.ceil(list.length/4)},(_,index)=>({id:`${pageTopic}/${unit.id}/${list[index*4].id}`,topicId:topic.id,unit,tasks:list.slice(index*4,index*4+4),first:index===0}));
 }));
-export const allTasks=topics.flatMap(topic=>topic.units.flatMap(unit=>unit.tasks||[]));
+export const allTasks=topics.flatMap(topic=>topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)));

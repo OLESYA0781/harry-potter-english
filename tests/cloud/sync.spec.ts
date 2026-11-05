@@ -394,7 +394,7 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
   await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Adverbs of Frequency/}).click();
-  for(let i=0;i<5;i++)await other.getByRole('button',{name:'Next →',exact:true}).click();
+  await other.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
   await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
   await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);
   await expect(page.locator('.ps2-journey-pair textarea').nth(0)).toHaveValue('How do you usually get to school?');
@@ -537,5 +537,21 @@ test('private homework photos upload, sync metadata and open on another device; 
   const remaining=await page.evaluate(async()=>new Promise(resolve=>{const r=indexedDB.open('vika-homework-photos',1);r.onsuccess=()=>{const db=r.result,t=db.transaction('photos','readonly'),q=t.objectStore('photos').getAll();t.oncomplete=()=>{resolve(q.result.length);db.close();};};}));
   expect(remaining).toBe(0);
 
+ }finally{await second.close();}
+});
+
+test('page-six groups and partial question-machine drafts synchronize without overwriting historical answers',async({page,context,browser})=>{
+ await rpc({}, {id:'jobs-page-six-pupil',fields:{'answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{'present-simple:v2':{schemaVersion:2,activePage:'jobs/jobs-page-six',seen:['jobs'],responses:{'affirm-translate-01':'Keep my earlier translation'}}}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-1');
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/The Jobs Workshop/}).click();
+ await page.locator('.ps2-subnav a').filter({hasText:'Where Do People Work? · 1–4'}).click();
+ const group=page.locator('.ps2-job-categories').first();await group.getByLabel('Work outdoors',{exact:true}).check();await group.getByLabel('Work indoors',{exact:true}).check();
+ await page.locator('.ps2-subnav a').filter({hasText:'The Question Machine · 1–4'}).click();
+ const machine=page.locator('.ps2-question-machine').first();await machine.locator('.ps2-chunk-bank button').nth(2).click();await machine.locator('.ps2-chunk-bank button').nth(3).click();await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-question-machine').first().locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
+  await other.locator('.ps2-subnav a').filter({hasText:'Where Do People Work? · 1–4'}).click();const restored=other.locator('.ps2-job-categories').first();await expect(restored.getByLabel('Work outdoors',{exact:true})).toBeChecked();await expect(restored.getByLabel('Work indoors',{exact:true})).toBeChecked();
+  const saved=await rpc();expect(saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses['affirm-translate-01']).toBe('Keep my earlier translation');
  }finally{await second.close();}
 });

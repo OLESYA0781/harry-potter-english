@@ -59,3 +59,32 @@
 .ps2-sidebar .ps2-subnav a {color:#e5e8d8}
 .ps2-sidebar .ps2-subnav a:hover,.ps2-sidebar .ps2-subnav a[aria-current] {color:#183e30}
 .ps2-sidebar .nav-item > .ps2-section-chevron {margin-left:auto;flex-shrink:0;color:#efd486;font-size:20px}
+
+/* Page-six job cards and games share the lesson's parchment, emerald and gold palette. */
+.ps2-job-art {display:block;width:100%;max-width:360px;height:auto;margin:0 auto 18px;border-radius:24px}
+.ps2-jobs-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:24px 0}
+.ps2-job-card {min-width:0;padding:16px;background:#fff8e5;border:1px solid #dccb9c;border-radius:22px;box-shadow:0 4px 0 #e8e0c8}
+.ps2-job-card>div {display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ps2-job-card h3 {font-size:24px;margin:0;overflow-wrap:anywhere}
+.ps2-job-card p {font-size:18px;line-height:1.5;margin:14px 0 0}
+.ps2-gallery-paging {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ps2-gallery-paging>span {font-size:17px;color:#53634b}
+.ps2-job-gloss {font-size:17px;line-height:1.5;color:#57674f!important}
+.ps2-dialogue {padding:20px;border:1px solid #d7c690;background:#fbf5df;border-radius:20px;margin:24px 0}
+.ps2-dialogue p {display:grid;grid-template-columns:85px minmax(0,1fr);gap:14px;margin:16px 0}
+.ps2-dialogue strong {color:#456d55}
+.ps2-factfile {display:grid;grid-template-columns:minmax(130px,.7fr) minmax(0,1.3fr);gap:24px;align-items:center;padding:24px;margin:24px 0;background:#edf2e3;border:2px solid #b6c6a6;border-radius:24px}
+.ps2-factfile h3 {margin-top:0}.ps2-factfile dl {margin:0}.ps2-factfile dl>div {border-top:1px solid #cbd5bb;padding:12px 0}
+.ps2-factfile dt {font-size:17px;font-weight:700;color:#617052}.ps2-factfile dd {margin:5px 0 0;font-size:22px;overflow-wrap:anywhere}
+.ps2-job-categories {border:0;min-width:0;padding:0;margin:0}.ps2-job-categories legend {font-size:25px;font-weight:750;padding:0 0 16px}
+.ps2-task .ps2-job-categories label {display:flex;gap:12px;align-items:center;min-height:54px;padding:12px;background:#fffdf4;border:1px solid #d6dcbf;border-radius:13px;margin:10px 0;cursor:pointer}
+.ps2-job-categories input {width:24px;height:24px;flex-shrink:0;accent-color:#42674e}.ps2-task .ps2-job-categories label>span {margin:0;font-weight:500}
+.ps2-chunk-answer,.ps2-chunk-bank {display:flex;gap:10px;flex-wrap:wrap;padding:18px;margin:16px 0;border-radius:18px}
+.ps2-chunk-answer {min-height:94px;background:#e4eedc;border:2px dashed #a7bd9c;align-items:center}
+.ps2-chunk-bank {background:#fff9e9}.ps2-chunk {display:inline-block;min-height:48px;padding:10px 16px;color:#284c39;border:2px solid #c5af70;border-radius:13px;background:#f5dfa0;font:700 20px/1.5 system-ui;cursor:pointer;max-width:100%;overflow-wrap:anywhere}
+.ps2-chunk:disabled {opacity:.35;cursor:default}.ps2-chunk:focus-visible {outline:3px solid #8967ae;outline-offset:3px}
+.ps2-interview {display:grid;gap:18px}.ps2-rounds {display:flex;flex-wrap:wrap;gap:14px}.ps2-rounds button[aria-pressed=true] {background:#f1d27c;color:#294534;border-color:#b39a57}
+.ps2-interview-choice {display:grid;gap:14px}.ps2-interview-choice select {width:100%;min-height:54px;padding:12px;border-radius:14px;border:2px solid #b9c6a9;background:#fffefa;font:21px/1.5 system-ui;color:#294534}
+.ps2-teacher-stage {padding:24px;background:#edf2e3;border-radius:20px}
+@media(max-width:1150px){.ps2-jobs-grid {grid-template-columns:1fr}.ps2-job-card>div,.ps2-job-card p {max-width:100%}}
+@media(max-width:600px){.ps2-dialogue {padding:14px}.ps2-dialogue p {grid-template-columns:1fr;gap:4px}.ps2-factfile {grid-template-columns:1fr;padding:18px}.ps2-factfile dd {font-size:21px}.ps2-gallery-paging .ps2-button {font-size:16px;padding:12px}.ps2-chunk-answer,.ps2-chunk-bank {padding:12px}.ps2-chunk {font-size:19px}}

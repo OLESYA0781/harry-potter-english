@@ -6,25 +6,26 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be']);
+ expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be','jobs-lab']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
  expect(new Set(pages.map(page=>page.id)).size).toBe(pages.length);
- expect(pages.flatMap(page=>page.tasks.map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
- expect(pages.every(page=>page.tasks.length<=4)).toBe(true);
- const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>unit.tasks||[]).length]));
- expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:14,'short-answers':8,frequency:23,'to-be':8});
+ expect(pages.flatMap(page=>page.tasks.filter(task=>!task.optional).map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
+ expect(pages.every(page=>page.tasks.length<=4||page.unit.jobInterview)).toBe(true);
+ const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)).length]));
+ expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:37,transport:0,negative:27,questions:39,'short-answers':13,frequency:28,'to-be':8,'jobs-lab':56});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
 });
 it('requires every nonblank response and viewed topic but never judges grammar',()=>{
  expect(lesson1Summary(initial)).toMatchObject({percent:0,status:'not-started'});
- const state=updateCourse(initial,course=>({...course,seen:topics.map(topic=>topic.id),responses:Object.fromEntries(allTasks.map(task=>[task.id,'  my own wrong answer!\n ']))}));
+ const state=updateCourse(initial,course=>({...course,seen:topics.map(topic=>topic.id),responses:Object.fromEntries(allTasks.map(task=>[task.id,task.categories?JSON.stringify([task.categories[0]]):task.chunks?JSON.stringify(task.chunks.map((_,i)=>task.chunks!.length-1-i)):'  my own wrong answer!\n ']))}));
  expect(lesson1Summary(state)).toMatchObject({percent:100,status:'completed'});
  const missing=updateCourse(state,course=>({...course,responses:{...course.responses,'compare-01':' \n '}}));
  expect(lesson1Summary(missing).status).toBe('in-progress');
+ expect(lesson1Summary(missing).percent).toBeLessThan(100);
  expect(readCourse(state).responses['compare-01']).toBe('  my own wrong answer!\n ');
 });
 it('never maps old slide indices or textbook responses to new tasks, and preserves the complete old record',()=>{
@@ -67,7 +68,7 @@ it('all retired Places screens resume at Affirmative and preserve historical ans
  }
  expect(topics.some(topic=>topic.id==='places')).toBe(false);
  expect(pages.some(page=>page.topicId==='places')).toBe(false);
- expect(allTasks).toHaveLength(95);
+ expect(allTasks).toHaveLength(216);
 });
 
 it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{

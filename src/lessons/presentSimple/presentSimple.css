@@ -17,3 +17,37 @@
 @media(max-width:600px) { .ps2-main { padding: 22px 14px 35px; font-size: 20px; }.ps2-main .ps2-heading { gap: 14px; padding: 22px 18px; }.ps2-heading > span { width: 45px; height: 48px; font-size: 24px; }.ps2-heading h1 { font-size: 26px; }.ps2-heading small { font-size: 14px; }.ps2-panel { padding: 18px; }.ps2-main h2,.ps2-dictionary h2 { font-size: 25px; }.ps2-task { padding: 18px; }.ps2-task textarea,.ps2-task select { font-size: 20px; }.ps2-word-grid { grid-template-columns: 1fr; }.ps2-formula { padding: 18px; font-size: 22px; gap: 10px; }.ps2-table:not(.ps2-question-table) .ps2-table-row { grid-template-columns: 1fr; }.ps2-question-table .ps2-table-row { gap: 12px; padding: 14px; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); }.ps2-question-table .ps2-table-row > div:first-child { padding: 16px 12px; font-size: 23px; }.ps2-question-table .ps2-table-row > div:not(:first-child) { font-size: 20px; }.ps2-button { font-size: 17px; padding: 13px 16px; }.ps2-dictionary { padding: 18px; }.ps2-dictionary > header { top: -18px; }.ps2-paging { gap: 10px; }.ps2-frequency { padding: 16px; }.ps2-frequency li > span { letter-spacing: 1px; } }
 
 .ps2-town-scene { margin: 24px 0; }.ps2-town-art { position: relative; overflow: hidden; aspect-ratio: 5 / 3; border-radius: 20px; }.ps2-town-art img { position: absolute; display: block; max-width: none; width: 200%; height: 500%; }.ps2-town-scene figcaption { padding: 16px; background: #e8efdc; border-radius: 14px; margin-top: 14px; }
+
+.ps2-unit-heading { display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:18px; }
+.ps2-unit-heading h2 { margin-bottom:0; }
+.ps2-by-badge { display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:10px 24px;border:2px solid #bca45d;border-radius:16px;background:#f5dc8d;color:#29483a;font:800 28px/1.2 system-ui,sans-serif;box-shadow:0 4px 0 #d7c48a; }
+
+.ps2-randomizers { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:24px 0; }
+.ps2-randomizers .ps2-picture-randomizer { display:block;width:100%;padding:0;overflow:hidden;border:3px solid #c7b276;border-radius:22px;background:#fff7df;box-shadow:0 5px 0 #ded4b8;cursor:pointer; }
+.ps2-picture-randomizer:focus-visible { outline:4px solid #7b976a;outline-offset:4px; }
+@media(max-width:600px) { .ps2-randomizers { gap:12px; } .ps2-randomizers .ps2-picture-randomizer { border-radius:15px; } }
+
+.ps2-journey-pair h3 { font-size:24px;line-height:1.5;color:#29483a; }
+.ps2-journey-pair label+label { margin-top:20px; }
+
+.ps2-helper-table { display:block;border:2px solid #bca45d;box-shadow:0 5px 0 #e2d7b6;border-radius:21px; }
+.ps2-helper-table .ps2-table-head,.ps2-table.ps2-helper-table .ps2-table-row { display:grid;grid-template-columns:minmax(0,1.2fr) minmax(66px,.8fr) minmax(0,1.2fr);gap:14px;align-items:center;padding:20px; }
+.ps2-helper-table .ps2-table-head { background:#f5dfa1;color:#29483a;font-size:19px; }
+.ps2-helper-table .ps2-table-head>strong,.ps2-table.ps2-helper-table .ps2-table-row>div { display:block;border:0;padding:0;min-width:0;overflow-wrap:anywhere; }
+.ps2-table.ps2-helper-table .ps2-table-row { font-size:22px;border-top:1px solid #daceaa; }
+.ps2-helper-table .ps2-cell-label { display:none; }
+.ps2-helper-token { display:inline-block;padding:12px 15px;border:2px solid #bda45d;border-radius:15px;background:#f5df93;color:#29483a;font:800 30px/1.2 system-ui,sans-serif;box-shadow:0 3px 0 #d1bd81; }
+@media(max-width:600px) { .ps2-helper-table .ps2-table-head,.ps2-table.ps2-helper-table .ps2-table-row { padding:14px 10px;gap:8px;grid-template-columns:minmax(0,1.1fr) minmax(60px,.8fr) minmax(0,1.1fr); } .ps2-helper-table .ps2-table-head { font-size:16px; } .ps2-table.ps2-helper-table .ps2-table-row { font-size:18px; } .ps2-helper-token { font-size:25px;padding:10px 8px; } }
+
+.ps2-subnav {display:grid;gap:6px;margin:0 8px 18px 30px;padding-left:14px;border-left:2px solid #d7bd71}
+.ps2-subnav a {display:block;padding:9px 10px;color:#365847;text-decoration:none;font-size:15px;line-height:1.4;border-radius:10px}
+.ps2-subnav a:hover,.ps2-subnav a[aria-current] {background:#fff2be;color:#183e30}
+.ps2-subnav a:focus-visible {outline:3px solid #b28b34;outline-offset:2px}
+.ps2-shell .mobile-stage {height:auto;gap:10px;flex-wrap:wrap;padding-bottom:12px}
+.ps2-shell .mobile-stage select {margin-bottom:8px;font-size:16px;min-height:44px}
+.ps2-shell .mobile-stage select {width:100%;min-width:0;max-width:100%;white-space:normal}
+.ps2-helper-token {white-space:nowrap}
+@media(max-width:600px) {
+ .ps2-helper-table .ps2-table-head,.ps2-table.ps2-helper-table .ps2-table-row {grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr)}
+ .ps2-helper-token {font-size:23px;padding:10px 5px}
+}

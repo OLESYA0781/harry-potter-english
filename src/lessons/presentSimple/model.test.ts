@@ -6,7 +6,7 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['welcome','uses','places','affirmative','transport','negative','questions','short-answers','frequency','to-be','final','vocabulary']);
+ expect(topics.map(topic=>topic.id)).toEqual(['welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
@@ -14,18 +14,18 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>unit.tasks||[]).length]));
- expect(counts).toEqual({welcome:0,uses:8,places:23,affirmative:22,transport:23,negative:12,questions:14,'short-answers':8,frequency:13,'to-be':8,final:17,vocabulary:0});
+ expect(counts).toEqual({welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:14,'short-answers':8,frequency:23,'to-be':8});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
- expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(100);
+ expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
 });
 it('requires every nonblank response and viewed topic but never judges grammar',()=>{
  expect(lesson1Summary(initial)).toMatchObject({percent:0,status:'not-started'});
  const state=updateCourse(initial,course=>({...course,seen:topics.map(topic=>topic.id),responses:Object.fromEntries(allTasks.map(task=>[task.id,'  my own wrong answer!\n ']))}));
  expect(lesson1Summary(state)).toMatchObject({percent:100,status:'completed'});
- const missing=updateCourse(state,course=>({...course,responses:{...course.responses,'final-story':' \n '}}));
+ const missing=updateCourse(state,course=>({...course,responses:{...course.responses,'compare-01':' \n '}}));
  expect(lesson1Summary(missing).status).toBe('in-progress');
- expect(readCourse(state).responses['final-story']).toBe('  my own wrong answer!\n ');
+ expect(readCourse(state).responses['compare-01']).toBe('  my own wrong answer!\n ');
 });
 it('never maps old slide indices or textbook responses to new tasks, and preserves the complete old record',()=>{
  const old={...structuredClone(initial),step:8,name:'Vika',answers:{grammarNotes:'  Keep notes\n ',grammarSlide:5,grammarSeen5:true,'exercise3:p5-3-2':'Old answer','exercise3:busy-days':['Monday']},scores:{old:{correct:true,first:true,latest:true,skill:'Grammar' as const}},ratings:{old:2}};
@@ -57,24 +57,42 @@ it('fails closed on an unknown course schema without erasing it',()=>{
  expect(state.answers[courseKey]).toEqual({schemaVersion:99,original:'preserved'});
 });
 
-it('retired Places pages resume at Where do we go and keep their historical matching answers',()=>{
- for(const activePage of ['places/places-cards','places/places-match/place-match-bank']){
-  const old=updateCourse(initial,course=>({...course,activePage,responses:{'place-match-bank':'банк'}}));
-  expect(pages[pageIndex(readCourse(old))].unit.title).toBe('Where do we go?');
-  const next=updateCourse(old,course=>({...course,responses:{...course.responses,'place-gap-01':'cinema'}}));
-  expect(readCourse(next).responses['place-match-bank']).toBe('банк');
-  expect(readCourse(next).responses['place-gap-01']).toBe('cinema');
+it('all retired Places screens resume at Affirmative and preserve historical answers',()=>{
+ for(const activePage of ['places/places-cards','places/places-match/place-match-bank','places/places-gaps/place-gap-01','places/town-museum/town-museum-01','places/hogwarts-town/town-01']){
+  const old=updateCourse(initial,course=>({...course,activePage,seen:['places'],responses:{'place-match-bank':'банк','place-gap-01':'cinema','town-museum-01':'Hermione is at the museum.'}}));
+  expect(pages[pageIndex(readCourse(old))].topicId).toBe('affirmative');
+  const next=updateCourse(old,course=>({...course,activePage:pages[pageIndex(course)].id}));
+  expect(readCourse(next).responses).toEqual(readCourse(old).responses);
+  expect(lesson1Summary(old).percent).toBe(0);
  }
- expect(topics.find(topic=>topic.id==='places')!.units.map(unit=>unit.title)).toEqual(['Where do we go?','Hogwarts Town — Museum','Hogwarts Town — Café','Hogwarts Town — Cinema','Hogwarts Town — Theatre','Hogwarts Town — Stadium']);
+ expect(topics.some(topic=>topic.id==='places')).toBe(false);
+ expect(pages.some(page=>page.topicId==='places')).toBe(false);
+ expect(allTasks).toHaveLength(95);
 });
 
-it('new illustrated town prompts use fresh IDs and removed Word Order positions resume at Affirmative',()=>{
+it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{
  const course={...freshCourse(),activePage:'word-order/order-practice/order-01',responses:{'order-01':'Old sentence','town-01':'Old place name'}};
  expect(pages[pageIndex(course)].topicId).toBe('affirmative');
- expect(pages[pageIndex({...course,activePage:'places/hogwarts-town/town-01'})].unit.id).toBe('town-museum');
- expect(allTasks.some(task=>task.id==='town-01' || task.id==='order-01')).toBe(false);
- const towns=topics.find(topic=>topic.id==='places')!.units.filter(unit=>unit.townScene);
- expect(towns).toHaveLength(5);expect(towns.every(unit=>unit.tasks?.length===3)).toBe(true);
- expect(towns[0].teacherHints).toContain('Hermione likes the museum.');
- expect(towns[0].townScene?.opens).toBe('09:00');expect(course.responses['town-01']).toBe('Old place name');
+ expect(allTasks.some(task=>task.id==='town-01' || task.id==='order-01' || task.id.startsWith('place-gap-') || task.id.startsWith('town-museum-'))).toBe(false);
+ expect(course.responses['town-01']).toBe('Old place name');
+});
+
+it('moves journeys to frequency block seven and safely resolves every retired transport/translation position',()=>{
+ expect(topics[6].id).toBe('frequency');
+ expect(topics.find(t=>t.id==='transport')!.units.map(u=>u.id)).toEqual(['travel-rule','transport-match']);
+ for(const activePage of ['transport/transport-gaps/transport-gap-01','transport/transport-write/transport-write-01'])expect(pages[pageIndex({...freshCourse(),activePage})].unit.id).toBe('journey-frequency');
+ expect(pages[pageIndex({...freshCourse(),activePage:'transport/transport-cards'})].unit.id).toBe('travel-rule');
+ expect(pages[pageIndex({...freshCourse(),activePage:'transport/transport-match/transport-match-bike'})].unit.id).toBe('transport-match');
+ expect(pages[pageIndex({...freshCourse(),activePage:'affirmative/affirm-write/affirm-write-01'})].unit.id).toBe('affirm-write');
+ expect(allTasks.filter(t=>t.id.startsWith('journey-frequency-'))).toHaveLength(10);
+ expect(allTasks.some(t=>t.id.startsWith('affirm-write-')||t.id.startsWith('transport-gap-')||t.id.startsWith('transport-match-')||t.id.startsWith('transport-write-'))).toBe(false);
+});
+
+it('retires the final challenge and standalone dictionary without deleting saved work',()=>{
+ for(const activePage of ['final/final-story/final-story','vocabulary/all-words']){
+  const saved={...freshCourse(),activePage,responses:{'final-story':'My old story'}};
+  expect(pages[pageIndex(saved)].topicId).toBe('to-be');
+  expect(saved.responses['final-story']).toBe('My old story');
+ }
+ expect(topics.some(topic=>['final','vocabulary'].includes(topic.id))).toBe(false);
 });

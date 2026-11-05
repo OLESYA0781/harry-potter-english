@@ -6,6 +6,7 @@ export const groups = [
   { id: 'places', title: 'Places in Town', russian: 'Места в городе' },
   { id: 'transport', title: 'Transport', russian: 'Транспорт' },
   { id: 'everyday', title: 'Everyday Life', russian: 'Повседневная жизнь' },
+  { id: 'jobs', title: 'Jobs', russian: 'Профессии' },
 ] as const;
 
 const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase().trim();

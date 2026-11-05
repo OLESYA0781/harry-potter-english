@@ -336,5 +336,140 @@
     "example": "Ron sits on the sofa.",
     "group": "everyday",
     "lessonSources": []
+  },
+  {
+    "id": "job-artist",
+    "english": "artist",
+    "russian": "художник",
+    "example": "The artist paints a picture of the park.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-builder",
+    "english": "builder",
+    "russian": "строитель",
+    "example": "The builder works at the school every day.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-bus-driver",
+    "english": "bus driver",
+    "russian": "водитель автобуса",
+    "example": "The bus driver goes to work early.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-chef",
+    "english": "chef",
+    "russian": "повар",
+    "example": "The chef cooks dinner at the restaurant.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-doctor",
+    "english": "doctor",
+    "russian": "врач",
+    "example": "My dad is a doctor at the hospital.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-farmer",
+    "english": "farmer",
+    "russian": "фермер",
+    "example": "The farmer works with animals every day.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-footballer",
+    "english": "footballer",
+    "russian": "футболист",
+    "example": "The footballer plays at the stadium on Saturdays.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-nurse",
+    "english": "nurse",
+    "russian": "медсестра, медбрат",
+    "example": "The nurse helps people at the hospital.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-office-worker",
+    "english": "office worker",
+    "russian": "офисный работник",
+    "example": "My mum is an office worker at the bank.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-pilot",
+    "english": "pilot",
+    "russian": "пилот",
+    "example": "The pilot travels to London by plane.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-police-officer",
+    "english": "police officer",
+    "russian": "полицейский",
+    "example": "The police officer works in our town.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-shop-assistant",
+    "english": "shop assistant",
+    "russian": "продавец",
+    "example": "The shop assistant works in a small shop.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-singer",
+    "english": "singer",
+    "russian": "певец, певица",
+    "example": "The singer sings at the theatre on Sundays.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-teacher",
+    "english": "teacher",
+    "russian": "учитель",
+    "example": "Our teacher writes letters after school.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "job-vet",
+    "english": "vet",
+    "russian": "ветеринар",
+    "example": "The vet helps cats and dogs every day.",
+    "group": "jobs",
+    "lessonSources": [],
+    "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
   }
 ]

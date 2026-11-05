@@ -376,12 +376,15 @@ test('reordered To Be topics restore legacy reading position and sync new practi
 });
 
 test('Lesson 1 stable matching and writing IDs restore after reload and on a second device',async({page,context,browser})=>{
+ const retired={version:1,data:{step:0,name:'',scores:{},ratings:{},answers:{'present-simple:v2':{schemaVersion:2,activePage:'places/town-museum/town-museum-where',seen:['places'],responses:{'place-gap-01':'old cinema','town-museum-where':'old museum draft','transport-match-bike':'bike','transport-gap-01':'old bus','transport-write-01':'old journey'}}}}};
+ await rpc({}, {id:'retired-places',fields:{'answers:@vika/lesson/lesson-1':retired}});
  await route(context);await login(page,'/#/lessons/lesson-1');
  await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();
+ await expect(page.locator('.ps2-by-badge')).toHaveText('By …');
  await page.getByRole('button',{name:'Next →',exact:true}).click();
- await page.getByRole('button',{name:'Next →',exact:true}).click();
- await page.locator('.ps2-task select').first().selectOption('bike');
- await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Vocabulary: Places in Town/}).click();
+ await page.getByRole('button',{name:'Next transport picture',exact:true}).click();
+ const picture=await page.getByRole('button',{name:'Next transport picture',exact:true}).locator('img').getAttribute('alt');
+ await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Affirmative Sentences/}).click();
  await page.getByRole('button',{name:'Next →',exact:true}).click();
  await page.getByRole('button',{name:'Next →',exact:true}).click();
  const draft='  My sentence stays.\n ';await page.locator('.ps2-task textarea').first().fill(draft);await sync(page);
@@ -389,8 +392,17 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
  try{
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
-  await other.getByRole('button',{name:'Next →',exact:true}).click();
-  await expect(other.locator('.ps2-task select').first()).toHaveValue('bike');await other.reload();await expect(other.locator('.ps2-task select').first()).toHaveValue('bike');
+  await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
+  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Adverbs of Frequency/}).click();
+  for(let i=0;i<5;i++)await other.getByRole('button',{name:'Next →',exact:true}).click();
+  await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
+  await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);
+  await expect(page.locator('.ps2-journey-pair textarea').nth(0)).toHaveValue('How do you usually get to school?');
+  await expect(page.locator('.ps2-journey-pair textarea').nth(1)).toHaveValue('  I usually go by tram.\n ');
+
+  const saved=await rpc();const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;
+  expect(responses['place-gap-01']).toBe('old cinema');expect(responses['town-museum-where']).toBe('old museum draft');expect(responses['transport-match-bike']).toBe('bike');expect(responses['transport-gap-01']).toBe('old bus');expect(responses['transport-write-01']).toBe('old journey');
+
  }finally{await second.close();}
 });
 

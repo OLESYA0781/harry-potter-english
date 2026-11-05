@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { findWords, groups, vocabulary } from './model';
 
 describe('My Vocabulary content', () => {
-  it('contains 42 unique complete entries in four valid groups', () => {
-    expect(vocabulary).toHaveLength(42);
-    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(42);
-    expect(new Set(vocabulary.map(word => word.id)).size).toBe(42);
+  it('contains 57 unique complete entries in five valid groups', () => {
+    expect(vocabulary).toHaveLength(57);
+    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(57);
+    expect(new Set(vocabulary.map(word => word.id)).size).toBe(57);
     expect(new Set(vocabulary.map(word => word.group))).toEqual(new Set(groups.map(group => group.id)));
     for (const word of vocabulary) {
       expect(word.russian.trim()).not.toBe('');
@@ -26,7 +26,11 @@ describe('My Vocabulary content', () => {
     expect(findWords('БОЛЬНИЦА').map(word => word.english)).toEqual(['hospital']);
     expect(findWords('train', 'places')).toEqual([]);
     expect(findWords('train', 'transport').map(word => word.english)).toEqual(['train']);
-    expect(findWords('')).toHaveLength(42);
+    expect(findWords('')).toHaveLength(57);
     expect(findWords('несуществующее')).toEqual([]);
   });
+});
+
+it('includes all fifteen Jobs words from the verified Go Getter page six',()=>{
+ expect(vocabulary.filter(word=>word.group==='jobs').map(word=>word.english)).toEqual(['artist','builder','bus driver','chef','doctor','farmer','footballer','nurse','office worker','pilot','police officer','shop assistant','singer','teacher','vet']);
 });

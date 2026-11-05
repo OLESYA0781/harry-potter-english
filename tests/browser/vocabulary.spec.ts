@@ -10,7 +10,7 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     const title = (await page.locator('.vocab-header h1').boundingBox())!;
     expect(title.y).toBeGreaterThanOrEqual(header.y);
     expect(title.y + title.height).toBeLessThanOrEqual(header.y + header.height);
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
     for (const entry of await page.locator('.vocab-entry').all()) {
       await expect(entry.locator('th')).not.toHaveText('');
       await expect(entry.locator('td').first()).not.toHaveText('');
@@ -28,12 +28,12 @@ for (const [width, height] of [[390, 844], [820, 1180], [1180, 820], [1440, 1000
     await expect(page.locator('.vocab-entry')).toHaveCount(0);
     await expect(page.getByText(/Слова не найдены/)).toBeVisible();
     await page.getByRole('button', { name: 'Показать все слова' }).click();
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
     await page.reload();
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
     await page.getByRole('link', { name: 'Main Menu', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     await page.locator('.vocabulary-nav-link').click();
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
   });
 }

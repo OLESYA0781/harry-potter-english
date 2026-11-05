@@ -16,10 +16,14 @@ export function updateCourse(state:LessonState,action:(course:Course)=>Course):L
 export function pageIndex(course:Course){
  const exact=pages.findIndex(page=>page.id===course.activePage);
  if(exact>=0)return exact;
- // Retired introductory Places screens resume at the first retained exercise.
- if(course.activePage.startsWith('places/hogwarts-town/'))return pages.findIndex(page=>page.unit.id==='town-museum');
+ if(/^(final|vocabulary)(\/|$)/.test(course.activePage))return pages.findIndex(page=>page.topicId==='to-be');
+ // Every retired Places screen resumes at the next retained topic.
+ if(course.activePage==='places' || course.activePage.startsWith('places/'))return pages.findIndex(page=>page.topicId==='affirmative');
+ if(course.activePage.startsWith('transport/transport-gaps') || course.activePage.startsWith('transport/transport-write'))return pages.findIndex(page=>page.unit.id==='journey-frequency');
+ if(course.activePage.startsWith('transport/transport-match/'))return pages.findIndex(page=>page.unit.id==='transport-match');
+ if(course.activePage.startsWith('transport/transport-cards'))return pages.findIndex(page=>page.topicId==='transport');
+ if(course.activePage.startsWith('affirmative/affirm-write/'))return pages.findIndex(page=>page.unit.id==='affirm-write');
  if(course.activePage.startsWith('word-order/'))return pages.findIndex(page=>page.topicId==='affirmative');
- if(course.activePage==='places/places-cards' || course.activePage.startsWith('places/places-match/'))return pages.findIndex(page=>page.topicId==='places');
  return 0;
 }
 export function legacyResponses(state:LessonState):[string,string][] {

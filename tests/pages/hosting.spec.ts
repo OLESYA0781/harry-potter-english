@@ -43,9 +43,9 @@ for (const [name, width, height] of [
       await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     }
     await page.goto('./#/vocabulary');
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
     await page.reload();
-    await expect(page.locator('.vocab-entry')).toHaveCount(42);
+    await expect(page.locator('.vocab-entry')).toHaveCount(57);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
     expect(badResources).toEqual([]);
     expect(errors).toEqual([]);

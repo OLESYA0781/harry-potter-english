@@ -10,7 +10,7 @@ export default function MyVocabulary() {
     <header className="vocab-header">
       <span className="vocab-emblem" aria-hidden="true"><BookOpen size={38} /></span>
       <div><h1>My Vocabulary <span aria-hidden="true">📖</span></h1><p lang="ru">Мой словарь</p></div>
-      <span className="vocab-count">{vocabulary.length} слова и выражения</span>
+      <span className="vocab-count">Слов и выражений: {vocabulary.length}</span>
     </header>
     <div className="vocab-controls">
       <label className="vocab-search"><span>Поиск по словарю</span><span className="vocab-search-field"><Search size={23} aria-hidden="true" /><input type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="English или русский перевод" />{query && <button type="button" aria-label="Очистить поиск" onClick={() => setQuery('')}><X size={22} aria-hidden="true" /></button>}</span></label>

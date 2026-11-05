@@ -86,7 +86,7 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
  await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
- await expect(nav.getByRole('button')).toHaveCount(11);
+ await expect(nav.getByRole('button')).toHaveCount(12);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
 test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{

@@ -14,7 +14,7 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.filter(task=>!task.optional).map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4||page.unit.jobInterview)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)).length]));
- expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:37,transport:0,negative:27,questions:39,'short-answers':13,frequency:28,'to-be':8,'jobs-lab':56});
+ expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:39,'short-answers':13,frequency:28,'to-be':8,'jobs-lab':56});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
@@ -68,7 +68,7 @@ it('all retired Places screens resume at Affirmative and preserve historical ans
  }
  expect(topics.some(topic=>topic.id==='places')).toBe(false);
  expect(pages.some(page=>page.topicId==='places')).toBe(false);
- expect(allTasks).toHaveLength(216);
+ expect(allTasks).toHaveLength(186);
 });
 
 it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{
@@ -104,4 +104,20 @@ it('places all six translations at the end of block three with stable IDs',()=>{
  expect(topics[3].units.at(-1)?.id).toBe('affirm-write');
  expect(last[0].id).toBe('affirmative/affirm-write/affirm-translate-01');
  expect(last.every(page=>page.topicId==='affirmative')).toBe(true);
+});
+
+it('removes Jobs in action while preserving its answers and safely restoring its old page',()=>{
+ const saved=updateCourse(initial,course=>({...course,activePage:'affirmative/jobs-affirmative/jobs-affirmative-artist',responses:{'jobs-affirmative-artist':'My saved sentence'}}));
+ expect(pages[pageIndex(readCourse(saved))].unit.id).toBe('affirm-write');
+ expect(readCourse(saved).responses['jobs-affirmative-artist']).toBe('My saved sentence');
+ expect(pages.some(page=>page.unit.id==='jobs-affirmative')).toBe(false);
+ expect(allTasks.some(task=>task.id.startsWith('jobs-affirmative-'))).toBe(false);
+});
+
+it('removes job-specific negatives but preserves the original negatives and saved responses',()=>{
+ const saved=updateCourse(initial,course=>({...course,activePage:'negative/jobs-negatives/jobs-negative-artist',responses:{'jobs-negative-artist':'Old negative answer'}}));
+ expect(pages[pageIndex(readCourse(saved))].topicId).toBe('questions');
+ expect(readCourse(saved).responses['jobs-negative-artist']).toBe('Old negative answer');
+ expect(allTasks.filter(task=>task.id.startsWith('negative-'))).toHaveLength(12);
+ expect(allTasks.some(task=>task.id.startsWith('jobs-negative-'))).toBe(false);
 });

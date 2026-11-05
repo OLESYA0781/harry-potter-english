@@ -13,9 +13,9 @@ The former lesson contained Welcome (page-4 dialogue and comprehension), one Gra
 | 00 My Vocabulary | 15 illustrated Jobs cards from page 6, with translations, authored examples and optional pronunciation; three per view |
 | 01 The Magic of Everyday Life | Short welcome, magic book and four bilingual examples |
 | 02 When Do We Use Present Simple? | Exactly four uses: habits, facts, feelings/thoughts/states, schedules; 8 classification tasks, two per category |
-| 03 Affirmative Sentences | Subject groups, endings; 10 verb gaps, 6 endings, 15 illustrated job sentences, then 6 Russian-to-English translations at the end of the block |
+| 03 Affirmative Sentences | Subject groups, endings; 10 verb gaps, 6 endings, then 6 Russian-to-English translations at the end of the block |
 | 04 Means of Transport | By … rule, then two picture-only independent randomizers (transport/place); ten nonrepeating pictures per deck |
-| 05 Negative Sentences | Don’t / doesn’t + base verb; 8 full negatives, 4 corrections, 15 job negatives |
+| 05 Negative Sentences | Don’t / doesn’t + base verb; 8 full negatives, 4 corrections |
 | 06 Questions | Do/Does game-style table, word order; 8 reordered questions, 6 transformations, 15 job questions, five Question Words mini-tasks and five word-choice tasks |
 | 07 Adverbs of Frequency | Rule, 8 positioning tasks, 5 personal sentences, 5 job-frequency tasks; Write your journeys: translate five questions and answer each using frequency adverbs (10 fields) |
 | 08 Short Answers | Question panel, Yes above No; 8 written short answers plus 5 job short answers |
@@ -24,7 +24,7 @@ The former lesson contained Welcome (page-4 dialogue and comprehension), one Gra
 
 | 10 The Jobs Workshop | Page-six reading, multi-group job cards, Harry interview questions, Peter factfile, two optional teacher interview forms, Guess My Job and The Question Machine |
 
-There are 216 required responses and eleven topics. All topics expose direct subsection navigation: desktop nested links and a phone subsection selector, including separate links to each four-task page. Arrows remain available. Navigation persists the same stable page IDs. The opt-in dictionary remains available from every topic, along with the global My Vocabulary page.
+There are 186 required responses and eleven topics. All topics expose direct subsection navigation: desktop nested links and a phone subsection selector, including separate links to each four-task page. Arrows remain available. Navigation persists the same stable page IDs. The opt-in dictionary remains available from every topic, along with the global My Vocabulary page.
 
 ## Sources and authorship
 
@@ -41,7 +41,7 @@ The outer shared storage record stays `{version:1,data:LessonState}` at `@vika/l
 
 Every edit uses the existing functional lesson-state update and spreads the complete previous lesson/answer record. Old `step`, name, scores, ratings, grammar notes/flags/slides, `intro:*`, `exerciseN:*` and busy-day arrays are retained verbatim. They do not count toward new tasks or appear as new-task responses. A read-only “Ответы предыдущей версии урока” section exposes old written responses, notes and day selections for recovery. No database migration, destructive reset, source-index mapping or overwriting import is performed. Unknown course schemas fail closed with an error while preserving their data.
 
-Completion counts nonblank new responses and visited topics, not correctness. Each topic completes after its responses are filled and it has been viewed. Percentages are granular across 216 responses plus 11 topic visits. No automatic Correct!/Try again! feedback or answer key is shown.
+Completion counts nonblank new responses and visited topics, not correctness. Each topic completes after its responses are filled and it has been viewed. Percentages are granular across 186 responses plus 11 topic visits. No automatic Correct!/Try again! feedback or answer key is shown.
 
 The existing Supabase RPC/CAS, local journal/queue, retry and explicit whole-lesson conflict resolution remain unchanged. Concurrent Lesson 1 edits are still one lesson-record conflict unit; both versions remain available to choose. Tests use isolated SQL/RPC fixtures only; the real pupil database is not accessed.
 
@@ -49,7 +49,7 @@ The existing Supabase RPC/CAS, local journal/queue, retry and explicit whole-les
 
 Production build; unit coverage for exact topic/vocabulary/task counts, stable IDs, no old/new response mapping, legacy recovery, unknown schema handling and preservation of other lesson records. Browser checks cover all response pages and full completion, exact reload persistence, read-only recovery, dictionary interaction, speech fallback, 390/768/1024/1366px layouts and Yes/No positioning. Isolated cloud tests cover second-device restoration of matching/writing responses, legacy data and offline conflicts. Existing Lesson 0, Homework and main-menu tests remain applicable.
 
-The entire former third topic, Vocabulary: Places in Town, is retired from navigation, pages, response requirements and completion. All `places/*` saved positions (cards, matching, gaps and Hogwarts Town) resolve to the next retained topic, Affirmative Sentences. Historical Places responses and seen flags remain stored without being counted toward active progress. Topic numbering now follows 11 retained topics and 216 active responses; all retained IDs are unchanged. Places words remain in the opt-in dictionary and My Vocabulary, and source art remains available for Lesson 0. The removed Word Order positions also resolve to Affirmative.
+The entire former third topic, Vocabulary: Places in Town, is retired from navigation, pages, response requirements and completion. All `places/*` saved positions (cards, matching, gaps and Hogwarts Town) resolve to the next retained topic, Affirmative Sentences. Historical Places responses and seen flags remain stored without being counted toward active progress. Topic numbering now follows 11 retained topics and 186 active responses; all retained IDs are unchanged. Places words remain in the opt-in dictionary and My Vocabulary, and source art remains available for Lesson 0. The removed Word Order positions also resolve to Affirmative.
 
 Final Hogwarts Challenge and the final dictionary topic are also retired; their saved page positions resume at Present Simple vs To Be and historical responses remain untouched. Removed transport vocabulary/gap/writing pages do not count toward completion. Old journey positions resolve to the new frequency practice; old matching positions resolve to the picture randomizer. Randomizer state is a separate response value, excluded from required-answer counts. Rewritten translations and journeys use new task IDs so earlier answers cannot appear under different prompts.
 
@@ -58,3 +58,7 @@ Printed/PDF page 6 of the supplied Go Getter 3 was visually checked: Vocabulary 
 ## Page-six expansion
 
 See [page-six audit and implementation map](LESSON1_PAGE6_AUDIT.md) for the six source exercises, 15-job coverage, Question Words, custom response formats and teacher-only interview. All original 95 prompts are retained. The workshop is block 10, after the existing block 09; existing numbering stays unchanged.
+
+Jobs in action was removed at the owner’s request. Its 15 answers remain stored but are excluded from completion. Saved positions in that unit resume at the following translation practice.
+
+Jobs: make negatives was also removed at the owner’s request. Its 15 answers remain stored without counting toward completion; saved positions resume at Questions. The original negative-sentence exercises are unchanged.

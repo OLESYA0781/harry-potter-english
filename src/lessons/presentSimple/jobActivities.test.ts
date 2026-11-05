@@ -4,9 +4,9 @@ import {allTasks,topics,pages} from './course';
 import {readChunks,readSelection,responseComplete} from './jobActivities';
 import {freshCourse,readCourse,updateCourse,lesson1Summary} from './model';
 import {initial} from '../../data';
-it('covers all fifteen professions in affirmative, negative, question and picture-description practice',()=>{
+it('covers all fifteen professions in question and picture-description practice',()=>{
  expect(jobs).toHaveLength(15);
- for(const job of jobs)for(const prefix of ['jobs-affirmative','jobs-negative','jobs-question','gg6-guess','gg6-groups'])expect(allTasks.some(task=>task.id===`${prefix}-${job.id}`)).toBe(true);
+ for(const job of jobs)for(const prefix of ['jobs-question','gg6-guess','gg6-groups'])expect(allTasks.some(task=>task.id===`${prefix}-${job.id}`)).toBe(true);
  for(const id of ['emma-uncle','jobs-groups','harry-interview','peter-factfile','job-interview','question-machine'])expect(pages.some(page=>page.unit.id===id)).toBe(true);
  expect(topics.find(topic=>topic.id==='questions')!.units.filter(unit=>unit.id.startsWith('qw-'))).toHaveLength(7);
 });

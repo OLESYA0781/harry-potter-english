@@ -17,6 +17,9 @@ export function updateCourse(state:LessonState,action:(course:Course)=>Course):L
 export function pageIndex(course:Course){
  const exact=pages.findIndex(page=>page.id===course.activePage);
  if(exact>=0)return exact;
+ const explanation=course.activePage.match(/^questions\/(qw-(?:what|where|when|who|how))\//);
+ if(explanation)return pages.findIndex(page=>page.unit.id===explanation[1]);
+ if(course.activePage.startsWith('frequency/jobs-frequency/'))return pages.findIndex(page=>page.topicId==='question-words');
  if(course.activePage==='jobs-lab'||course.activePage.startsWith('jobs-lab/'))return pages.findIndex(page=>page.topicId==='question-machine');
  if(/^(final|vocabulary)(\/|$)/.test(course.activePage))return pages.findIndex(page=>page.topicId==='to-be');
  // Every retired Places screen resumes at the next retained topic.

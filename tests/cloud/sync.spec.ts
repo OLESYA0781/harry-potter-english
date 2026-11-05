@@ -393,7 +393,7 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
   await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
-  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Adverbs of Frequency/}).click();
+  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Write your journeys/}).click();
   await other.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
   await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
   await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);

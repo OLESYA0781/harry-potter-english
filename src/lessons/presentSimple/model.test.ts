@@ -6,7 +6,7 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine']);
+ expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine','journeys']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
@@ -14,7 +14,7 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.filter(task=>!task.optional).map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4||page.unit.jobInterview)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)).length]));
- expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:28,'question-words':10,'to-be':8,'question-machine':5});
+ expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:13,'question-words':5,'to-be':8,'question-machine':5,journeys:10});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
@@ -68,7 +68,7 @@ it('all retired Places screens resume at Affirmative and preserve historical ans
  }
  expect(topics.some(topic=>topic.id==='places')).toBe(false);
  expect(pages.some(page=>page.topicId==='places')).toBe(false);
- expect(allTasks).toHaveLength(130);
+ expect(allTasks).toHaveLength(120);
 });
 
 it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{
@@ -78,7 +78,7 @@ it('Word Order positions also resume at Affirmative without dropping historical 
  expect(course.responses['town-01']).toBe('Old place name');
 });
 
-it('moves journeys to frequency block seven and safely resolves every retired transport/translation position',()=>{
+it('moves journeys to the end and safely resolves every retired transport/translation position',()=>{
  expect(topics[7].id).toBe('frequency');
  expect(topics.find(t=>t.id==='transport')!.units.map(u=>u.id)).toEqual(['travel-rule','transport-match']);
  for(const activePage of ['transport/transport-gaps/transport-gap-01','transport/transport-write/transport-write-01'])expect(pages[pageIndex({...freshCourse(),activePage})].unit.id).toBe('journey-frequency');
@@ -122,7 +122,7 @@ it('removes job-specific negatives but preserves the original negatives and save
  expect(allTasks.some(task=>task.id.startsWith('jobs-negative-'))).toBe(false);
 });
 
-it('places Question Words immediately after Frequency and preserves all previous screen IDs',()=>{
+it('places Question Words immediately after Frequency and safely restores previous screen positions',()=>{
  expect(topics[topics.findIndex(topic=>topic.id==='frequency')+1].id).toBe('question-words');
  expect(pages.find(page=>page.unit.id==='qw-formula')!.id).toBe('questions/qw-formula');
  const saved={...freshCourse(),activePage:'questions/qw-what/qw-what',responses:{'qw-what':'What'}};
@@ -147,4 +147,27 @@ it('keeps Question Machine alone and preserves its page IDs while retiring the r
  expect(machine.id).toBe('jobs-lab/question-machine/gg6-machine-where');
  expect(pages[pageIndex({...freshCourse(),activePage:machine.id})].id).toBe(machine.id);
  expect(allTasks.some(task=>/^gg6-(reading|groups|harry|peter|interview|guess)-/.test(task.id))).toBe(false);
+});
+
+it('ends with standalone journeys using the original page and answer IDs and retires Working day',()=>{
+ expect(topics.at(-1)?.id).toBe('journeys');
+ expect(pages.at(-1)?.unit.id).toBe('journey-frequency');
+ expect(topics.find(topic=>topic.id==='frequency')!.units.map(unit=>unit.id)).not.toContain('journey-frequency');
+ const saved={...freshCourse(),activePage:'frequency/journey-frequency/journey-frequency-school-self-question',responses:{'journey-frequency-school-self-question':'How do you usually get to school?','jobs-frequency-police-officer':'Old draft'}};
+ expect(pages[pageIndex(saved)].topicId).toBe('journeys');
+ expect(pages[pageIndex({...saved,activePage:'frequency/jobs-frequency/jobs-frequency-police-officer'})].topicId).toBe('question-words');
+ expect(saved.responses['jobs-frequency-police-officer']).toBe('Old draft');
+ expect(allTasks.some(task=>task.id.startsWith('jobs-frequency-'))).toBe(false);
+});
+
+it('keeps five word explanations free of mini-tasks and restores their retired exercise positions',()=>{
+ for(const word of ['what','where','when','who','how']){
+  const unit=topics.find(topic=>topic.id==='question-words')!.units.find(unit=>unit.id===`qw-${word}`)!;
+  expect(unit.tasks).toBeUndefined();
+  expect(unit.examples?.length).toBeGreaterThan(0);
+  const saved={...freshCourse(),activePage:`questions/qw-${word}/qw-${word}`,responses:{[`qw-${word}`]:'Old mini-task answer'}};
+  expect(pages[pageIndex(saved)].unit.id).toBe(`qw-${word}`);
+  expect(saved.responses[`qw-${word}`]).toBe('Old mini-task answer');
+ }
+ expect(allTasks.filter(task=>task.id.startsWith('qw-'))).toHaveLength(5);
 });

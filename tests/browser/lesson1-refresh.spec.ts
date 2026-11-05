@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 async function topic(page: Page, id: string, width: number) {
   if (width <= 600) await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
-  else await page.getByRole('navigation', { name: 'Lesson 1 topics' }).getByRole('button').filter({ hasText: ({ transport: 'Means of Transport', affirmative: 'Affirmative Sentences', frequency: 'Adverbs of Frequency', questions: 'Questions', translations: 'Переведи предложение на английский', negative: 'Negative Sentences' } as Record<string, string>)[id] }).click();
+  else await page.getByRole('navigation', { name: 'Lesson 1 topics' }).getByRole('button').filter({ hasText: ({ transport: 'Means of Transport', affirmative: 'Affirmative Sentences', journeys: 'Write your journeys', frequency: 'Adverbs of Frequency', questions: 'Questions', translations: 'Переведи предложение на английский', negative: 'Negative Sentences' } as Record<string, string>)[id] }).click();
 }
 for (const width of [390, 820]) test(`two picture-only randomizers exhaust decks without repeats at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 1000 });
@@ -32,7 +32,7 @@ for (const width of [390, 820]) test(`two picture-only randomizers exhaust decks
   await expect(page.locator('.ps2-heading h1')).toHaveText('Negative Sentences');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-for (const width of [390, 1366]) test(`translations, game grammar table and block-seven journeys at ${width}px`, async ({ page }) => {
+for (const width of [390, 1366]) test(`translations, game grammar table and final journeys at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 1000 });
   await page.goto('/#/lessons/lesson-1'); await topic(page, 'affirmative', width);
   const translation = 'affirmative/affirm-write/affirm-translate-01';
@@ -52,6 +52,7 @@ for (const width of [390, 1366]) test(`translations, game grammar table and bloc
   await topic(page, 'negative', width); await expect(page.locator('.ps2-panel')).not.toContainText('Spider — паук');
   await topic(page, 'frequency', width);
   await expect(page.locator('.ps2-heading > span')).toHaveText('07');
+  await topic(page,'journeys',width);
   if(width<=600)await page.getByLabel('Choose Lesson 1 section').selectOption('frequency/journey-frequency/journey-frequency-school-self-question');
   else await page.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
   await expect(page.locator('.ps2-panel h2')).toHaveText('Write your journeys');
@@ -86,7 +87,7 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
  await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
- await expect(nav.getByRole('button')).toHaveCount(12);
+ await expect(nav.getByRole('button')).toHaveCount(13);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
 test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{

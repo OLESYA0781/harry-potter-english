@@ -1,6 +1,6 @@
 # Lesson 1: Go Getter 3, page 6
 
-Current configuration after owner revisions: 130 required responses, 12 topics, no active Workshop or interview fields. Question Words is standalone after Frequency; Question Machine is standalone at the end. The original implementation audit below records PR 69 before the subsequent removals. Removed responses remain stored and do not count toward completion.
+Current configuration after owner revisions: 120 required responses, 13 topics, no active Workshop or interview fields. Question Words is standalone after Frequency; Question Machine is standalone; Write your journeys is the final separate block. The original implementation audit below records PR 69 before the subsequent removals. Removed responses remain stored and do not count toward completion.
 
 ## Audit before editing
 
@@ -48,3 +48,7 @@ Question Words is now a standalone topic immediately after Adverbs of Frequency.
 Quick job answers was removed at the owner’s request; original short-answer practice remains. Historical job short answers are retained without counting toward progress, and their saved positions resume at Present Simple vs To Be.
 
 The entire Jobs Workshop was subsequently removed except The Question Machine, which is now independent. Saved machine page IDs and all answer IDs remain unchanged. Other retired Workshop positions safely resume at the machine.
+
+A working day was subsequently removed. Write your journeys moved into a standalone final topic with its existing page and response IDs. Earlier responses in both exercises remain untouched; only the journey fields count toward active progress.
+
+Embedded mini-tasks were subsequently removed from the five individual question-word explanations. Rules/examples and the separate Choose the question word practice remain. Historical answers are retained and prior mini-task positions resolve to the corresponding explanation.

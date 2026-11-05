@@ -1,3 +1,4 @@
+import {responseComplete} from './jobActivities';
 import type { LessonState } from '../../data';
 import { allTasks, pages, topics } from './course';
 export const courseKey='present-simple:v2';
@@ -35,10 +36,10 @@ export function legacyResponses(state:LessonState):[string,string][] {
 }
 export function lesson1Summary(state:LessonState){
  const course=readCourse(state);
- const filled=(id:string)=>!!course.responses[id]?.trim();
- const answersDone=allTasks.filter(task=>filled(task.id)).length;
+ const filled=(task:typeof allTasks[number])=>responseComplete(task,course.responses[task.id]);
+ const answersDone=allTasks.filter(task=>filled(task)).length;
  const viewed=topics.filter(topic=>course.seen.includes(topic.id)).length;
- const completed=topics.filter(topic=>course.seen.includes(topic.id) && topic.units.every(unit=>(unit.tasks||[]).every(task=>filled(task.id)))).length;
+ const completed=topics.filter(topic=>course.seen.includes(topic.id) && topic.units.every(unit=>(unit.tasks||[]).filter(task=>!task.optional).every(task=>filled(task)))).length;
  const total=allTasks.length+topics.length;
- return {percent:Math.round((answersDone+viewed)/total*100),status:completed===topics.length?'completed' as const:answersDone+viewed>0 || Object.keys(state.answers).length>0?'in-progress' as const:'not-started' as const,detail:`${completed} из ${topics.length} тем · ${answersDone} из ${allTasks.length} ответов`};
+ return {percent:Math.min(completed===topics.length?100:99,Math.round((answersDone+viewed)/total*100)),status:completed===topics.length?'completed' as const:answersDone+viewed>0 || Object.keys(state.answers).length>0?'in-progress' as const:'not-started' as const,detail:`${completed} из ${topics.length} тем · ${answersDone} из ${allTasks.length} ответов`};
 }

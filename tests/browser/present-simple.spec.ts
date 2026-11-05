@@ -5,14 +5,13 @@ async function topic(page:import('@playwright/test').Page,id:string,width=1280){
  if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
  else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(topics.findIndex(topic=>topic.id===id)).click();
 }
-test('ten topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
+test('eleven topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:{step:8,name:'',scores:{},ratings:{},answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Historical answer'}}}}}})));
  await page.goto(route);
- await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(10);
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(11);
  await expect(page.locator('.ps2-heading h1')).toHaveText('My Vocabulary');
- await expect(page.locator('.ps2-jobs-vocabulary > div')).toHaveCount(15);
- await expect(page.locator('.ps2-jobs-vocabulary')).toContainText('ветеринар');
- await expect(page.locator('.ps2-jobs-vocabulary button')).toHaveCount(15);
+ await expect(page.locator('.ps2-job-card')).toHaveCount(3);
+ await expect(page.locator('.ps2-job-card .ps2-job-art')).toHaveCount(3);
  await expect(page.getByRole('dialog')).not.toBeVisible();
  await expect(page.getByText(/Ожидаются оригинальные материалы|Professor’s Grammar Room|Watch or listen and read/)).toHaveCount(0);
  await topic(page,'negative');await page.getByRole('button',{name:'Next →',exact:true}).click();
@@ -31,7 +30,7 @@ test('ten topics replace the old lesson, restore drafts and offer an opt-in voca
  await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();await expect(page.locator('.ps2-source')).toHaveCount(0);
 });
 test('all new practice pages save original responses and allow completion without grading',async({page})=>{
- test.setTimeout(90000);
+ test.setTimeout(180000);
  await page.goto(route);
  let answered=0;
  for(let i=0;i<pages.length;i++){
@@ -39,6 +38,8 @@ test('all new practice pages save original responses and allow completion withou
   const selects=page.locator('.ps2-task select'),fields=page.locator('.ps2-task textarea');
   for(const select of await selects.all()){await select.selectOption({index:1});answered++;}
   for(const field of await fields.all()){await field.fill(`  Pupil draft ${answered}.\n `);answered++;}
+  for(const group of await page.locator('.ps2-job-categories').all()){await group.getByRole('checkbox').first().check();answered++;}
+  for(const machine of await page.locator('.ps2-question-machine').all()){for(const chunk of await machine.locator('.ps2-chunk-bank button').all())await chunk.click();answered++;}
   await expect(page.locator('.ps2-panel')).not.toContainText(/Correct!|Try again!/);
   if(i<pages.length-1)await page.getByRole('button',{name:'Next →',exact:true}).click();
  }

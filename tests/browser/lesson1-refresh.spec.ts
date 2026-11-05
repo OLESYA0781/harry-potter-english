@@ -52,7 +52,8 @@ for (const width of [390, 1366]) test(`translations, game grammar table and bloc
   await topic(page, 'negative', width); await expect(page.locator('.ps2-panel')).not.toContainText('Spider — паук');
   await topic(page, 'frequency', width);
   await expect(page.locator('.ps2-heading > span')).toHaveText('07');
-  for (let i = 0; i < 5; i++) await page.getByRole('button', { name: 'Next →', exact: true }).click();
+  if(width<=600)await page.getByLabel('Choose Lesson 1 section').selectOption('frequency/journey-frequency/journey-frequency-school-self-question');
+  else await page.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
   await expect(page.locator('.ps2-panel h2')).toHaveText('Write your journeys');
   await expect(page.locator('.ps2-journey-pair')).toHaveCount(2);
   const inputs = page.locator('.ps2-journey-pair textarea'); await expect(inputs).toHaveCount(4);
@@ -85,7 +86,7 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
  await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
- await expect(nav.getByRole('button')).toHaveCount(10);
+ await expect(nav.getByRole('button')).toHaveCount(11);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
 test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{

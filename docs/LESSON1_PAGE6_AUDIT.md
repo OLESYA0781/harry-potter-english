@@ -23,16 +23,20 @@ Audited main at b026e6506f5a9a35e42223fa36e3825a53bc40c7. Printed page 6 of the 
 | Ex. 6 Interview | Teacher-mode-only job chooser and two independently saved blank five-field forms, one per role-swapped round. | Workshop → Job Interview |
 | Authored games | Guess My Job covers all 15 job illustrations/hints, written job and one/two questions, plus gated oral prompts. Question Machine offers all five question words, removable/reusable word chunks and gated oral follow-up. | Workshop → Guess My Job / The Question Machine |
 
-The original 95 response prompts stay in place. Each profession is additionally used in affirmative, negative and Do/Does question practice, as well as grouping and picture-description practice. Short-answer and frequency units receive five job prompts each. Transport and workplace contexts connect existing vocabulary with the new jobs. Translation practice remains last in block 03.
+The original 95 response prompts stay in place. Each profession is additionally used in Do/Does question practice, as well as grouping and picture-description practice. Short-answer and frequency units receive five job prompts each. Transport and workplace contexts connect existing vocabulary with the new jobs. Translation practice remains last in block 03.
 
 ## Storage and completion
 
 No new Supabase tables, migrations, Auth, RLS, queue or conflict logic. New fields use new stable IDs within the existing schema-v2 course response map. Existing selected page IDs also remain valid.
 
-There are 216 required responses, 11 topics and 10 additional optional interview fields. Category selections and chunk order serialize as validated JSON strings. Categories count once at least one valid category is selected. Constructed questions count only once every chunk is used exactly once; grammar/order correctness is not required and no answer is revealed. Empty selections and reset questions save as empty strings. Partial questions survive reload and cloud restoration. Optional interview fields, role selection and job choices do not block completion; pupil access to Teacher mode is unchanged.
+There are 186 required responses, 11 topics and 10 additional optional interview fields. Category selections and chunk order serialize as validated JSON strings. Categories count once at least one valid category is selected. Constructed questions count only once every chunk is used exactly once; grammar/order correctness is not required and no answer is revealed. Empty selections and reset questions save as empty strings. Partial questions survive reload and cloud restoration. Optional interview fields, role selection and job choices do not block completion; pupil access to Teacher mode is unchanged.
 
 The interview has one page with two rounds of five fields; all other practice pages contain at most four tasks. Newly introduced spoken instructions and answer hints are gated by Teacher mode. Reading and Peter’s factfile remain visible on every related answer page.
 
 ## Validation
 
 Model coverage checks all 15 jobs across practice types, every source exercise, stable IDs, multiple categories, partial/full chunk state, optional teacher fields and unchanged older responses. Browser checks exercise all card pages, responsive widths, categories, factfile persistence, chunk removal/reset, two interview rounds, direct navigation and overall completion. Isolated cloud fixtures test cross-device categories/partial questions while retaining earlier translations. Production builds cover both the root hosting path and GitHub Pages subpath. These are Chromium device-size emulations, not physical iPhone/iPad or Russian-network tests.
+
+Jobs in action was removed at the owner’s request. Its 15 answers remain stored but are excluded from completion. Saved positions in that unit resume at the following translation practice.
+
+Jobs: make negatives was also removed at the owner’s request. Its 15 answers remain stored without counting toward completion; saved positions resume at Questions. The original negative-sentence exercises are unchanged.

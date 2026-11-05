@@ -1,4 +1,4 @@
-import {jobAffirmative,jobNegative,jobQuestions,jobShort,jobFrequency,questionWordUnits,jobsLabUnits} from './jobsCourse';
+import {jobQuestions,jobShort,jobFrequency,questionWordUnits,jobsLabUnits} from './jobsCourse';
 // Lesson 1 schema v2. Vocabulary lists: Go Getter 3 SB p. 5.
 // All practice below is author-created, not a transcription of book exercises.
 export type Word={en:string;ru:string;art:string};
@@ -85,8 +85,7 @@ const topicDefinitions:Topic[]=[
 ];
 // Retire the former third block without changing historical response IDs or dictionaries.
 const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(topic=>
- topic.id==='affirmative'?{...topic,units:[...topic.units.filter(unit=>unit.id!=='affirm-write'),jobAffirmative,topic.units.find(unit=>unit.id==='affirm-write')!]}:
- topic.id==='negative'?{...topic,units:[...topic.units,jobNegative]}:
+ topic.id==='affirmative'?{...topic,units:[...topic.units.filter(unit=>unit.id!=='affirm-write'),topic.units.find(unit=>unit.id==='affirm-write')!]}:
  topic.id==='questions'?{...topic,units:[...topic.units,jobQuestions,...questionWordUnits]}:
  topic.id==='short-answers'?{...topic,units:[...topic.units,jobShort]}:
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:

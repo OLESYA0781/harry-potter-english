@@ -68,7 +68,7 @@ for (const width of [390,1366]) test(`every topic offers direct subsection navig
  const {topics,pages}=await import('../../src/lessons/presentSimple/course');
  for(const item of topics){
   if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(item.id);
-  else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').filter({hasText:item.title}).click();
+  else {const button=page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').filter({hasText:item.title});if(await button.getAttribute('aria-expanded')!=='true')await button.click();}
   const sections=pages.filter(part=>part.topicId===item.id);
   const target=sections[sections.length-1];
   if(width<=600){await expect(page.getByLabel('Choose Lesson 1 section').locator('option')).toHaveCount(sections.length);await page.getByLabel('Choose Lesson 1 section').selectOption(target.id);}
@@ -85,7 +85,7 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
  await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
- await expect(nav.getByRole('button')).toHaveCount(9);
+ await expect(nav.getByRole('button')).toHaveCount(10);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
 test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{

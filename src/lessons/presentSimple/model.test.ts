@@ -6,7 +6,7 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be']);
+ expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
@@ -14,7 +14,7 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>unit.tasks||[]).length]));
- expect(counts).toEqual({welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:14,'short-answers':8,frequency:23,'to-be':8});
+ expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:14,'short-answers':8,frequency:23,'to-be':8});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
@@ -78,7 +78,7 @@ it('Word Order positions also resume at Affirmative without dropping historical 
 });
 
 it('moves journeys to frequency block seven and safely resolves every retired transport/translation position',()=>{
- expect(topics[6].id).toBe('frequency');
+ expect(topics[7].id).toBe('frequency');
  expect(topics.find(t=>t.id==='transport')!.units.map(u=>u.id)).toEqual(['travel-rule','transport-match']);
  for(const activePage of ['transport/transport-gaps/transport-gap-01','transport/transport-write/transport-write-01'])expect(pages[pageIndex({...freshCourse(),activePage})].unit.id).toBe('journey-frequency');
  expect(pages[pageIndex({...freshCourse(),activePage:'transport/transport-cards'})].unit.id).toBe('travel-rule');

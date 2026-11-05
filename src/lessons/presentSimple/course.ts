@@ -6,7 +6,7 @@ export const transport:Word[]=[['bike','велосипед'],['boat','лодка
 export const expressions=[['go to school','ходить в школу'],['play tennis','играть в теннис'],['hang out','проводить время вместе'],['by bike','на велосипеде'],['by bus','на автобусе'],['by car','на машине'],['by train','на поезде'],['on foot','пешком'],['every day','каждый день'],['always','всегда'],['usually','обычно'],['often','часто'],['sometimes','иногда'],['never','никогда']];
 export const categories=['Привычка','Факт','Чувство или состояние','Расписание'];
 export type Task={id:string;prompt:string;options?:string[];art?:string;long?:boolean;pair?:{id:string;question:string;part:'question'|'answer'}};
-export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all';visual?:'book'|'order'|'frequency'|'randomizer';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];tasks?:Task[];book?:string};
+export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all'|'jobs';visual?:'book'|'order'|'frequency'|'randomizer';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];tasks?:Task[];book?:string};
 export type Topic={id:string;title:string;units:Unit[]};
 const tasks=(prefix:string,prompts:string[],options?:string[]):Task[]=>prompts.map((prompt,i)=>({id:`${prefix}-${String(i+1).padStart(2,'0')}`,prompt,options}));
 const wordsMatch=(prefix:string,words:Word[],picture=false):Task[]=>words.map(word=>({id:`${prefix}-${word.en}`,prompt:picture?`Назови транспорт: ${word.ru}`:word.en,art:picture?word.art:undefined,options:picture?transport.map(w=>w.en).slice().reverse():places.map(w=>w.ru).slice().reverse()}));
@@ -19,6 +19,7 @@ const journeyQuestions = [
 ];
 const journeyPractice:Unit={id:'journey-frequency',title:'Write your journeys',text:'Сначала переведи каждый вопрос на английский, затем ответь на него полным предложением. В ответе используй always, usually, often, sometimes или never.',tasks:journeyQuestions.flatMap(([id,question])=>(['question','answer'] as const).map(part=>({id:`journey-frequency-${id}-${part}`,prompt:`${part==='question'?'Переведи вопрос':'Ответь на вопрос'}: ${question}`,pair:{id,question,part}})))};
 const topicDefinitions:Topic[]=[
+ {id:'jobs',title:'My Vocabulary',units:[{id:'jobs-page-six',title:'Jobs',words:'jobs',text:'Профессии: познакомься со словами перед уроком.',book:'Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs. Список профессий сохранён; переводы добавлены для словаря.'}]},
  {id:'welcome',title:'The Magic of Everyday Life',units:[{id:'everyday-book',title:'Welcome to Present Simple',visual:'book',text:'Present Simple — простое настоящее время. Сегодня мы научимся рассказывать о том, что делаем каждый день, что любим, какие факты знаем и что происходит по расписанию.',examples:[['I play chess every day.','Я играю в шахматы каждый день.'],['Hermione loves books.','Гермиона любит книги.'],['The sun rises in the east.','Солнце встаёт на востоке.'],['The train leaves at eleven.','Поезд отправляется в одиннадцать.']]}]},
  {id:'uses',title:'When Do We Use Present Simple?',units:[
   {id:'habits',title:'Habits and routines',text:'Привычки и регулярные действия: то, что мы делаем каждый день, обычно или регулярно.',examples:[['I go to school every day.','Я хожу в школу каждый день.'],['Harry plays chess.','Гарри играет в шахматы.'],['We often visit the park.','Мы часто посещаем парк.']]},
@@ -86,7 +87,7 @@ const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(top
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:
  topic.id==='frequency'?{...topic,units:[...topic.units,journeyPractice]}:topic);
 // Frequency is block 7: its theory precedes the moved journeys practice.
-const topicOrder=['welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be'];
+const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be'];
 export const topics:Topic[]=topicOrder.map(id=>retainedTopics.find(topic=>topic.id===id)!);
 export type Page={id:string;topicId:string;unit:Unit;tasks:Task[];first:boolean};
 // Four tasks per screen keeps tablet and phone pages short. IDs never depend on slide numbers.

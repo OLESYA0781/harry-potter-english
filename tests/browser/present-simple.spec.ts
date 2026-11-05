@@ -5,11 +5,14 @@ async function topic(page:import('@playwright/test').Page,id:string,width=1280){
  if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
  else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(topics.findIndex(topic=>topic.id===id)).click();
 }
-test('nine topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
+test('ten topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:{step:8,name:'',scores:{},ratings:{},answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Historical answer'}}}}}})));
  await page.goto(route);
- await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(9);
- await expect(page.locator('.ps2-heading h1')).toHaveText('The Magic of Everyday Life');
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(10);
+ await expect(page.locator('.ps2-heading h1')).toHaveText('My Vocabulary');
+ await expect(page.locator('.ps2-jobs-vocabulary > div')).toHaveCount(15);
+ await expect(page.locator('.ps2-jobs-vocabulary')).toContainText('ветеринар');
+ await expect(page.locator('.ps2-jobs-vocabulary button')).toHaveCount(15);
  await expect(page.getByRole('dialog')).not.toBeVisible();
  await expect(page.getByText(/Ожидаются оригинальные материалы|Professor’s Grammar Room|Watch or listen and read/)).toHaveCount(0);
  await topic(page,'negative');await page.getByRole('button',{name:'Next →',exact:true}).click();

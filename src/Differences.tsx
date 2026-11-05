@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import DifferencePicture from "./DifferencePicture";
 export const differences = [
   {
     title: "Ron’s snack",
@@ -86,37 +86,7 @@ function Scene({
       : { left: 65, top: 21, width: 28, height: 25 },
     { left: 10, top: 2, width: 32, height: 33 },
   ];
-  return (
-    <figure className="difference-figure">
-      <figcaption>
-        <strong>Picture {variant}</strong>
-        <span>Tap a difference</span>
-      </figcaption>
-      <div
-        className="difference-scene"
-        aria-label={`Picture ${variant}: a school common room. Find ${differenceCount} differences.`}
-        style={{ backgroundPosition: isA ? "left center" : "right center" }}
-      >
-        {areas.map((area, i) => (
-          <button
-            key={i}
-            type="button"
-            className={`difference-hotspot ${found.includes(i) ? "found" : ""}`}
-            style={
-              Object.fromEntries(
-                Object.entries(area).map(([k, v]) => [k, `${v}%`]),
-              ) as CSSProperties
-            }
-            aria-label={`Compare area ${i + 1} in picture ${variant}`}
-            aria-pressed={found.includes(i)}
-            onClick={() => onFind(i)}
-          >
-            {found.includes(i) && <span>{i + 1} ✓</span>}
-          </button>
-        ))}
-      </div>
-    </figure>
-  );
+  return <DifferencePicture variant={variant} count={differenceCount} found={found} areas={areas} onFind={onFind} sceneStyle={{backgroundPosition:isA?'left center':'right center'}}/>;
 }
 export default function Differences({
   teacher,

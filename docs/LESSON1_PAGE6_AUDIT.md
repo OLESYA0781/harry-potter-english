@@ -1,6 +1,6 @@
 # Lesson 1: Go Getter 3, page 6
 
-Current configuration after owner revisions: 120 required responses, 13 topics, no active Workshop or interview fields. Question Words is standalone after Frequency; Question Machine is standalone; Write your journeys is the final separate block. The original implementation audit below records PR 69 before the subsequent removals. Removed responses remain stored and do not count toward completion.
+Current configuration after owner revisions and the separate warm-up addition: 121 required response/activity fields, 14 topics, no active Workshop or interview fields. Question Words is standalone after Frequency; Question Machine is standalone; Write your journeys is the final separate block. The original implementation audit below records PR 69 before the subsequent removals. Removed responses remain stored and do not count toward completion.
 
 ## Audit before editing
 

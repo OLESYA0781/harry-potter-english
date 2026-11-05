@@ -5,11 +5,12 @@ async function topic(page:import('@playwright/test').Page,id:string,width=1280){
  if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption(id);
  else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').nth(topics.findIndex(topic=>topic.id===id)).click();
 }
-test('thirteen topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
+test('fourteen topics replace the old lesson, restore drafts and offer an opt-in vocabulary dialog',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('hogwarts-english-v1',JSON.stringify({version:3,data:{step:0,name:'',scores:{},ratings:{},answers:{'@vika/lesson/lesson-1':{version:1,data:{step:8,name:'',scores:{},ratings:{},answers:{grammarNotes:'  Old notes\n ','exercise3:p5-3-2':'Historical answer'}}}}}})));
  await page.goto(route);
- await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(13);
- await expect(page.locator('.ps2-heading h1')).toHaveText('My Vocabulary');
+ await expect(page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button')).toHaveCount(14);
+ await expect(page.locator('.ps2-heading h1')).toHaveText('Warm-up — Back to Hogwarts!');
+ await topic(page,'jobs');
  await expect(page.locator('.ps2-job-card')).toHaveCount(3);
  await expect(page.locator('.ps2-job-card .ps2-job-art')).toHaveCount(3);
  await expect(page.getByRole('dialog')).not.toBeVisible();
@@ -35,6 +36,7 @@ test('all new practice pages save original responses and allow completion withou
  let answered=0;
  for(let i=0;i<pages.length;i++){
   await expect(page.locator('.ps2-panel h2')).toHaveText(pages[i].unit.title);
+  if(pages[i].unit.visual==='differences'){for(let n=0;n<7;n++)await page.locator('.ps2-warmup .difference-scene').first().getByRole('button').nth(n).click();answered++;}
   const selects=page.locator('.ps2-task select'),fields=page.locator('.ps2-task textarea');
   for(const select of await selects.all()){await select.selectOption({index:1});answered++;}
   for(const field of await fields.all()){await field.fill(`  Pupil draft ${answered}.\n `);answered++;}
@@ -79,7 +81,7 @@ test('speech uses the existing browser mechanism and unavailable speech has a cl
 test('unsupported speech reports a notice without losing drafts',async({page})=>{
  await page.addInitScript(()=>{delete (window as unknown as {speechSynthesis?:unknown}).speechSynthesis;delete (window as unknown as {SpeechSynthesisUtterance?:unknown}).SpeechSynthesisUtterance;});
  await page.goto(route);await page.getByRole('button',{name:'My Vocabulary',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Listen: bank',exact:true}).click();
- await expect(page.getByRole('status')).toHaveText('Английское произношение недоступно в этом браузере.');
+ await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Английское произношение недоступно в этом браузере.');
 });
 
 test('removed third block resumes at Affirmative and keeps its historical answers',async({page})=>{

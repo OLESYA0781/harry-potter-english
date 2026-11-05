@@ -88,3 +88,14 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  await expect(nav.getByRole('button')).toHaveCount(9);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
+test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{
+ await page.setViewportSize({width:1366,height:900});await page.goto('/#/lessons/lesson-1');
+ const nav=page.getByRole('navigation',{name:'Lesson 1 topics'});
+ const topic=nav.getByRole('button').filter({hasText:'Affirmative Sentences'});await topic.click();
+ await page.locator('.ps2-subnav a').filter({hasText:'Переведи предложение на английский · 1–4'}).click();
+ const input=page.getByLabel('Врач работает в больнице.',{exact:true});await input.fill('The doctor works at the hospital.');
+ await topic.click();await expect(topic).toHaveAttribute('aria-expanded','false');await expect(page.locator('.ps2-subnav')).toHaveCount(0);
+ await expect(input).toHaveValue('The doctor works at the hospital.');
+ await topic.click();await expect(topic).toHaveAttribute('aria-expanded','true');await expect(page.locator('.ps2-subnav')).toBeVisible();
+ await expect(input).toHaveValue('The doctor works at the hospital.');
+});

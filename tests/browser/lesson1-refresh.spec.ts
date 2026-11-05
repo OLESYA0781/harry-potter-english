@@ -34,7 +34,7 @@ for (const width of [390, 820]) test(`two picture-only randomizers exhaust decks
 });
 for (const width of [390, 1366]) test(`translations, game grammar table and block-seven journeys at ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: 1000 });
-  await page.goto('/#/lessons/lesson-1'); await topic(page, 'translations', width);
+  await page.goto('/#/lessons/lesson-1'); await topic(page, 'affirmative', width);
   const translation = 'affirmative/affirm-write/affirm-translate-01';
   if(width<=600) await page.getByLabel('Choose Lesson 1 section').selectOption(translation);
   else await page.locator('.ps2-subnav a').filter({hasText:'Переведи предложение на английский · 1–4'}).click();
@@ -85,13 +85,13 @@ test('expanded sidebar scrolls to every remaining topic on a short tablet viewpo
  const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
  await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
- await expect(nav.getByRole('button')).toHaveCount(11);
+ await expect(nav.getByRole('button')).toHaveCount(10);
  expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
 });
 test('active topic toggles subsections without resetting the exercise or draft',async({page})=>{
  await page.setViewportSize({width:1366,height:900});await page.goto('/#/lessons/lesson-1');
  const nav=page.getByRole('navigation',{name:'Lesson 1 topics'});
- const topic=nav.getByRole('button').filter({hasText:'Переведи предложение на английский'});await topic.click();
+ const topic=nav.getByRole('button').filter({hasText:'Affirmative Sentences'});await topic.click();
  await page.locator('.ps2-subnav a').filter({hasText:'Переведи предложение на английский · 1–4'}).click();
  const input=page.getByLabel('Врач работает в больнице.',{exact:true});await input.fill('The doctor works at the hospital.');
  await topic.click();await expect(topic).toHaveAttribute('aria-expanded','false');await expect(page.locator('.ps2-subnav')).toHaveCount(0);

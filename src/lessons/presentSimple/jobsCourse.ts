@@ -3,7 +3,6 @@ import {jobs,jobCategories} from './jobsData';
 const source=(n:number)=>`Go Getter 3 Student’s Book, p. 6, Exercise ${n}. Учебная цель сохранена; интерактивный формат и дополнительные формулировки авторские.`;
 const jobTasks=(kind:string,make:(job:typeof jobs[number])=>string):Task[]=>jobs.map(job=>({id:`jobs-${kind}-${job.id}`,prompt:make(job),job:job.id}));
 export const jobQuestions:Unit={id:'jobs-questions',title:'Ask about their jobs',text:'Преврати утверждение в вопрос с Does. Напиши вопрос целиком.',book:source(4),tasks:jobTasks('question',job=>`A${job.name==='artist'?'n':''} ${job.name} ${job.action} ${job.place}.`)};
-export const jobShort:Unit={id:'jobs-short',title:'Quick job answers',text:'Напиши краткий ответ по отметке «Да» или «Нет».',tasks:jobs.slice(5,10).map((job,i)=>({id:`jobs-short-${job.id}`,prompt:`Does the ${job.name} go to work ${job.transport}? — ${i%2?'Нет':'Да'}`,job:job.id})),book:source(4)};
 export const jobFrequency:Unit={id:'jobs-frequency',title:'A working day',text:'Вставь наречие в правильное место и перепиши предложение целиком.',book:source(5),tasks:jobs.slice(10).map((job,i)=>({id:`jobs-frequency-${job.id}`,prompt:`The ${job.name} goes to work ${job.transport}. (${['always','usually','often','sometimes','never'][i]})`,job:job.id}))};
 const mini=(id:string,prompt:string,options?:string[]):Task=>({id:`qw-${id}`,prompt,options});
 export const questionWordUnits:Unit[]=[

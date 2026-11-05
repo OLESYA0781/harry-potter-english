@@ -18,18 +18,18 @@ Audited main at b026e6506f5a9a35e42223fa36e3825a53bc40c7. Printed page 6 of the 
 | Ex. 1 Emma’s Uncle | Short authored dialogue retaining Eric/artist, Madrid, Eva/chef/restaurant; four one-word gaps and two comprehension sentences. No purported book audio. | The Jobs Workshop → Emma’s Uncle |
 | Ex. 2 Jobs | All 15 words with authored full-person SVG scenes, clothing/tools/workplace details, Russian translations and optional pronunciation; three cards at a time. Teacher repetition prompts appear only in Teacher mode. | 00 My Vocabulary |
 | Ex. 3 Job groups | Fifteen illustrated cards; independent checkboxes allow each job in several categories. No single supposedly correct allocation. | The Jobs Workshop → Where Do People Work? |
-| Ex. 4 Question Words | Explicit formula, five Russian explanations/examples/mini-tasks, subject-Who exception, short word-choice task; five Harry questions each with word choice and full written question. | 06 Questions → Question Words; Workshop → Questions about Harry’s dad |
+| Ex. 4 Question Words | Explicit formula, five Russian explanations/examples/mini-tasks, subject-Who exception, short word-choice task; five Harry questions each with word choice and full written question. | 08 Question Words; Workshop → Questions about Harry’s dad |
 | Ex. 5 Factfile | Exact five supplied Peter Nichols facts, illustrated doctor card visible on both answer pages; five full written answers. | Workshop → Job Factfile |
 | Ex. 6 Interview | Teacher-mode-only job chooser and two independently saved blank five-field forms, one per role-swapped round. | Workshop → Job Interview |
 | Authored games | Guess My Job covers all 15 job illustrations/hints, written job and one/two questions, plus gated oral prompts. Question Machine offers all five question words, removable/reusable word chunks and gated oral follow-up. | Workshop → Guess My Job / The Question Machine |
 
-The original 95 response prompts stay in place. Each profession is additionally used in Do/Does question practice, as well as grouping and picture-description practice. Short-answer and frequency units receive five job prompts each. Transport and workplace contexts connect existing vocabulary with the new jobs. Translation practice remains last in block 03.
+The original 95 response prompts stay in place. Each profession is additionally used in Do/Does question practice, as well as grouping and picture-description practice. The frequency unit receives five job prompts. Transport and workplace contexts connect existing vocabulary with the new jobs. Translation practice remains last in block 03.
 
 ## Storage and completion
 
 No new Supabase tables, migrations, Auth, RLS, queue or conflict logic. New fields use new stable IDs within the existing schema-v2 course response map. Existing selected page IDs also remain valid.
 
-There are 186 required responses, 11 topics and 10 additional optional interview fields. Category selections and chunk order serialize as validated JSON strings. Categories count once at least one valid category is selected. Constructed questions count only once every chunk is used exactly once; grammar/order correctness is not required and no answer is revealed. Empty selections and reset questions save as empty strings. Partial questions survive reload and cloud restoration. Optional interview fields, role selection and job choices do not block completion; pupil access to Teacher mode is unchanged.
+There are 181 required responses, 12 topics and 10 additional optional interview fields. Category selections and chunk order serialize as validated JSON strings. Categories count once at least one valid category is selected. Constructed questions count only once every chunk is used exactly once; grammar/order correctness is not required and no answer is revealed. Empty selections and reset questions save as empty strings. Partial questions survive reload and cloud restoration. Optional interview fields, role selection and job choices do not block completion; pupil access to Teacher mode is unchanged.
 
 The interview has one page with two rounds of five fields; all other practice pages contain at most four tasks. Newly introduced spoken instructions and answer hints are gated by Teacher mode. Reading and Peter’s factfile remain visible on every related answer page.
 
@@ -40,3 +40,7 @@ Model coverage checks all 15 jobs across practice types, every source exercise, 
 Jobs in action was removed at the owner’s request. Its 15 answers remain stored but are excluded from completion. Saved positions in that unit resume at the following translation practice.
 
 Jobs: make negatives was also removed at the owner’s request. Its 15 answers remain stored without counting toward completion; saved positions resume at Questions. The original negative-sentence exercises are unchanged.
+
+Question Words is now a standalone topic immediately after Adverbs of Frequency. All seven units and ten responses retain their original page and task IDs.
+
+Quick job answers was removed at the owner’s request; original short-answer practice remains. Historical job short answers are retained without counting toward progress, and their saved positions resume at Present Simple vs To Be.

@@ -23,6 +23,7 @@ export function pageIndex(course:Course){
  if(course.activePage.startsWith('transport/transport-gaps') || course.activePage.startsWith('transport/transport-write'))return pages.findIndex(page=>page.unit.id==='journey-frequency');
  if(course.activePage.startsWith('transport/transport-match/'))return pages.findIndex(page=>page.unit.id==='transport-match');
  if(course.activePage.startsWith('transport/transport-cards'))return pages.findIndex(page=>page.topicId==='transport');
+ if(course.activePage.startsWith('short-answers/jobs-short/'))return pages.findIndex(page=>page.topicId==='to-be');
  if(course.activePage.startsWith('negative/jobs-negatives/'))return pages.findIndex(page=>page.topicId==='questions');
  if(course.activePage.startsWith('affirmative/jobs-affirmative/'))return pages.findIndex(page=>page.unit.id==='affirm-write');
  if(course.activePage.startsWith('affirmative/affirm-write/'))return pages.findIndex(page=>page.unit.id==='affirm-write');

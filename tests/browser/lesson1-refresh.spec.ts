@@ -78,3 +78,13 @@ for (const width of [390,1366]) test(`every topic offers direct subsection navig
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
 });
+test('expanded sidebar scrolls to every remaining topic on a short tablet viewport',async({page})=>{
+ await page.setViewportSize({width:820,height:700});await page.goto('/#/lessons/lesson-1');
+ const nav=page.getByRole('navigation',{name:'Lesson 1 topics'});
+ await nav.getByRole('button').filter({hasText:'When Do We Use'}).click();
+ const last=nav.getByRole('button').filter({hasText:'Present Simple vs To Be'});
+ await last.scrollIntoViewIfNeeded();await expect(last).toBeInViewport();await last.click();
+ await expect(page.locator('.ps2-heading h1')).toHaveText('Present Simple vs To Be');
+ await expect(nav.getByRole('button')).toHaveCount(9);
+ expect(await nav.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
+});

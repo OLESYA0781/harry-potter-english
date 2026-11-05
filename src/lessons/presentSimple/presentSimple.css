@@ -51,3 +51,10 @@
  .ps2-helper-table .ps2-table-head,.ps2-table.ps2-helper-table .ps2-table-row {grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr)}
  .ps2-helper-token {font-size:23px;padding:10px 5px}
 }
+
+/* Keep every topic reachable when expanded subsections exceed the viewport. */
+.ps2-sidebar {overflow:hidden}
+.ps2-sidebar > .brand,.ps2-sidebar > .lesson-label {flex-shrink:0}
+.ps2-sidebar > nav {flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:#d7bd71 #243e35}
+.ps2-sidebar .ps2-subnav a {color:#e5e8d8}
+.ps2-sidebar .ps2-subnav a:hover,.ps2-sidebar .ps2-subnav a[aria-current] {color:#183e30}

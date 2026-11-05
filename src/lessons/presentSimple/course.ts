@@ -84,16 +84,20 @@ const topicDefinitions:Topic[]=[
 ];
 // Retire the former third block without changing historical response IDs or dictionaries.
 const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(topic=>
+ topic.id==='affirmative'?{...topic,units:topic.units.filter(unit=>unit.id!=='affirm-write')}:
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:
  topic.id==='frequency'?{...topic,units:[...topic.units,journeyPractice]}:topic);
+retainedTopics.push({id:'translations',title:'Переведи предложение на английский',units:[topicDefinitions.find(topic=>topic.id==='affirmative')!.units.find(unit=>unit.id==='affirm-write')!]});
 // Frequency is block 7: its theory precedes the moved journeys practice.
-const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be'];
+const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','short-answers','to-be','translations'];
 export const topics:Topic[]=topicOrder.map(id=>retainedTopics.find(topic=>topic.id===id)!);
 export type Page={id:string;topicId:string;unit:Unit;tasks:Task[];first:boolean};
 // Four tasks per screen keeps tablet and phone pages short. IDs never depend on slide numbers.
 export const pages:Page[]=topics.flatMap(topic=>topic.units.flatMap(unit=>{
  const list=unit.tasks||[];
+ // Preserve existing translation page IDs as well as response IDs after moving the unit.
+ const pageTopic=unit.id==='affirm-write'?'affirmative':topic.id;
  if(!list.length)return [{id:`${topic.id}/${unit.id}`,topicId:topic.id,unit,tasks:[],first:true}];
- return Array.from({length:Math.ceil(list.length/4)},(_,index)=>({id:`${topic.id}/${unit.id}/${list[index*4].id}`,topicId:topic.id,unit,tasks:list.slice(index*4,index*4+4),first:index===0}));
+ return Array.from({length:Math.ceil(list.length/4)},(_,index)=>({id:`${pageTopic}/${unit.id}/${list[index*4].id}`,topicId:topic.id,unit,tasks:list.slice(index*4,index*4+4),first:index===0}));
 }));
 export const allTasks=topics.flatMap(topic=>topic.units.flatMap(unit=>unit.tasks||[]));

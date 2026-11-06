@@ -1,0 +1,6 @@
+import type {CSSProperties,ReactNode} from 'react';
+export type DifferenceArea={left:number;top:number;width:number;height:number};
+/** Shared picture frame and percentage hotspots used by Trial and Lesson 1. */
+export default function DifferencePicture({variant,count,found,areas,onFind,sceneClassName='',sceneStyle,description,children}:{variant:'A'|'B';count:number;found:readonly number[];areas:readonly DifferenceArea[];onFind:(index:number)=>void;sceneClassName?:string;sceneStyle?:CSSProperties;description?:string;children?:ReactNode}){
+ return <figure className="difference-figure"><figcaption><strong>Picture {variant}</strong><span>Tap a difference</span></figcaption><div className={`difference-scene ${sceneClassName}`.trim()} aria-label={description||`Picture ${variant}: a school common room. Find ${count} differences.`} style={sceneStyle}>{children}{areas.map((area,i)=><button key={i} type="button" className={`difference-hotspot ${found.includes(i)?'found':''}`} style={Object.fromEntries(Object.entries(area).map(([key,value])=>[key,`${value}%`])) as CSSProperties} aria-label={`Compare area ${i+1} in picture ${variant}`} aria-pressed={found.includes(i)} onClick={()=>onFind(i)}>{found.includes(i)&&<span>{i+1} ✓</span>}</button>)}</div></figure>;
+}

@@ -11,3 +11,5 @@ CSS displays individual cells using background positions, preserving aspect rati
 - `differences.webp`: two side-by-side finished square common-room illustrations with fully opaque RGB backgrounds. Six differences: Ron’s action, book count, ball location, cup presence, Hermione sitting on the floor / on the sofa, and daytime / nighttime through the window. Notebook and pencil are identical distractors. Interactive regions are mapped in `src/Differences.tsx`.
 
 - `common-room.webp`: one fully opaque RGB landscape illustration of all six characters together, each doing their corresponding everyday action. `src/CommonRoomScene.tsx` provides six accessible character hotspots and optional pan/zoom. Separate matching cards below are unchanged.
+
+- `lesson-1/warmup-room.webp` and `lesson-1/warmup-pieces.webp`: new square common-room background and transparent 3×3 cutout atlas matching the original differences artwork. The two scenes share all unchanged layers and have exactly seven logical differences. Full mapping in `lesson-1/README.md` and `src/lessons/presentSimple/WarmupDifferences.tsx`.

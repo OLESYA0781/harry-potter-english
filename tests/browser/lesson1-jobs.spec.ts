@@ -8,6 +8,8 @@ async function section(page:Page,unit:string,last=false){
 }
 for(const width of [390,820,1180,1440])test(`page-six illustrated activities fit ${width}px and persist selections`,async({page})=>{
  await page.setViewportSize({width,height:1000});await page.goto('/#/lessons/lesson-1');
+ if(width<=600)await page.getByLabel('Choose Lesson 1 topic').selectOption('jobs');
+ else await page.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button').filter({hasText:'My Vocabulary'}).click();
  // Mobile selectors are visually hidden on larger screens; use desktop section links there.
  const navigate=async(unit:string,last=false)=>{
   if(width<=600)return section(page,unit,last);

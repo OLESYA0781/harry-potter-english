@@ -27,6 +27,6 @@ it('preserves old and new responses in one unchanged course record, and excludes
  const after=updateCourse(before,course=>({...course,responses:{...course.responses,'gg6-groups-vet':'["Work outdoors","Work with animals"]'}}));
  expect(readCourse(after).responses['affirm-translate-01']).toBe('Old draft');expect(readCourse(after).responses['gg6-machine-who']).toBe('[2,0]');
  expect(allTasks.some(task=>task.id.startsWith('gg6-interview-'))).toBe(false);
- const full=updateCourse(after,course=>({...course,seen:topics.map(topic=>topic.id),responses:{...course.responses,...Object.fromEntries(allTasks.map(task=>[task.id,task.categories?JSON.stringify([task.categories[0]]):task.chunks?JSON.stringify(task.chunks.map((_,i)=>i)):'Any own answer']))}}));
+ const full=updateCourse(after,course=>({...course,seen:topics.map(topic=>topic.id),responses:{...course.responses,...Object.fromEntries(allTasks.map(task=>[task.id,task.game?JSON.stringify({version:1,found:['cat','room','cup','ron','books','picture','hermione']}):task.categories?JSON.stringify([task.categories[0]]):task.chunks?JSON.stringify(task.chunks.map((_,i)=>i)):'Any own answer']))}}));
  expect(lesson1Summary(full).status).toBe('completed');
 });

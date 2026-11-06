@@ -551,3 +551,18 @@ test('standalone Question Machine restores drafts while preserving retired Works
   const saved=await rpc();const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;expect(responses['affirm-translate-01']).toBe('Keep my earlier translation');expect(responses['gg6-groups-artist']).toBe('["Work outdoors","Work indoors"]');
  }finally{await second.close();}
 });
+
+test('Lesson 1 warm-up discoveries sync across devices and replay preserves Trial, Lesson 0 and written answers',async({page,context,browser})=>{
+ await rpc({}, {id:'warmup-existing-pupil',fields:{'answers:differencesFound':[0,2],'answers:differencesSceneVersion':2,'answers:@vika/lesson/lesson-0':{version:1,data:{...initial,answers:{'negative:157-5':'Keep Lesson 0'}}},'answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{'present-simple:v2':{schemaVersion:2,activePage:'warmup/warmup-differences/lesson1-warmup-differences:v1',seen:[],responses:{'affirm-translate-01':'Keep my translation'}}}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-1');
+ const game=page.locator('.ps2-warmup');await game.getByRole('button',{name:'Compare area 1 in picture A',exact:true}).click();await game.getByRole('button',{name:'Compare area 5 in picture B',exact:true}).click();await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');const otherGame=other.locator('.ps2-warmup');await expect(otherGame.locator('.difference-counter')).toContainText('2 / 7');
+  for(const index of [1,2,3,5,6])await otherGame.locator('.difference-scene').first().getByRole('button').nth(index).click();await sync(other);await sync(page);
+  await expect(game.locator('.difference-counter')).toContainText('7 / 7');await game.getByRole('button',{name:'Play Again',exact:true}).click();await sync(page);await sync(other);
+  await expect(otherGame.locator('.difference-counter')).toContainText('0 / 7');
+  const saved=await rpc();expect(saved.fields['answers:differencesFound'].value).toEqual([0,2]);expect(saved.fields['answers:differencesSceneVersion'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers['negative:157-5']).toBe('Keep Lesson 0');
+  const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;expect(responses['affirm-translate-01']).toBe('Keep my translation');expect(JSON.parse(responses['lesson1-warmup-differences:v1'])).toMatchObject({found:[],completedOnce:true});
+ }finally{await second.close();}
+});

@@ -1,3 +1,4 @@
+import {warmupKey} from './warmupState';
 import {jobQuestions,questionWordUnits,questionMachineUnit} from './jobsCourse';
 // Lesson 1 schema v2. Vocabulary lists: Go Getter 3 SB p. 5.
 // All practice below is author-created, not a transcription of book exercises.
@@ -6,8 +7,8 @@ export const places:Word[]=[['bank','банк'],['café','кафе'],['cinema','
 export const transport:Word[]=[['bike','велосипед'],['boat','лодка'],['bus','автобус'],['car','машина'],['motorbike','мотоцикл'],['plane','самолёт'],['taxi','такси'],['train','поезд'],['tram','трамвай'],['underground','метро']].map(([en,ru])=>({en,ru,art:en}));
 export const expressions=[['go to school','ходить в школу'],['play tennis','играть в теннис'],['hang out','проводить время вместе'],['by bike','на велосипеде'],['by bus','на автобусе'],['by car','на машине'],['by train','на поезде'],['on foot','пешком'],['every day','каждый день'],['always','всегда'],['usually','обычно'],['often','часто'],['sometimes','иногда'],['never','никогда']];
 export const categories=['Привычка','Факт','Чувство или состояние','Расписание'];
-export type Task={id:string;prompt:string;options?:string[];art?:string;long?:boolean;job?:string;categories?:string[];chunks?:string[];optional?:boolean;pair?:{id:string;question:string;part:'question'|'answer'}};
-export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all'|'jobs';visual?:'book'|'order'|'frequency'|'randomizer';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];dialogue?:string[][];factfile?:boolean;teacherOnly?:boolean;jobInterview?:boolean;tasks?:Task[];book?:string};
+export type Task={id:string;prompt:string;options?:string[];art?:string;long?:boolean;job?:string;categories?:string[];chunks?:string[];optional?:boolean;game?:'warmup-differences';pair?:{id:string;question:string;part:'question'|'answer'}};
+export type Unit={id:string;title:string;text?:string;examples?:string[][];formula?:string[];table?:{headers:string[];rows:string[][]};words?:'places'|'transport'|'all'|'jobs';visual?:'book'|'order'|'frequency'|'randomizer'|'differences';townScene?:{index:number;alt:string;opens:string};teacherHints?:string[];dialogue?:string[][];factfile?:boolean;teacherOnly?:boolean;jobInterview?:boolean;tasks?:Task[];book?:string};
 export type Topic={id:string;title:string;units:Unit[]};
 const tasks=(prefix:string,prompts:string[],options?:string[]):Task[]=>prompts.map((prompt,i)=>({id:`${prefix}-${String(i+1).padStart(2,'0')}`,prompt,options}));
 const wordsMatch=(prefix:string,words:Word[],picture=false):Task[]=>words.map(word=>({id:`${prefix}-${word.en}`,prompt:picture?`Назови транспорт: ${word.ru}`:word.en,art:picture?word.art:undefined,options:picture?transport.map(w=>w.en).slice().reverse():places.map(w=>w.ru).slice().reverse()}));
@@ -89,11 +90,12 @@ const retainedTopics=topicDefinitions.filter(topic=>topic.id!=='places').map(top
  topic.id==='questions'?{...topic,units:[...topic.units,jobQuestions]}:
  topic.id==='transport'?{...topic,units:topic.units.filter(unit=>!['transport-cards','transport-gaps','transport-write'].includes(unit.id))}:
  topic);
+retainedTopics.push({id:'warmup',title:'Warm-up — Back to Hogwarts!',units:[{id:'warmup-differences',title:'Hogwarts: Find the Differences',visual:'differences',tasks:[{id:warmupKey,prompt:'Find seven differences',game:'warmup-differences'}],book:'Авторская разминка Lesson 1 по лексике и to be из Lesson 0. Общий фон и восемь вырезанных элементов иллюстрации образуют семь отличий; озвучивание ответов не проверяется автоматически.'}]});
 retainedTopics.push({id:'question-words',title:'Question Words',units:questionWordUnits});
 retainedTopics.push({id:'question-machine',title:'The Question Machine',units:[questionMachineUnit]});
 retainedTopics.push({id:'journeys',title:'Write your journeys',units:[journeyPractice]});
 // Journey practice is a separate final topic; Frequency keeps its existing numbering.
-const topicOrder=['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine','journeys'];
+const topicOrder=['warmup','jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine','journeys'];
 export const topics:Topic[]=topicOrder.map(id=>retainedTopics.find(topic=>topic.id===id)!);
 export type Page={id:string;topicId:string;unit:Unit;tasks:Task[];first:boolean};
 // Four tasks per screen keeps tablet and phone pages short. IDs never depend on slide numbers.

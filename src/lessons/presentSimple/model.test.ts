@@ -6,7 +6,7 @@ import {presentSimpleLesson,lessons,toBeLesson,trialLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 
 it('has the requested topics after removing Word Order, exact book vocabulary, and unique stable response/page IDs',()=>{
- expect(topics.map(topic=>topic.id)).toEqual(['jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine','journeys']);
+ expect(topics.map(topic=>topic.id)).toEqual(['warmup','jobs','welcome','uses','affirmative','transport','negative','questions','frequency','question-words','short-answers','to-be','question-machine','journeys']);
  expect(places.map(word=>word.en)).toEqual(['bank','café','cinema','hospital','hotel','museum','park','restaurant','stadium','theatre']);
  expect(transport.map(word=>word.en)).toEqual(['bike','boat','bus','car','motorbike','plane','taxi','train','tram','underground']);
  expect(new Set(allTasks.map(task=>task.id)).size).toBe(allTasks.length);
@@ -14,14 +14,14 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(pages.flatMap(page=>page.tasks.filter(task=>!task.optional).map(task=>task.id))).toEqual(allTasks.map(task=>task.id));
  expect(pages.every(page=>page.tasks.length<=4||page.unit.jobInterview)).toBe(true);
  const counts=Object.fromEntries(topics.map(topic=>[topic.id,topic.units.flatMap(unit=>(unit.tasks||[]).filter(task=>!task.optional)).length]));
- expect(counts).toEqual({jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:13,'question-words':5,'to-be':8,'question-machine':5,journeys:10});
+ expect(counts).toEqual({warmup:1,jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:13,'question-words':5,'to-be':8,'question-machine':5,journeys:10});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
  expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
 });
 it('requires every nonblank response and viewed topic but never judges grammar',()=>{
  expect(lesson1Summary(initial)).toMatchObject({percent:0,status:'not-started'});
- const state=updateCourse(initial,course=>({...course,seen:topics.map(topic=>topic.id),responses:Object.fromEntries(allTasks.map(task=>[task.id,task.categories?JSON.stringify([task.categories[0]]):task.chunks?JSON.stringify(task.chunks.map((_,i)=>task.chunks!.length-1-i)):'  my own wrong answer!\n ']))}));
+ const state=updateCourse(initial,course=>({...course,seen:topics.map(topic=>topic.id),responses:Object.fromEntries(allTasks.map(task=>[task.id,task.game?JSON.stringify({version:1,found:['cat','room','cup','ron','books','picture','hermione']}):task.categories?JSON.stringify([task.categories[0]]):task.chunks?JSON.stringify(task.chunks.map((_,i)=>task.chunks!.length-1-i)):'  my own wrong answer!\n ']))}));
  expect(lesson1Summary(state)).toMatchObject({percent:100,status:'completed'});
  const missing=updateCourse(state,course=>({...course,responses:{...course.responses,'compare-01':' \n '}}));
  expect(lesson1Summary(missing).status).toBe('in-progress');
@@ -68,7 +68,7 @@ it('all retired Places screens resume at Affirmative and preserve historical ans
  }
  expect(topics.some(topic=>topic.id==='places')).toBe(false);
  expect(pages.some(page=>page.topicId==='places')).toBe(false);
- expect(allTasks).toHaveLength(120);
+ expect(allTasks).toHaveLength(121);
 });
 
 it('Word Order positions also resume at Affirmative without dropping historical responses',()=>{
@@ -79,7 +79,7 @@ it('Word Order positions also resume at Affirmative without dropping historical 
 });
 
 it('moves journeys to the end and safely resolves every retired transport/translation position',()=>{
- expect(topics[7].id).toBe('frequency');
+ expect(topics.findIndex(topic=>topic.id==='frequency')).toBe(8);
  expect(topics.find(t=>t.id==='transport')!.units.map(u=>u.id)).toEqual(['travel-rule','transport-match']);
  for(const activePage of ['transport/transport-gaps/transport-gap-01','transport/transport-write/transport-write-01'])expect(pages[pageIndex({...freshCourse(),activePage})].unit.id).toBe('journey-frequency');
  expect(pages[pageIndex({...freshCourse(),activePage:'transport/transport-cards'})].unit.id).toBe('travel-rule');
@@ -101,7 +101,7 @@ it('retires the final challenge and standalone dictionary without deleting saved
 it('places all six translations at the end of block three with stable IDs',()=>{
  const last=pages.filter(page=>page.unit.id==='affirm-write');
  expect(pages.filter(page=>page.topicId==='affirmative').slice(-last.length)).toEqual(last);
- expect(topics[3].units.at(-1)?.id).toBe('affirm-write');
+ expect(topics.find(topic=>topic.id==='affirmative')!.units.at(-1)?.id).toBe('affirm-write');
  expect(last[0].id).toBe('affirmative/affirm-write/affirm-translate-01');
  expect(last.every(page=>page.topicId==='affirmative')).toBe(true);
 });

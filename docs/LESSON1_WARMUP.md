@@ -12,12 +12,12 @@ The new first topic is **Warm-up — Back to Hogwarts!**, before My Vocabulary a
 
 ## Exactly seven differences
 
-New generated artwork matches the existing reference's warm stone room, golden daylight, detailed carved furniture, burgundy textiles and friendly 3D children. `public/art/lesson-1/warmup-room.webp` is the same square background in both pictures. `warmup-pieces.webp` is one transparent 3×3 atlas. CSS crops and positions its cells without stretching; no independently redrawn second room can introduce extra differences.
+New generated artwork matches the existing reference's warm stone room, golden daylight, detailed carved furniture, burgundy textiles and friendly 3D children. `public/art/lesson-1/warmup-room.webp` is the same square background in both pictures. `warmup-pieces.webp` is one transparent 3×3 atlas. A separate `warmup-mess.webp` overrides only Picture B’s clutter with more crumpled parchment, loose scraps and sweet wrappers. CSS crops and positions its cells without stretching; no independently redrawn second room can introduce extra differences.
 
 | ID | Picture A | Picture B |
 | --- | --- | --- |
 | cat | Same cat on floor | Same cat on sofa |
-| room | Clean floor | School bag, scarf and papers on floor |
+| room | Clean floor | School bag, scarf, numerous crumpled papers, torn sheets and sweet wrappers on floor |
 | cup | Same tea cup on table | Same tea cup on floor |
 | ron | Tired/yawning face | Alert face; the body layer is identical |
 | books | Two red books | The same two books plus one |
@@ -41,3 +41,5 @@ Play Again resets only `found` in this round. Earlier lesson answers, other less
 ## Validation
 
 Unit tests cover unique discoveries, malformed/duplicate state, round-only reset, retained Trial/written answers, completion and seven layer/coordinate definitions. Browser tests click the actual scaled coordinates of all seven regions at phone, tablet portrait/landscape and desktop sizes; verify paired highlights, repeat clicks, reload, keyboard, reset, minimum touch targets and teacher text below images. Trial's original six-difference regression tests check the shared-renderer extraction. Isolated cloud fixtures verify discoveries and replay across devices without altering Trial, Lesson 0 or earlier translations. Both root and GitHub Pages production paths are built and checked. These are Chromium emulations, not physical-device or Russian-network claims.
+
+Picture B’s rubbish was expanded at the owner’s request. Its single room/mess hotspot was widened to cover the visible pile; no extra difference or state version was added. Picture A and all other visual elements are unchanged.

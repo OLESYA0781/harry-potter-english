@@ -8,3 +8,5 @@ Generated specifically for this project from the existing `../differences.webp` 
 CSS in `WarmupDifferences.tsx` displays atlas cells at 300% background size. Both rooms share the same backdrop and props; only the seven specified logical differences change. Ron's body is shared across both pictures and his face is clipped separately. The final scene composition and hotspot coordinates are in that component; state is independently namespaced in `warmupState.ts`.
 
 PNG generator outputs were encoded to WebP with alpha retained; no parts of either illustration were independently repainted to make a second background. See `docs/LESSON1_WARMUP.md` for coordinate, state and validation details.
+
+- `warmup-mess.webp`: a larger standalone transparent schoolbag/scarf/rubbish sprite used only in Picture B instead of atlas cell 7. More crumpled parchment, torn sheets and sweet wrappers make the room visibly dirtier. The entire mess remains one difference with the same saved ID and one scaled hotspot.

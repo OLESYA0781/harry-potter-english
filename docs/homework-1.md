@@ -1,3 +1,5 @@
+> Historical Trial Lesson homework documentation. For the current Lesson 1 homework at `#/homework/1`, see [HOMEWORK_LESSON1.md](HOMEWORK_LESSON1.md).
+
 # Homework 1 — My First Hogwarts Mission
 
 Open Trial Lesson → Homework. Lesson continues to show the original twelve chapters.

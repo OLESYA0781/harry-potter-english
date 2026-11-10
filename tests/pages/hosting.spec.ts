@@ -42,6 +42,11 @@ for (const [name, width, height] of [
       await page.getByRole('link', { name: 'Main Menu', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     }
+    await page.goto('./#/homework/1');
+    await expect(page.getByRole('heading',{name:'Lesson 1 — Present Simple Homework',exact:true})).toBeVisible();
+    const anna=page.locator('.hw1-anna img');await anna.scrollIntoViewIfNeeded();await expect(anna).toBeVisible();await expect.poll(()=>anna.evaluate(img=>(img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await page.reload();await expect(page.locator('.hw1-task')).toHaveCount(7);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
     await page.goto('./#/vocabulary');
     await expect(page.locator('.vocab-entry')).toHaveCount(57);
     await page.reload();

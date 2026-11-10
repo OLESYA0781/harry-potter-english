@@ -10,3 +10,5 @@ CSS in `WarmupDifferences.tsx` displays atlas cells at 300% background size. Bot
 PNG generator outputs were encoded to WebP with alpha retained; no parts of either illustration were independently repainted to make a second background. See `docs/LESSON1_WARMUP.md` for coordinate, state and validation details.
 
 - `warmup-mess.webp`: a larger standalone transparent schoolbag/scarf/rubbish sprite used only in Picture B instead of atlas cell 7. More crumpled parchment, torn sheets and sweet wrappers make the room visibly dirtier. The entire mess remains one difference with the same saved ID and one scaled hotspot.
+
+- `homework-anna.webp`: newly generated square storybook illustration of Anna, a vet in a green coat with a cat and dog in a bright magical animal hospital. Generated using the existing warm-up artwork as a style reference, then encoded to WebP. Used only in Lesson 1 homework Task 4; no external image dependency.

@@ -20,7 +20,7 @@ for (const [width, height] of [[320, 568], [360, 740], [390, 844], [430, 932], [
       expect(linkBox.x + linkBox.width).toBeLessThanOrEqual(width);
     }
     await menu.getByRole('link', { name: /Homework 1/ }).click();
-    await expect(page.getByRole('heading', { name: 'Homework 1', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Lesson 1 — Present Simple Homework', exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   });
 }

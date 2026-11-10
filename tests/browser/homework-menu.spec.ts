@@ -1,21 +1,9 @@
-import { test, expect } from '@playwright/test';
-test('Homework 1 menu keeps its card and hides assignments after reload', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await page.locator('.homework-menu > summary').click();
-  await page.getByRole('link', { name: /Homework 1/ }).click();
-  await expect(page).toHaveURL(/#\/homework\/1$/);
-  await expect(page.getByRole('heading', { name: 'Homework 1', exact: true })).toBeVisible();
-  await expect(page.locator('.hw-field, .hw-words, .homework-sidebar')).toHaveCount(0);
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'Homework 1', exact: true })).toBeVisible();
-  await page.getByRole('tab', { name: 'Lesson', exact: true }).click();
-  await page.getByRole('tab', { name: 'Homework 1', exact: true }).click();
-  await expect(page.locator('.hw-field, .hw-words')).toHaveCount(0);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  await page.locator('.homework-menu > summary').click();
-  await page.getByRole('link', { name: /Homework 0/ }).click();
-  await expect(page.getByRole('heading', { name: 'Hogwarts Homework — The Magic of To Be', exact: true })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'Hogwarts Homework — The Magic of To Be', exact: true })).toBeVisible();
+import {test,expect} from '@playwright/test';
+for(const width of [390,1440])test(`homework is newest-first, independent of lesson order, after reload at ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:1000});await page.goto('/');
+ const menu=page.locator('.homework-menu');await menu.locator('summary').click();await expect(menu.locator('li strong')).toHaveText(['Homework 1','Homework 0']);
+ await menu.getByRole('link',{name:/Homework 1/}).click();await expect(page.getByRole('heading',{name:'Lesson 1 — Present Simple Homework',exact:true})).toBeVisible();
+ await page.reload();await menu.locator('summary').click();await expect(menu.locator('li strong')).toHaveText(['Homework 1','Homework 0']);
+ await menu.getByRole('link',{name:/Homework 0/}).click();await expect(page.getByRole('heading',{name:'Hogwarts Homework — The Magic of To Be',exact:true})).toBeVisible();
+ await page.locator('.lesson-menu:not(.homework-menu) > summary').click();await expect(page.locator('.lesson-menu:not(.homework-menu) li strong')).toHaveText(['Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
 });

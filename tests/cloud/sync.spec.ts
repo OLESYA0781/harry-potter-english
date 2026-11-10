@@ -275,13 +275,13 @@ test('an old cloud position in a removed chapter keeps its answers and revisions
   expect(result.fields['ratings:reading'].value).toBe(2);
 });
 
-test('hidden Homework 1 retains existing cloud drafts across devices', async ({ page, context, browser }) => {
+test('new Homework 1 retains archived Trial homework drafts across devices', async ({ page, context, browser }) => {
   const draft = '  Hermione usualy drink tea!!\nI is unsure.  ';
   const key = '@vika/lesson/trial-homework/mistake-0';
   await rpc({}, {id:'old-homework',fields:{['answers:'+key]:draft,'answers:diary':'Existing lesson answer','ratings:reading':2}});
   await route(context); await login(page);
   await page.goto('/#/homework/1');
-  await expect(page.getByRole('heading',{name:'Homework 1',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Lesson 1 — Present Simple Homework',exact:true})).toBeVisible();
   await expect(page.locator('.hw-field, .hw-words')).toHaveCount(0);
   await page.reload(); await sync(page);
   const second=await browser.newContext(); await route(second);
@@ -564,5 +564,30 @@ test('Lesson 1 warm-up discoveries sync across devices and replay preserves Tria
   await expect(otherGame.locator('.difference-counter')).toContainText('0 / 7');
   const saved=await rpc();expect(saved.fields['answers:differencesFound'].value).toEqual([0,2]);expect(saved.fields['answers:differencesSceneVersion'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers['negative:157-5']).toBe('Keep Lesson 0');
   const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;expect(responses['affirm-translate-01']).toBe('Keep my translation');expect(JSON.parse(responses['lesson1-warmup-differences:v1'])).toMatchObject({found:[],completedOnce:true});
+ }finally{await second.close();}
+});
+
+test('Lesson 1 homework syncs assignments, notebook marks and all detective answers without altering older work',async({page,context,browser})=>{
+ test.setTimeout(90000);
+ const prefix='@vika/lesson/lesson-1-homework/v1/',agency=prefix+'job-agency';
+ const oldHw0='@vika/lesson/lesson-0-homework/written/profile/hogwarts',oldTrial='@vika/lesson/trial-homework/day';
+ await rpc({}, {id:'present-simple-homework',fields:{['answers:'+oldHw0]:'Keep Homework 0',['answers:'+oldTrial]:'Keep Trial homework','answers:@vika/lesson/lesson-0':{version:1,data:{...initial,answers:{'mistake:01':'Keep Lesson 0'}}}}});
+ await route(context);await login(page,'/#/homework/1');
+ await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 1',exact:true}).click();
+ await page.getByLabel('Task 2 completed in notebook',{exact:true}).check();
+ await page.locator('#hw1-task-4 textarea').first().fill('  My own answer about Anna.\n ');await page.locator('#hw1-task-6 textarea').first().fill('  I usually do not drink tea.\n ');
+ for(let i=0;i<6;i++)await page.locator('#hw1-task-7 textarea').nth(i).fill(`  My detective answer ${i+1}!\n `);await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,'/#/homework/1');await expect(other.locator('[data-slot=paint]')).toContainText('pilot');await expect(other.getByLabel('Task 2 completed in notebook',{exact:true})).toBeChecked();
+  await expect(other.locator('#hw1-task-4 textarea').first()).toHaveValue('  My own answer about Anna.\n ');await expect(other.locator('#hw1-task-6 textarea').first()).toHaveValue('  I usually do not drink tea.\n ');
+  for(let i=0;i<6;i++)await expect(other.locator('#hw1-task-7 textarea').nth(i)).toHaveValue(`  My detective answer ${i+1}!\n `);
+  await other.reload();await expect(other.locator('#hw1-task-7 textarea').last()).toHaveValue('  My detective answer 6!\n ');
+  await context.setOffline(true);await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 2',exact:true}).click();
+  await other.getByRole('button',{name:'Select teacher',exact:true}).click();await other.getByRole('button',{name:'Place selected job in description 3',exact:true}).click();await sync(other);
+  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();await expect(page.getByText(`Поле «answers:${agency}» изменено на другом устройстве.`)).toBeVisible();
+  await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();await expect(page.locator('[data-slot=paint]')).toContainText('pilot');await expect(page.locator('[data-slot=bus]')).toContainText('teacher');
+  const saved=await rpc();expect(saved.fields['answers:'+oldHw0].value).toBe('Keep Homework 0');expect(saved.fields['answers:'+oldTrial].value).toBe('Keep Trial homework');expect(saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers['mistake:01']).toBe('Keep Lesson 0');
+  const placed=Object.values(saved.fields['answers:'+agency].value.placements);expect(new Set(placed).size).toBe(placed.length);
  }finally{await second.close();}
 });

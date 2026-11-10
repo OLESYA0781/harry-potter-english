@@ -17,8 +17,15 @@ export const transportSentences=[
 ];
 export const annaFacts=[['Name','Anna'],['Job','vet'],['Workplace','animal hospital'],['Starts work','9 a.m.'],['Travels to work','by bus'],['Usually helps','cats and dogs'],['Wears','a green coat']];
 export const interviewQuestions=[
- ['job','What does Anna do?'],['workplace','Where does Anna work?'],['start','When does Anna start work?'],['transport','How does Anna travel to work?'],['who','Who helps cats and dogs?'],['clothes','What does Anna wear at work?'],['restaurant','Does Anna work at a restaurant?'],['bus','Does Anna travel to work by bus?'],
-].map(([id,text])=>({id,text}));
+ ['job','What does Anna do?','Кем работает Анна?'],
+ ['workplace','Where does Anna work?','Где работает Анна?'],
+ ['start','When does Anna start work?','Когда Анна начинает работать?'],
+ ['transport','How does Anna travel to work?','Как Анна добирается на работу?'],
+ ['who','Who helps cats and dogs?','Кто помогает кошкам и собакам?'],
+ ['clothes','What does Anna wear at work?','Что Анна носит на работе?'],
+ ['restaurant','Does Anna work at a restaurant?','Анна работает в ресторане?'],
+ ['bus','Does Anna travel to work by bus?','Анна ездит на работу на автобусе?'],
+].map(([id,text,translation])=>({id,text,translation}));
 export const frequencyWords=['always','usually','often','sometimes','never'];
 export const negativeSentences=[
  ['morning-tea','I usually drink tea in the morning.'],['nurse-hospital','A nurse often works at a hospital.'],['plane-travel','They sometimes travel by plane.'],['brother-football','My brother always plays football.'],['emma-bike','Emma usually goes to school by bike.'],

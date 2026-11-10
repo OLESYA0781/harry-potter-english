@@ -3,7 +3,7 @@ import {agencyDescriptions,agencyJobs} from '../../src/lessons/homeworkOne/data'
 for(const width of [390,820,1180,1440])test(`seven homework tasks fit ${width}px, notebook tasks have no answer fields, and drafts persist`,async({page})=>{
  await page.setViewportSize({width,height:1000});await page.goto('/#/homework/1');
  await expect(page.locator('.hw1-task')).toHaveCount(7);await expect(page.locator('.hw1-description')).toHaveCount(15);await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(15);
- for(const number of [2,3,5]){const task=page.locator(`#hw1-task-${number}`);await expect(task).toContainText('WRITE IN YOUR NOTEBOOK');await expect(task.locator('textarea,input[type=text]')).toHaveCount(0);await task.getByRole('checkbox').check();}
+ for(const number of [2,3,5]){const task=page.locator(`#hw1-task-${number}`);await expect(task).toContainText('WRITE IN YOUR NOTEBOOK');await expect(task.locator('textarea,input[type=text]')).toHaveCount(0);}
  await expect(page.locator('#hw1-task-2 .hw1-numbered li')).toHaveCount(10);await expect(page.locator('#hw1-task-3 .hw1-numbered li')).toHaveCount(10);
  await expect(page.locator('#hw1-task-4 textarea')).toHaveCount(8);await expect(page.locator('#hw1-task-6 textarea')).toHaveCount(5);await expect(page.locator('#hw1-task-7 textarea')).toHaveCount(6);
  await expect(page.locator('#hw1-task-7 .hw1-field-prompt strong,#hw1-task-7 .hw1-field-prompt mark,#hw1-task-7 .hw1-field-prompt u')).toHaveCount(0);
@@ -11,10 +11,10 @@ for(const width of [390,820,1180,1440])test(`seven homework tasks fit ${width}px
  const inputs=page.locator('.hw1-written-card textarea');for(let i=0;i<await inputs.count();i++)await inputs.nth(i).fill(`  My answer ${i}!\n `);
  await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 1',exact:true}).click();
  await page.reload();await expect(page.locator('[data-slot=paint]')).toContainText('pilot');await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(14);
- for(let i=0;i<await inputs.count();i++)await expect(inputs.nth(i)).toHaveValue(`  My answer ${i}!\n `);for(const number of [2,3,5])await expect(page.locator(`#hw1-task-${number}`).getByRole('checkbox')).toBeChecked();
+ for(let i=0;i<await inputs.count();i++)await expect(inputs.nth(i)).toHaveValue(`  My answer ${i}!\n `);
  await expect(page.locator('.hw1-homework')).not.toContainText(/Correct!|Try again!/);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.getByRole('button',{name:/Go to Task 4:/}).click();await page.screenshot({path:`work/homework-one-${width}.png`,fullPage:true});
+ await expect(page.locator('.hw1-task-nav')).toHaveCount(0);await expect(page.locator('.hw1-notebook-done')).toHaveCount(0);await expect(page.locator('.hw1-task').last()).toHaveAttribute('id','hw1-task-3');await expect(page.locator('.hw1-question-translation')).toHaveCount(8);await page.screenshot({path:`work/homework-one-${width}.png`,fullPage:true});
 });
 test('tap/keyboard placement is unique, reversible, and does not grade incorrect matches',async({page})=>{
  await page.goto('/#/homework/1');const artist=page.getByRole('button',{name:'Select artist',exact:true});await artist.focus();await page.keyboard.press('Enter');
@@ -23,7 +23,7 @@ test('tap/keyboard placement is unique, reversible, and does not grade incorrect
  await page.getByRole('button',{name:'Return artist to the bank',exact:true}).click();await expect(page.locator('.hw1-job-bank')).toContainText('artist');await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(15);
  for(let i=0;i<agencyJobs.length;i++){await page.getByRole('button',{name:`Select ${agencyJobs[i].label}`,exact:true}).click();await page.getByRole('button',{name:`Place selected job in description ${15-i}`,exact:true}).click();}
  await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(0);await expect(page.locator('.hw1-placed .hw1-job-card')).toHaveCount(15);
- await expect(page.locator('.hw1-task-nav').getByRole('button',{name:/Go to Task 1:/})).toContainText('The Hogwarts Job Agency');
+ await expect(page.locator('.hw1-task-nav')).toHaveCount(0);
  await expect(page.locator('.hw1-homework')).not.toContainText(/Correct!|Try again!/);
 });
 test('actual mouse drag moves a card to a description and back to the bank',async({page})=>{

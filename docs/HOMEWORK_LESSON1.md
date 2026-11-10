@@ -1,8 +1,8 @@
 # Lesson 1 — Present Simple Homework
 
-Open `#/homework/1`. Seven tasks cover jobs, places, transport, routines and distinguishing to be from action verbs. Task 7 follows The Magic of Negatives and contains six unmarked erroneous sentences with empty full-answer fields. There are no answers, hints, correctness checks or automatic feedback.
+Open `#/homework/1`. Seven tasks cover jobs, places, transport, routines and distinguishing to be from action verbs. The Grammar Detective follows The Magic of Negatives and contains six unmarked erroneous sentences with empty full-answer fields. There are no answers, hints, correctness checks or automatic feedback.
 
-Tasks 2, 3 and 5 are notebook assignments with independently saved completion marks. Tasks 4, 6 and 7 have 8, 5 and 6 written fields respectively. Task 1 has 15 draggable job cards and descriptions, with touch, keyboard and tap alternatives; cards can be moved or returned without duplicates. Any complete placement counts, regardless of correctness.
+The Magic Town, My Magical Weekly Routine and How Do They Get to Work are notebook assignments. The transport assignment is last. The opening task index and notebook completion controls are removed; historical completion values remain stored. Display numbering is sequential while section and answer IDs remain stable. The interview, negatives and detective assignments retain 8, 5 and 6 written fields respectively. All eight interview questions have visible Russian translations. Task 1 has 15 draggable job cards and descriptions, with touch, keyboard and tap alternatives; cards can be moved or returned without duplicates. Any complete placement counts, regardless of correctness.
 
 ## Persistence
 

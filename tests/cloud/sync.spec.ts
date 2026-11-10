@@ -574,12 +574,11 @@ test('Lesson 1 homework syncs assignments, notebook marks and all detective answ
  await rpc({}, {id:'present-simple-homework',fields:{['answers:'+oldHw0]:'Keep Homework 0',['answers:'+oldTrial]:'Keep Trial homework','answers:@vika/lesson/lesson-0':{version:1,data:{...initial,answers:{'mistake:01':'Keep Lesson 0'}}}}});
  await route(context);await login(page,'/#/homework/1');
  await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 1',exact:true}).click();
- await page.getByLabel('Task 2 completed in notebook',{exact:true}).check();
  await page.locator('#hw1-task-4 textarea').first().fill('  My own answer about Anna.\n ');await page.locator('#hw1-task-6 textarea').first().fill('  I usually do not drink tea.\n ');
  for(let i=0;i<6;i++)await page.locator('#hw1-task-7 textarea').nth(i).fill(`  My detective answer ${i+1}!\n `);await sync(page);
  const second=await browser.newContext();await route(second);
  try{
-  const other=await second.newPage();await login(other,'/#/homework/1');await expect(other.locator('[data-slot=paint]')).toContainText('pilot');await expect(other.getByLabel('Task 2 completed in notebook',{exact:true})).toBeChecked();
+  const other=await second.newPage();await login(other,'/#/homework/1');await expect(other.locator('[data-slot=paint]')).toContainText('pilot');await expect(other.locator('.hw1-notebook-done')).toHaveCount(0);
   await expect(other.locator('#hw1-task-4 textarea').first()).toHaveValue('  My own answer about Anna.\n ');await expect(other.locator('#hw1-task-6 textarea').first()).toHaveValue('  I usually do not drink tea.\n ');
   for(let i=0;i<6;i++)await expect(other.locator('#hw1-task-7 textarea').nth(i)).toHaveValue(`  My detective answer ${i+1}!\n `);
   await other.reload();await expect(other.locator('#hw1-task-7 textarea').last()).toHaveValue('  My detective answer 6!\n ');

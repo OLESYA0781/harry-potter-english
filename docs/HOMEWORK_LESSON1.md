@@ -17,3 +17,5 @@ Unit tests cover ordering, immutable assignment moves, completion without gradin
 Displayed Tasks 5 (negatives) and 6 (Grammar Detective) are now notebook-only, using the same five and six prompts. Their previously saved text remains untouched in storage; only the interview retains online written fields.
 
 Translation, negatives and detective prompts now reuse varied places and transport (museum/tram, cinema/train, stadium/bike, park/car, theatre/taxi, plane). Existing prompt IDs and archived answers are retained.
+
+All seven tasks now distribute jobs, places and transport more broadly. The interview includes Anna (vet/bike), Ben (chef/tram) and Leo (pilot/train), with eight translated questions across the three factfiles. Free writing requests at least two professions, two places and two transport types. The notebook formats, stable IDs and existing drafts remain unchanged.

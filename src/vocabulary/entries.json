@@ -583,5 +583,13 @@
     "example": "We train at the stadium on Saturdays.",
     "group": "everyday",
     "lessonSources": []
+  },
+  {
+    "id": "to-go-to-work",
+    "english": "to go to work",
+    "russian": "ходить на работу",
+    "example": "My dad goes to work by train.",
+    "group": "everyday",
+    "lessonSources": []
   }
 ]

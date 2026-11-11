@@ -20,7 +20,7 @@ it('keeps all 15 jobs in a shuffled unique bank and the specified seven tasks wi
  expect(agencyJobs).toHaveLength(15);expect(agencyDescriptions).toHaveLength(15);
  const shuffled=shuffleJobs(()=>0);expect(new Set(shuffled.map(job=>job.id)).size).toBe(15);expect(shuffled).not.toEqual(agencyJobs);
  expect(taskTitles).toHaveLength(7);expect(interviewQuestions).toHaveLength(8);expect(negativeSentences).toHaveLength(5);expect(detectiveSentences).toHaveLength(6);expect(townSentences).toHaveLength(10);expect(transportSentences).toHaveLength(10);
- expect(negativeSentences.map(item=>item.text)).toEqual(['I usually drink tea in the morning.','A singer often goes to the theatre by taxi.','They sometimes travel by plane.','My brother always plays football at the stadium.','Emma usually goes to school by bike.']);
+ expect(negativeSentences.map(item=>item.text)).toEqual(['A farmer usually eats breakfast at six.','A singer often goes to the theatre by taxi.','Office workers sometimes travel by plane.','A footballer always trains at the stadium.','A teacher usually goes to school by bike.']);
 });
 it('counts completion without judging answers and keeps notebook marks separate from written work and older data',()=>{
  const old=structuredClone(initial);old.answers={'@vika/lesson/lesson-0':{version:1,data:initial},'@vika/lesson/trial-homework/day':'Keep old work','@vika/lesson/lesson-0-homework/written/profile/hogwarts':'Keep HW0'};

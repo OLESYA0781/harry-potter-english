@@ -15,20 +15,16 @@ export const townSentences=[
 export const transportSentences=[
  'Певец ездит в театр на трамвае.','Медсестра ездит на работу на велосипеде.','Строитель ездит на работу на автобусе.','Продавец ездит в кафе на такси.','Офисный работник путешествует на самолёте.','Ветеринар иногда путешествует на лодке.','Учитель ездит в музей на метро.','Полицейский ездит в парк на машине.','Фермер ездит на работу на мотоцикле.','Повар ездит в отель на поезде.',
 ];
-export const annaFacts=[['Name','Anna'],['Job','vet'],['Workplace','animal hospital'],['Starts work','9 a.m.'],['Travels to work','by bike'],['Usually helps','cats and dogs'],['Wears','a green coat']];
-export const otherFactfiles=[
- {name:'Ben',facts:[['Job','chef'],['Workplace','restaurant'],['Starts work','11 a.m.'],['Travels to work','by tram']]},
- {name:'Leo',facts:[['Job','pilot'],['Workplace','plane'],['Starts work','7 a.m.'],['Travels to work','by train']]},
-];
+export const annaFacts=[['Name','Anna'],['Job','vet'],['Workplace','animal hospital'],['Starts work','9 a.m.'],['Travels to work','by bus'],['Usually helps','cats and dogs'],['Wears','a green coat']];
 export const interviewQuestions=[
  ['job','What does Anna do?','Кем работает Анна?'],
- ['workplace','Where does Ben work?','Где работает Бен?'],
- ['start','When does Leo start work?','Когда Лео начинает работать?'],
+ ['workplace','Where does Anna work?','Где работает Анна?'],
+ ['start','When does Anna start work?','Когда Анна начинает работать?'],
  ['transport','How does Anna travel to work?','Как Анна добирается на работу?'],
- ['who','Who works on a plane?','Кто работает в самолёте?'],
+ ['who','Who helps cats and dogs?','Кто помогает кошкам и собакам?'],
  ['clothes','What does Anna wear at work?','Что Анна носит на работе?'],
- ['restaurant','Does Ben work at a restaurant?','Бен работает в ресторане?'],
- ['bus','Does Leo travel to work by tram?','Лео ездит на работу на трамвае?'],
+ ['restaurant','Does Anna work at a restaurant?','Анна работает в ресторане?'],
+ ['bus','Does Anna travel to work by bus?','Анна ездит на работу на автобусе?'],
 ].map(([id,text,translation])=>({id,text,translation}));
 export const frequencyWords=['always','usually','often','sometimes','never'];
 export const negativeSentences=[

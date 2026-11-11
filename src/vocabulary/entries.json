@@ -471,5 +471,117 @@
     "group": "jobs",
     "lessonSources": [],
     "bookSource": "Go Getter 3 Student’s Book, p. 6, Vocabulary Jobs; example authored for My Vocabulary"
+  },
+  {
+    "id": "to-wash",
+    "english": "to wash",
+    "russian": "мыть, умываться",
+    "example": "I wash my hands before breakfast.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-enjoy",
+    "english": "to enjoy",
+    "russian": "получать удовольствие от, наслаждаться",
+    "example": "I enjoy playing games with my friends.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-work",
+    "english": "to work",
+    "russian": "работать",
+    "example": "My mother works at a hospital.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-write",
+    "english": "to write",
+    "russian": "писать",
+    "example": "We write in our notebooks every lesson.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "after",
+    "english": "after",
+    "russian": "после",
+    "example": "We play outside after our lessons.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-travel",
+    "english": "to travel",
+    "russian": "путешествовать, ездить",
+    "example": "We travel by train in summer.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "training",
+    "english": "training",
+    "russian": "тренировка",
+    "example": "Harry has Quidditch training after school.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-eat",
+    "english": "to eat",
+    "russian": "есть, кушать",
+    "example": "I eat porridge in the morning.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "breakfast",
+    "english": "breakfast",
+    "russian": "завтрак",
+    "example": "We have breakfast at eight o’clock.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "lesson",
+    "english": "lesson",
+    "russian": "урок",
+    "example": "Our English lesson starts at nine.",
+    "group": "general",
+    "lessonSources": []
+  },
+  {
+    "id": "to-hate",
+    "english": "to hate",
+    "russian": "ненавидеть, очень не любить",
+    "example": "I hate getting up very early.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-have-lunch",
+    "english": "to have lunch",
+    "russian": "обедать",
+    "example": "We have lunch at school every day.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-have-dinner",
+    "english": "to have dinner",
+    "russian": "ужинать",
+    "example": "I have dinner with my family.",
+    "group": "everyday",
+    "lessonSources": []
+  },
+  {
+    "id": "to-train",
+    "english": "to train",
+    "russian": "тренироваться",
+    "example": "We train at the stadium on Saturdays.",
+    "group": "everyday",
+    "lessonSources": []
   }
 ]

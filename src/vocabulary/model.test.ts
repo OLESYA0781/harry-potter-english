@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { findWords, groups, vocabulary } from './model';
 
 describe('My Vocabulary content', () => {
-  it('contains 71 unique complete entries in five valid groups', () => {
-    expect(vocabulary).toHaveLength(71);
-    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(71);
-    expect(new Set(vocabulary.map(word => word.id)).size).toBe(71);
+  it('contains 72 unique complete entries in five valid groups', () => {
+    expect(vocabulary).toHaveLength(72);
+    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(72);
+    expect(new Set(vocabulary.map(word => word.id)).size).toBe(72);
     expect(new Set(vocabulary.map(word => word.group))).toEqual(new Set(groups.map(group => group.id)));
     for (const word of vocabulary) {
       expect(word.russian.trim()).not.toBe('');
@@ -18,7 +18,7 @@ describe('My Vocabulary content', () => {
     expect(vocabulary.filter(word => word.english.startsWith('to ')).map(word => word.english)).toEqual([
       'to paint', 'to sleep', 'to write a letter', 'to rest',
       'to spend time with my family', 'to clean my room', 'to drink', 'to sit',
-      'to wash', 'to enjoy', 'to work', 'to write', 'to travel', 'to eat', 'to hate', 'to have lunch', 'to have dinner', 'to train',
+      'to wash', 'to enjoy', 'to work', 'to write', 'to travel', 'to eat', 'to hate', 'to have lunch', 'to have dinner', 'to train', 'to go to work',
     ]);
     expect(findWords('to sit')[0].example).toBe('Ron sits on the sofa.');
   });
@@ -27,7 +27,7 @@ describe('My Vocabulary content', () => {
     expect(findWords('БОЛЬНИЦА').map(word => word.english)).toEqual(['hospital']);
     expect(findWords('train', 'places')).toEqual([]);
     expect(findWords('train', 'transport').map(word => word.english)).toEqual(['train']);
-    expect(findWords('')).toHaveLength(71);
+    expect(findWords('')).toHaveLength(72);
     expect(findWords('несуществующее')).toEqual([]);
   });
 });

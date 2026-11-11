@@ -10,7 +10,7 @@ export const agencyDescriptions=[
  ['paint','I paint pictures.'],['houses','I build houses.'],['bus','I drive a bus.'],['restaurant-cook','I cook food in a restaurant.'],['hospital-help','I help sick people at a hospital.'],['farm-vegetables','I grow vegetables on a farm.'],['stadium-football','I play football at a stadium.'],['patient-care','I look after patients at a hospital.'],['office-emails','I work in an office and write emails.'],['planes','I fly planes.'],['town-safe','I help people and keep the town safe.'],['shop-customers','I help customers in a shop.'],['stage-songs','I sing songs on a stage.'],['school-children','I teach children at school.'],['sick-animals','I help sick animals.'],
 ].map(([id,text])=>({id,text}));
 export const townSentences=[
- 'Врач работает в больнице.','Повар готовит еду в ресторане.','Мы смотрим фильмы в кинотеатре.','Футболист играет на стадионе.','Гермиона ест кашу на завтрак.','Моя семья отдыхает в парке.','Мы останавливаемся в отеле.','Мой папа работает в банке.','Певица выступает в театре.','Мы пьём чай в кафе.',
+ 'Художник ездит в музей на трамвае.','Повар готовит еду в ресторане.','Мы ездим в кинотеатр на поезде.','Футболист ездит на стадион на велосипеде.','Гермиона ест кашу на завтрак.','Моя семья иногда ездит в парк на машине.','Мы останавливаемся в отеле.','Мой папа работает в банке.','Певица выступает в театре.','Мы пьём чай в кафе.',
 ];
 export const transportSentences=[
  'Учитель ездит на работу на велосипеде.','Врач ездит в больницу на автобусе.','Полицейский ездит на работу на машине.','Повар ездит в ресторан на такси.','Пилот путешествует на самолёте.','Фермер иногда путешествует на лодке.','Медсестра ездит на работу на метро.','Художник ездит в музей на трамвае.','Продавец ездит на работу на мотоцикле.','Футболист ездит на стадион на поезде.',
@@ -28,9 +28,9 @@ export const interviewQuestions=[
 ].map(([id,text,translation])=>({id,text,translation}));
 export const frequencyWords=['always','usually','often','sometimes','never'];
 export const negativeSentences=[
- ['morning-tea','I usually drink tea in the morning.'],['nurse-hospital','A nurse often works at a hospital.'],['plane-travel','They sometimes travel by plane.'],['brother-football','My brother always plays football.'],['emma-bike','Emma usually goes to school by bike.'],
+ ['morning-tea','I usually drink tea in the morning.'],['nurse-hospital','A singer often goes to the theatre by taxi.'],['plane-travel','They sometimes travel by plane.'],['brother-football','My brother always plays football at the stadium.'],['emma-bike','Emma usually goes to school by bike.'],
 ].map(([id,text])=>({id,text}));
 export const detectiveSentences=[
- ['she-works','She is works at a hospital.'],['harry-plays','Harry is play football every day.'],['they-go','They are go to school by bus.'],['mother-teacher','My mother a teacher.'],['hermione-studies','Hermione studies is English.'],['we-visit','We are usually visit the park.'],
+ ['she-works','She is works at a museum.'],['harry-plays','Harry is travel by train every day.'],['they-go','They are go to the park by tram.'],['mother-teacher','My mother a teacher.'],['hermione-studies','Hermione studies is English.'],['we-visit','We are usually visit the park.'],
 ].map(([id,text])=>({id,text}));
 export const taskTitles=['The Hogwarts Job Agency','The Magic Town','How Do They Get to Work?','The Secret Interview','My Magical Weekly Routine','The Magic of Negatives','The Grammar Detective — Find and Correct the Mistake'];

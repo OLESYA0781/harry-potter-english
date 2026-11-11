@@ -3,9 +3,9 @@ import {agencyDescriptions,agencyJobs} from '../../src/lessons/homeworkOne/data'
 for(const width of [390,820,1180,1440])test(`seven homework tasks fit ${width}px, notebook tasks have no answer fields, and drafts persist`,async({page})=>{
  await page.setViewportSize({width,height:1000});await page.goto('/#/homework/1');
  await expect(page.locator('.hw1-task')).toHaveCount(7);await expect(page.locator('.hw1-description')).toHaveCount(15);await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(15);
- for(const number of [2,3,5]){const task=page.locator(`#hw1-task-${number}`);await expect(task).toContainText('WRITE IN YOUR NOTEBOOK');await expect(task.locator('textarea,input[type=text]')).toHaveCount(0);}
+ for(const number of [2,3,5,6,7]){const task=page.locator(`#hw1-task-${number}`);await expect(task).toContainText('WRITE IN YOUR NOTEBOOK');await expect(task.locator('textarea,input[type=text]')).toHaveCount(0);}
  await expect(page.locator('#hw1-task-2 .hw1-numbered li')).toHaveCount(10);await expect(page.locator('#hw1-task-3 .hw1-numbered li')).toHaveCount(10);
- await expect(page.locator('#hw1-task-4 textarea')).toHaveCount(8);await expect(page.locator('#hw1-task-6 textarea')).toHaveCount(5);await expect(page.locator('#hw1-task-7 textarea')).toHaveCount(6);
+ await expect(page.locator('#hw1-task-4 textarea')).toHaveCount(8);await expect(page.locator('#hw1-task-6 .hw1-numbered li')).toHaveCount(5);await expect(page.locator('#hw1-task-7 .hw1-numbered li')).toHaveCount(6);
  await expect(page.locator('#hw1-task-7 .hw1-field-prompt strong,#hw1-task-7 .hw1-field-prompt mark,#hw1-task-7 .hw1-field-prompt u')).toHaveCount(0);
  await expect(page.locator('.hw1-anna')).toContainText('9 a.m.');await expect(page.locator('.hw1-anna')).toContainText('a green coat');
  const inputs=page.locator('.hw1-written-card textarea');for(let i=0;i<await inputs.count();i++)await inputs.nth(i).fill(`  My answer ${i}!\n `);

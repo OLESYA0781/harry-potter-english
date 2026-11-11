@@ -13,3 +13,7 @@ The global Homework menu sorts catalog entries by immutable creation date, then 
 ## Verification
 
 Unit tests cover ordering, immutable assignment moves, completion without grading and preservation of older data. Browser tests cover seven tasks, notebook-only instructions, raw drafts after refresh, keyboard/tap, real mouse drag and emulated mobile long-press drag. Cloud tests use isolated PGlite and mocked transport to verify two-device restoration and concurrent edits without accessing the production pupil account. Pages tests exercise the repository base path and local Anna artwork. Emulated viewport checks do not constitute a physical iPhone test.
+
+Displayed Tasks 5 (negatives) and 6 (Grammar Detective) are now notebook-only, using the same five and six prompts. Their previously saved text remains untouched in storage; only the interview retains online written fields.
+
+Translation, negatives and detective prompts now reuse varied places and transport (museum/tram, cinema/train, stadium/bike, park/car, theatre/taxi, plane). Existing prompt IDs and archived answers are retained.

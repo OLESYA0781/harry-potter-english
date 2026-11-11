@@ -567,26 +567,27 @@ test('Lesson 1 warm-up discoveries sync across devices and replay preserves Tria
  }finally{await second.close();}
 });
 
-test('Lesson 1 homework syncs assignments, notebook marks and all detective answers without altering older work',async({page,context,browser})=>{
+test('Lesson 1 homework syncs assignments and retains archived notebook answers without altering older work',async({page,context,browser})=>{
  test.setTimeout(90000);
  const prefix='@vika/lesson/lesson-1-homework/v1/',agency=prefix+'job-agency';
  const oldHw0='@vika/lesson/lesson-0-homework/written/profile/hogwarts',oldTrial='@vika/lesson/trial-homework/day';
- await rpc({}, {id:'present-simple-homework',fields:{['answers:'+oldHw0]:'Keep Homework 0',['answers:'+oldTrial]:'Keep Trial homework','answers:@vika/lesson/lesson-0':{version:1,data:{...initial,answers:{'mistake:01':'Keep Lesson 0'}}}}});
+ await rpc({}, {id:'present-simple-homework',fields:{['answers:'+prefix+'written/negatives/morning-tea']:'Keep negative draft',['answers:'+prefix+'written/detective/she-works']:'Keep detective draft',['answers:'+oldHw0]:'Keep Homework 0',['answers:'+oldTrial]:'Keep Trial homework','answers:@vika/lesson/lesson-0':{version:1,data:{...initial,answers:{'mistake:01':'Keep Lesson 0'}}}}});
  await route(context);await login(page,'/#/homework/1');
  await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 1',exact:true}).click();
- await page.locator('#hw1-task-4 textarea').first().fill('  My own answer about Anna.\n ');await page.locator('#hw1-task-6 textarea').first().fill('  I usually do not drink tea.\n ');
- for(let i=0;i<6;i++)await page.locator('#hw1-task-7 textarea').nth(i).fill(`  My detective answer ${i+1}!\n `);await sync(page);
+ await page.locator('#hw1-task-4 textarea').first().fill('  My own answer about Anna.\n ');
+ await sync(page);
  const second=await browser.newContext();await route(second);
  try{
   const other=await second.newPage();await login(other,'/#/homework/1');await expect(other.locator('[data-slot=paint]')).toContainText('pilot');await expect(other.locator('.hw1-notebook-done')).toHaveCount(0);
-  await expect(other.locator('#hw1-task-4 textarea').first()).toHaveValue('  My own answer about Anna.\n ');await expect(other.locator('#hw1-task-6 textarea').first()).toHaveValue('  I usually do not drink tea.\n ');
-  for(let i=0;i<6;i++)await expect(other.locator('#hw1-task-7 textarea').nth(i)).toHaveValue(`  My detective answer ${i+1}!\n `);
-  await other.reload();await expect(other.locator('#hw1-task-7 textarea').last()).toHaveValue('  My detective answer 6!\n ');
+  await expect(other.locator('#hw1-task-4 textarea').first()).toHaveValue('  My own answer about Anna.\n ');
+  await expect(other.locator('#hw1-task-6 textarea,#hw1-task-7 textarea')).toHaveCount(0);
+  await other.reload();await expect(other.locator('#hw1-task-7')).toContainText('WRITE IN YOUR NOTEBOOK');
   await context.setOffline(true);await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 2',exact:true}).click();
   await other.getByRole('button',{name:'Select teacher',exact:true}).click();await other.getByRole('button',{name:'Place selected job in description 3',exact:true}).click();await sync(other);
   await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();await expect(page.getByText(`Поле «answers:${agency}» изменено на другом устройстве.`)).toBeVisible();
   await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();await expect(page.locator('[data-slot=paint]')).toContainText('pilot');await expect(page.locator('[data-slot=bus]')).toContainText('teacher');
   const saved=await rpc();expect(saved.fields['answers:'+oldHw0].value).toBe('Keep Homework 0');expect(saved.fields['answers:'+oldTrial].value).toBe('Keep Trial homework');expect(saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers['mistake:01']).toBe('Keep Lesson 0');
+  expect(saved.fields['answers:'+prefix+'written/negatives/morning-tea'].value).toBe('Keep negative draft');expect(saved.fields['answers:'+prefix+'written/detective/she-works'].value).toBe('Keep detective draft');
   const placed=Object.values(saved.fields['answers:'+agency].value.placements);expect(new Set(placed).size).toBe(placed.length);
  }finally{await second.close();}
 });

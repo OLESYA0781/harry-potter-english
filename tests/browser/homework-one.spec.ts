@@ -7,7 +7,7 @@ for(const width of [390,820,1180,1440])test(`seven homework tasks fit ${width}px
  await expect(page.locator('#hw1-task-2 .hw1-numbered li')).toHaveCount(10);await expect(page.locator('#hw1-task-3 .hw1-numbered li')).toHaveCount(10);
  await expect(page.locator('#hw1-task-4 textarea')).toHaveCount(8);await expect(page.locator('#hw1-task-6 .hw1-numbered li')).toHaveCount(5);await expect(page.locator('#hw1-task-7 .hw1-numbered li')).toHaveCount(6);
  await expect(page.locator('#hw1-task-7 .hw1-field-prompt strong,#hw1-task-7 .hw1-field-prompt mark,#hw1-task-7 .hw1-field-prompt u')).toHaveCount(0);
- await expect(page.locator('.hw1-extra-profiles article')).toHaveCount(2);await expect(page.locator('.hw1-extra-profiles')).toContainText('chef');await expect(page.locator('.hw1-extra-profiles')).toContainText('pilot');await expect(page.locator('.hw1-anna')).toContainText('9 a.m.');await expect(page.locator('.hw1-anna')).toContainText('a green coat');
+ await expect(page.locator('.hw1-extra-profiles')).toHaveCount(0);await expect(page.locator('.hw1-anna')).toContainText('by bus');await expect(page.locator('.hw1-anna')).toContainText('9 a.m.');await expect(page.locator('.hw1-anna')).toContainText('a green coat');
  const inputs=page.locator('.hw1-written-card textarea');for(let i=0;i<await inputs.count();i++)await inputs.nth(i).fill(`  My answer ${i}!\n `);
  await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 1',exact:true}).click();
  await page.reload();await expect(page.locator('[data-slot=paint]')).toContainText('pilot');await expect(page.locator('.hw1-job-bank .hw1-job-card')).toHaveCount(14);

@@ -17,5 +17,3 @@
 @media(prefers-reduced-motion:reduce){.hw1-homework * {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .hw1-question-translation{display:block;margin-top:8px;font-size:.9em;font-weight:400;line-height:1.5;color:#526950}
-
-.hw1-extra-profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px;margin:24px 0}.hw1-extra-profiles article{background:#eef3e4;border:1px solid #bacaa6;border-radius:22px;padding:24px}.hw1-extra-profiles h3{font-size:28px}.hw1-extra-profiles dt{font-weight:700}.hw1-extra-profiles dd{margin:4px 0 18px;font-size:22px}

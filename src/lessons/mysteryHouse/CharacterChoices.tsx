@@ -1,0 +1,5 @@
+import {Character} from '../../Art';
+import {assetUrl} from '../../assetUrl';
+export default function CharacterChoices({options,value,onChange}:{options:string[];value:string[];onChange:(tokens:string[])=>void}){return <div className="mh-picture-choices">{options.map((name,i)=><button type="button" key={name} className={`mh-portrait ${value[0]===`t${i}`?'mh-selected':''}`} aria-pressed={value[0]===`t${i}`} onClick={()=>onChange([`t${i}`])} aria-label={`Выбрать ${name}`}><span className={`mh-portrait-scene mh-person-${name.toLowerCase()}`}>
+ {name==='Hermione'?<><span className="mh-library-shelves" aria-hidden="true"/><span className="mh-cutout" style={{backgroundImage:`url(${assetUrl('/art/lesson-1/warmup-pieces.webp')})`,backgroundPosition:'100% 0%'}} role="img" aria-label="Гермиона у библиотечных полок"/></>:name==='Ron'?<span className="mh-cutout" style={{backgroundImage:`url(${assetUrl('/art/lesson-1/warmup-pieces.webp')})`,backgroundPosition:'0% 0%'}} role="img" aria-label="Усталый Рон с прикрытыми глазами отдыхает в кресле"/>:<Character name={name}/>}
+ </span><span className="mh-character-name">{name}</span></button>)}</div>;}

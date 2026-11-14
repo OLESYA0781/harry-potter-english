@@ -1,0 +1,33 @@
+import {useEffect,useRef,useState} from 'react';
+import {ArrowLeft,ArrowRight,BookOpen,Check,Mail,Sparkles} from 'lucide-react';
+import type {LessonProps} from '../types';
+import {rooms,roundKey} from './data';
+import {readDraft,completeDraft,roomDone,roundDone,mysterySummary} from './model';
+import HouseScene from './HouseScene';
+import MagicTokens from './MagicTokens';
+import CharacterChoices from './CharacterChoices';
+import {assetUrl} from '../../assetUrl';
+const jobCells=['pilot','doctor','farmer','teacher','artist','singer','chef','shop-assistant'];
+import './mysteryHouse.css';
+export default function MysteryHouse({state,setState,canTeach=false}:LessonProps){
+ const [teacherRequested,setTeacherRequested]=useState(false),[opening,setOpening]=useState<number|null>(null),[letter,setLetter]=useState(false);
+ const timer=useRef<ReturnType<typeof setTimeout>|null>(null),heading=useRef<HTMLHeadingElement>(null),house=useRef<HTMLDivElement>(null);
+ const teacher=canTeach&&teacherRequested,step=state.step>=1&&state.step<=12?state.step:0,roomIndex=step?Math.floor((step-1)/2):-1,roundIndex=step?(step-1)%2:0;
+ const room=rooms[roomIndex],round=room?.rounds[roundIndex],complete=rooms.map((_,i)=>roomDone(state,i)),allDone=complete.every(Boolean),summary=mysterySummary(state);
+ useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);},[]);
+ useEffect(()=>{if(!canTeach)setTeacherRequested(false);},[canTeach]);
+ useEffect(()=>{if(step)heading.current?.focus();},[step]);
+ function navigate(next:number){setState(previous=>({...previous,step:next}));}
+ function openDoor(index:number){setOpening(index);timer.current=setTimeout(()=>{setOpening(null);navigate(index*2+(roundDone(state,index,0)&&!roundDone(state,index,1)?2:1));},450);}
+ let draft={tokens:[] as string[],submitted:false},error='';if(round)try{draft=readDraft(state.answers[roundKey(room.id,round.id)],round);}catch(e){error=e instanceof Error?e.message:'Не удалось открыть комнату.';}
+ const save=(tokens:string[])=>setState(previous=>({...previous,answers:{...previous.answers,[roundKey(room.id,round.id)]:{tokens,submitted:false}}}));
+ function finish(){setState(previous=>{const current=readDraft(previous.answers[roundKey(room.id,round.id)],round);return {...previous,step:roundIndex===0?roomIndex*2+2:0,answers:{...previous.answers,[roundKey(room.id,round.id)]:{...current,submitted:true}}};});}
+ function back(){navigate(0);requestAnimationFrame(()=>house.current?.focus());}
+ return <main className="mh-lesson"><div className="mh-title"><span className="mh-eyebrow">Lesson 2 · The Hogwarts Mystery: Questions &amp; Articles</span><h1>Warm-up — The Mystery House</h1><p>Шесть дверей. Двенадцать маленьких тайн.</p><div className="mh-top-tools"><a href="#/vocabulary"><BookOpen size={20}/>My Vocabulary</a>{canTeach&&<button type="button" className="teacher-toggle" aria-pressed={teacher} onClick={()=>setTeacherRequested(!teacherRequested)}>{teacher?'Exit teacher mode':'Teacher mode'}</button>}<span className="mh-progress">{summary.detail}</span></div></div>
+ {!step?<section className="mh-house-view" ref={house} tabIndex={-1} aria-label="Волшебный дом"><div className="mh-house-caption"><Sparkles size={22}/><p>Выбери любую дверь и открой её тайну.</p><span>10–12 минут</span></div><HouseScene completed={complete} opening={opening} onOpen={openDoor}/><p className="mh-house-note">В каждой комнате — два раунда. К пройденным дверям можно вернуться.</p>{allDone&&<div className={`mh-envelope-wrap ${letter?'mh-envelope-open':''}`}><button type="button" className="mh-envelope" aria-expanded={letter} onClick={()=>setLetter(!letter)} aria-label="Открыть волшебный конверт"><span className="mh-envelope-flap"/><Mail size={54}/><span className="mh-wax-seal" aria-hidden="true">H</span><span>Твоё тайное письмо</span></button>{letter&&<div className="mh-letter" role="status"><Sparkles/><h2>Well done! You are ready for your next mystery!</h2><p>Next: Question Words — What, Where, When, Who, How</p></div>}</div>}</section>:<section className={`mh-room mh-room-${room.id}`} key={step} aria-labelledby="mh-room-title"><div className="mh-room-architecture" aria-hidden="true" style={{backgroundImage:`linear-gradient(#fff9e5e8,#fffaf0fa),url(${assetUrl('/art/common-room.webp')})`,backgroundSize:'cover'}}><span className="mh-room-window"/><span className="mh-room-lamp"/><span className="mh-room-lamp"/></div><div className="mh-room-top"><button type="button" className="mh-back" onClick={back}><ArrowLeft size={20}/>К дому</button><div className="mh-round-switch" aria-label="Раунды">{[0,1].map(r=><button type="button" key={r} aria-pressed={roundIndex===r} onClick={()=>navigate(roomIndex*2+r+1)}>Раунд {r+1}{roundDone(state,roomIndex,r)&&<Check size={18}/>}</button>)}</div></div><p className="mh-eyebrow">Door {roomIndex+1} · Раунд {roundIndex+1} из 2</p><h2 ref={heading} id="mh-room-title" tabIndex={-1}>{room.title}</h2><p className="mh-room-instruction">{round.kind==='characters'||round.kind==='jobs'?'Послушай преподавателя и выбери картинку.':round.kind==='gap'?'Верни слову его место в предложении.':room.id==='negative'?'Преврати предложение в отрицательное.':'Преврати предложение в вопрос.'}</p>
+ {teacher&&<aside className="mh-teacher" aria-label="Teacher's Mode"><strong>Teacher’s Mode · Door {roomIndex+1} · Round {roundIndex+1}/2</strong><p>Read aloud: {round.read}</p><p>Answer: {round.answer}</p><p>{round.guide}</p></aside>}
+ {error?<p role="alert">{error}</p>:<>{round.kind==='characters'?<CharacterChoices options={round.options} value={draft.tokens} onChange={save}/>:round.kind==='jobs'?<div className="mh-picture-choices">{round.options.map((job,i)=><button key={job} type="button" className={`mh-job-choice ${draft.tokens[0]===`t${i}`?'mh-selected':''}`} aria-label={`Выбрать картинку ${i+1}`} aria-pressed={draft.tokens[0]===`t${i}`} onClick={()=>save([`t${i}`])}><span className="mh-job-art" role="img" aria-label="Персонаж на рабочем месте" style={{backgroundImage:`url(${assetUrl('/art/lesson-2/mystery-jobs.webp')})`,backgroundPosition:`${jobCells.indexOf(job)%4/3*100}% ${Math.floor(jobCells.indexOf(job)/4)*100}%`}}/><span className="mh-picture-number">{i+1}</span></button>)}</div>:<MagicTokens options={round.options} value={draft.tokens} onChange={save} prompt={round.prompt!} sequence={round.kind==='sentence'}/>}
+ <div className="mh-room-bottom"><span>{draft.submitted?'Раунд сохранён. Ответ можно изменить.':'Выбери ответ и сохрани раунд.'}</span><button type="button" className="mh-finish" disabled={!completeDraft(round,draft)} onClick={finish}>{roundIndex===0?'Сохранить · Раунд 2':'Сохранить · К дому'}<ArrowRight size={21}/></button></div></>}
+ </section>}
+ </main>;
+}

@@ -591,3 +591,18 @@ test('Lesson 1 homework syncs assignments and retains archived notebook answers 
   const placed=Object.values(saved.fields['answers:'+agency].value.placements);expect(new Set(placed).size).toBe(placed.length);
  }finally{await second.close();}
 });
+
+test('Mystery House drafts sync across devices, keep old lessons and hide teacher text for the learner',async({page,context,browser})=>{
+ test.setTimeout(90000);
+ const oldKey='answers:@vika/lesson/lesson-1',newKey='answers:@vika/lesson/lesson-2';
+ await rpc({}, {id:'mystery-house-old-data',fields:{[oldKey]:{version:1,data:{...initial,answers:{old:'Keep Lesson 1'}}},'answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts':'Keep homework'}});
+ await route(context);await login(page,'/#/lessons/lesson-2');
+ await page.getByRole('button',{name:/^Door 1 —/}).click();await page.getByRole('button',{name:'Выбрать Hermione',exact:true}).click();await page.getByRole('button',{name:'Сохранить · Раунд 2',exact:true}).click();await page.getByRole('button',{name:'Выбрать Ron',exact:true}).click();await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{const other=await second.newPage();await login(other,'/#/lessons/lesson-2');await expect(other.getByRole('button',{name:'Выбрать Ron',exact:true})).toHaveAttribute('aria-pressed','true');await expect(other.locator('.mh-progress')).toHaveText('1 из 12 раундов');await other.reload();await expect(other.getByRole('button',{name:'Выбрать Ron',exact:true})).toHaveAttribute('aria-pressed','true');
+  await other.getByRole('button',{name:'Сохранить · К дому',exact:true}).click();await sync(other);await sync(page);await expect(page.locator('.mh-door-done')).toHaveCount(1);
+  const saved=await rpc();expect(saved.fields[oldKey].value.data.answers.old).toBe('Keep Lesson 1');expect(saved.fields['answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts'].value).toBe('Keep homework');expect(saved.fields[newKey].value.data.answers['mystery-house/v1/who/tired'].submitted).toBe(true);
+ }finally{await second.close();}
+ await page.goto('/#/lessons/lesson-2');await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await page.getByRole('button',{name:/^Door 1 —/}).click();await expect(page.locator('.mh-teacher')).toBeVisible();
+ if(!await page.getByRole('button',{name:'Выйти',exact:true}).isVisible())await page.locator('.cloud-progress > summary').click();await page.getByRole('button',{name:'Выйти',exact:true}).click();await page.getByLabel('Email',{exact:true}).fill('ddarya.rr@gmail.com');await page.getByLabel('Пароль',{exact:true}).fill('test-only-password');await page.getByRole('button',{name:'Войти',exact:true}).click();await expect(page.getByRole('button',{name:'Выйти',exact:true})).toBeVisible();await expect(page.locator('.mh-teacher')).toHaveCount(0);await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);await page.reload();await expect(page.locator('.mh-teacher')).toHaveCount(0);await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);
+});

@@ -47,7 +47,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     try {
       const state = readLesson(progress.state, lesson);
       let summary=lesson.summarize(state);
-      if(lesson.id==='lesson-2'){const moved=transferredProgress(readLesson(progress.state,presentSimpleLesson));const done=Number(summary.detail.split(' ')[0])+moved.done,total=53+moved.total;summary={percent:Math.round(done/total*100),status:done===total?'completed':done||summary.status==='in-progress'?'in-progress':'not-started',detail:`${done} из ${total} этапов`};}
+      if(lesson.id==='lesson-2'){const moved=transferredProgress(readLesson(progress.state,presentSimpleLesson));const done=Number(summary.detail.split(' ')[0])+moved.done,total=86+moved.total;summary={percent:Math.round(done/total*100),status:done===total?'completed':done||summary.status==='in-progress'?'in-progress':'not-started',detail:`${done} из ${total} этапов`};}
       return { lesson, state, summary, error: undefined };
     }
     catch (e) { return { lesson, state: null, summary: { status: 'in-progress', percent: 0, detail: '' } as LessonSummary, error: e instanceof Error ? e.message : 'Не удалось открыть урок.' }; }

@@ -42,6 +42,10 @@ for (const [name, width, height] of [
       await page.getByRole('link', { name: 'Main Menu', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'My Lessons', exact: true })).toBeVisible();
     }
+    await page.goto('./#/lessons/lesson-2');
+    if(await page.locator('.ar-sidebar').isVisible())await page.locator('.ar-sidebar button').last().click();else await page.getByLabel('Choose Lesson 2 section').selectOption('11');
+    await expect(page.locator('.gk-building')).toHaveCount(6);
+    expect(await page.locator('.gk-building-art').first().evaluate(el=>getComputedStyle(el).backgroundImage)).toContain('/harry-potter-english/art/lesson-2/quest/buildings.webp');
     await page.goto('./#/homework/1');
     await expect(page.getByRole('heading',{name:'Lesson 1 — Present Simple Homework',exact:true})).toBeVisible();
     const anna=page.locator('.hw1-anna img');await anna.scrollIntoViewIfNeeded();await expect(anna).toBeVisible();await expect.poll(()=>anna.evaluate(img=>(img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);

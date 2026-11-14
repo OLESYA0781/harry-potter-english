@@ -4,7 +4,7 @@ import { Volume2, BookOpen, X } from 'lucide-react';
 import type { LessonProps } from '../types';
 import type { Word } from './course';
 import { vocabulary as sharedVocabulary } from '../../vocabulary/model';
-import { expressions, pages, places, topics, transport } from './course';
+import { expressions, pages as allPages, places, topics as allTopics, transport } from './course';
 import { legacyResponses, lesson1Summary, pageIndex, readCourse, updateCourse } from './model';
 import WordArt from './WordArt';
 import TravelRandomizer from './TravelRandomizer';
@@ -16,11 +16,14 @@ import WarmupDifferences from './WarmupDifferences';
 import {warmupKey} from './warmupState';
 import './presentSimple.css';
 
-export default function PresentSimpleLesson({state,setState,canTeach=false}:LessonProps){
- const course=readCourse(state),index=pageIndex(course),page=pages[index];
+export default function PresentSimpleLesson({state,setState,canTeach=false,onlyTopic}:LessonProps & {onlyTopic?:string}){
+ const moved=['question-words','question-machine','journeys'];
+ const topics=allTopics.filter(t=>onlyTopic?t.id===onlyTopic:!moved.includes(t.id));
+ const pages=allPages.filter(p=>topics.some(t=>t.id===p.topicId));
+ const course=readCourse(state),restored=allPages[pageIndex(course)]?.id,index=Math.max(0,pages.findIndex(p=>p.id===restored)),page=pages[index];
  const topic=topics.find(topic=>topic.id===page.topicId)!;
  const topicIndex=topics.indexOf(topic),unit=page.unit;
- const topicNumber=(index:number)=>index===0?'W':String(index-1).padStart(2,'0');
+ const topicNumber=(index:number)=>onlyTopic?'':index===0?'W':String(index-1).padStart(2,'0');
  const sectionLabel=(item:typeof page)=>item.unit.title+((item.unit.tasks?.length||0)>4?` · ${item.unit.tasks!.findIndex(task=>task.id===item.tasks[0].id)+1}–${item.unit.tasks!.findIndex(task=>task.id===item.tasks[0].id)+item.tasks.length}`:'');
  const sections=pages.filter(item=>item.topicId===topic.id);
  const [collapsedTopic,setCollapsedTopic]=useState<string|null>(null);
@@ -46,9 +49,9 @@ export default function PresentSimpleLesson({state,setState,canTeach=false}:Less
  const vocabulary=()=> <><h3>Places in town</h3>{cards(places)}<h3>Means of transport</h3>{cards(transport)}<h3>Jobs</h3><dl className="ps2-expressions">{sharedVocabulary.filter(word=>word.group==='jobs').map(word=><div key={word.id}><dt>{word.english}{pronounce(word.english)}</dt><dd lang="ru">{word.russian}</dd></div>)}</dl><h3>Useful expressions</h3><dl className="ps2-expressions">{expressions.map(([en,ru])=><div key={en}><dt>{en}{pronounce(en)}</dt><dd lang="ru">{ru}</dd></div>)}</dl></>;
  const old=legacyResponses(state);
  const closeDictionary=()=>{setDictionary(false);dictionaryButton.current?.focus();};
- return <div className="app-shell ps2-shell"><aside className="sidebar ps2-sidebar"><div className="brand"><span className="brand-icon">✦</span><span>HOGWARTS<small>LESSON 1</small></span></div><div className="lesson-label">PRESENT SIMPLE</div><nav aria-label="Lesson 1 topics">{topics.map((topic,i)=><div key={topic.id}><button className={`nav-item ${topic.id===page.topicId?'active':''}`} key={topic.id} aria-current={topic.id===page.topicId?'step':undefined} aria-expanded={topic.id===page.topicId && collapsedTopic!==topic.id} aria-controls={`ps2-sections-${topic.id}`} onClick={()=>{if(topic.id===page.topicId)setCollapsedTopic(current=>current===topic.id?null:topic.id);else {setCollapsedTopic(null);navigate(pages.find(page=>page.topicId===topic.id)!.id);}}}><span>{topicNumber(i)}</span><span>{topic.title}</span><span className="ps2-section-chevron" aria-hidden="true">{topic.id===page.topicId && collapsedTopic!==topic.id?'⌃':'⌄'}</span></button>{topic.id===page.topicId && collapsedTopic!==topic.id && <div id={`ps2-sections-${topic.id}`} className="ps2-subnav" aria-label={`Sections of ${topic.title}`}>{sections.map(item=><a key={item.id} href="#/lessons/lesson-1" aria-current={item.id===page.id?'step':undefined} onClick={event=>{event.preventDefault();navigate(item.id);}}>{sectionLabel(item)}</a>)}</div>}</div>)}</nav></aside>
- <div className="main-shell"><div className="mobile-stage"><select aria-label="Choose Lesson 1 topic" value={topic.id} onChange={event=>navigate(pages.find(page=>page.topicId===event.target.value)!.id)}>{topics.map((topic,i)=><option value={topic.id} key={topic.id}>{topicNumber(i)}. {topic.title}</option>)}</select><select aria-label="Choose Lesson 1 section" value={page.id} onChange={event=>navigate(event.target.value)}>{sections.map(item=><option key={item.id} value={item.id}>{sectionLabel(item)}</option>)}</select></div>
- <main className="ps2-main"><header className="ps2-heading"><span>{topicNumber(topicIndex)}</span><div><small>Lesson 1 · Present Simple</small><h1>{topic.title}</h1></div></header>
+ return <div className="app-shell ps2-shell"><aside className="sidebar ps2-sidebar"><div className="brand"><span className="brand-icon">✦</span><span>HOGWARTS<small>LESSON {onlyTopic?2:1}</small></span></div><div className="lesson-label">PRESENT SIMPLE</div><nav aria-label="Lesson 1 topics">{topics.map((topic,i)=><div key={topic.id}><button className={`nav-item ${topic.id===page.topicId?'active':''}`} key={topic.id} aria-current={topic.id===page.topicId?'step':undefined} aria-expanded={topic.id===page.topicId && collapsedTopic!==topic.id} aria-controls={`ps2-sections-${topic.id}`} onClick={()=>{if(topic.id===page.topicId)setCollapsedTopic(current=>current===topic.id?null:topic.id);else {setCollapsedTopic(null);navigate(pages.find(page=>page.topicId===topic.id)!.id);}}}><span>{topicNumber(i)}</span><span>{topic.title}</span><span className="ps2-section-chevron" aria-hidden="true">{topic.id===page.topicId && collapsedTopic!==topic.id?'⌃':'⌄'}</span></button>{topic.id===page.topicId && collapsedTopic!==topic.id && <div id={`ps2-sections-${topic.id}`} className="ps2-subnav" aria-label={`Sections of ${topic.title}`}>{sections.map(item=><a key={item.id} href="#/lessons/lesson-1" aria-current={item.id===page.id?'step':undefined} onClick={event=>{event.preventDefault();navigate(item.id);}}>{sectionLabel(item)}</a>)}</div>}</div>)}</nav></aside>
+ <div className="main-shell"><div className="mobile-stage"><select aria-label={onlyTopic?'Choose Lesson 2 topic':'Choose Lesson 1 topic'} value={topic.id} onChange={event=>navigate(pages.find(page=>page.topicId===event.target.value)!.id)}>{topics.map((topic,i)=><option value={topic.id} key={topic.id}>{topicNumber(i)}. {topic.title}</option>)}</select><select aria-label={onlyTopic?'Choose Lesson 2 subsection':'Choose Lesson 1 section'} value={page.id} onChange={event=>navigate(event.target.value)}>{sections.map(item=><option key={item.id} value={item.id}>{sectionLabel(item)}</option>)}</select></div>
+ <main className="ps2-main"><header className="ps2-heading"><span>{topicNumber(topicIndex)}</span><div><small>Lesson {onlyTopic?2:1} · {onlyTopic?topic.title:'Present Simple'}</small><h1>{topic.title}</h1></div></header>
  <div className="ps2-tools"><button className="ps2-button" ref={dictionaryButton} onClick={()=>setDictionary(true)}><BookOpen size={21} aria-hidden="true"/>My Vocabulary</button>{canTeach && <button className="teacher-toggle" aria-pressed={teacher} onClick={()=>setTeacherRequested(!teacherRequested)}>{teacher?'Exit teacher mode':'Teacher mode'}</button>}</div>
  {notice && !dictionary && <p role="status">{notice}</p>}
  <section className="ps2-panel" aria-label={unit.title}><div className="ps2-unit-heading"><h2>{unit.title}</h2>{unit.id==='travel-rule' && <span className="ps2-by-badge">By …</span>}</div>

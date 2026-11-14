@@ -1,6 +1,6 @@
 import {responseComplete} from './jobActivities';
 import type { LessonState } from '../../data';
-import { allTasks, pages, topics } from './course';
+import { allTasks, pages, topics as allTopics } from './course';
 export const courseKey='present-simple:v2';
 export type Course={schemaVersion:2;activePage:string;seen:string[];responses:Record<string,string>};
 export const freshCourse=():Course=>({schemaVersion:2,activePage:pages[0].id,seen:[],responses:{}});
@@ -42,6 +42,9 @@ export function legacyResponses(state:LessonState):[string,string][] {
  });
 }
 export function lesson1Summary(state:LessonState){
+ const moved=['question-words','question-machine','journeys'];
+ const topics=allTopics.filter(t=>!moved.includes(t.id));
+ const allTasks=topics.flatMap(t=>t.units.flatMap(u=>(u.tasks||[]).filter(t=>!t.optional)));
  const course=readCourse(state);
  const filled=(task:typeof allTasks[number])=>responseComplete(task,course.responses[task.id]);
  const answersDone=allTasks.filter(task=>filled(task)).length;

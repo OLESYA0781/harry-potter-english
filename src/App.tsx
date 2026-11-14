@@ -11,6 +11,8 @@ import {homeworks} from './lessons/homeworkCatalog';
 import './lessons/homework.css';
 import './lessons/homeworkGame.css';
 import { lessons } from './lessons/registry';
+import {TransferredContext,transferredProgress} from './lessons/transferred';
+import {presentSimpleLesson} from './lessons/registry';
 import { readLesson, updateLesson } from './lessons/progress';
 import { statusLabels } from './lessons/types';
 import type { LessonDefinition, LessonSummary } from './lessons/types';
@@ -44,7 +46,9 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const items = catalog.map(lesson => {
     try {
       const state = readLesson(progress.state, lesson);
-      return { lesson, state, summary: lesson.summarize(state), error: undefined };
+      let summary=lesson.summarize(state);
+      if(lesson.id==='lesson-2'){const moved=transferredProgress(readLesson(progress.state,presentSimpleLesson));const done=Number(summary.detail.split(' ')[0])+moved.done,total=53+moved.total;summary={percent:Math.round(done/total*100),status:done===total?'completed':done||summary.status==='in-progress'?'in-progress':'not-started',detail:`${done} из ${total} этапов`};}
+      return { lesson, state, summary, error: undefined };
     }
     catch (e) { return { lesson, state: null, summary: { status: 'in-progress', percent: 0, detail: '' } as LessonSummary, error: e instanceof Error ? e.message : 'Не удалось открыть урок.' }; }
   });
@@ -72,7 +76,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     {progress.error && <p role="alert" className="platform-error">{progress.error}</p>}
     {route && !active && !homeworkZero && !homeworkOne && !vocabularyOpen && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
     {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework 1</button></div>}
-    {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} />
+    {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <TransferredContext.Provider value={active.id==='lesson-2'?{canTeach,state:readLesson(progress.state,presentSimpleLesson),setState:action=>progress.setState(root=>updateLesson(root,presentSimpleLesson,action))}:null}><Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} /></TransferredContext.Provider>
       : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Main Menu</a></main>
       : vocabularyOpen ? <MyVocabulary /> : homeworkOne ? <HomeworkOne state={progress.state} setState={progress.setState} /> : homeworkZero ? <HomeworkZero state={progress.state} setState={progress.setState} /> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;

@@ -17,7 +17,7 @@ it('has the requested topics after removing Word Order, exact book vocabulary, a
  expect(counts).toEqual({warmup:1,jobs:0,welcome:0,uses:8,affirmative:22,transport:0,negative:12,questions:29,'short-answers':8,frequency:13,'question-words':5,'to-be':8,'question-machine':5,journeys:10});
  expect(topics.find(topic=>topic.id==='uses')!.units.map(unit=>unit.title)).not.toContain('Permanent situations');
  expect(allTasks.filter(task=>!task.options).length).toBeGreaterThan(80);
- expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-1','lesson-0','trial']);
+ expect(lessons.map(lesson=>lesson.id)).toEqual(['lesson-2','lesson-1','lesson-0','trial']);
 });
 it('requires every nonblank response and viewed topic but never judges grammar',()=>{
  expect(lesson1Summary(initial)).toMatchObject({percent:0,status:'not-started'});

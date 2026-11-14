@@ -15,3 +15,7 @@ Every assignment, ordered question, interview status, opened letter, excluded lo
 Validation covers complete phone/desktop playthroughs, returning to prior questions, raw text after refresh, ungraded completion, teacher keys, real mouse/emulated touch dragging, and isolated cloud restoration. Emulation is not a physical iPhone test; the 15–20 minute duration is a teacher-led estimate.
 
 Guardian questions revision 2 covers farmer, pilot, nurse, footballer, builder and bus driver, with different question forms. New drafts, question index and completion use guardian-v2 / guardian-index-v2 / completed-v2 keys. Original question responses and completion remain stored, and historical free text is available in Teacher mode; old answers are never relabelled as answers to the new questions. Hermione receives the key and gives English-only thanks; the collection label is removed.
+
+## Requested restart
+
+The owner's explicit restart request is applied once on the next quest mount after deployment. `golden-key-reset/2026-11-14-request-1` is stored outside the quest prefix. Only `golden-key/v1/` entries are cleared; the previous entries are archived under `golden-key-archive/2026-11-14-request-1`. All other Lesson 2 responses and the selected lesson section remain unchanged. The marker prevents refreshing or opening a second device from resetting a new replay. This does not directly modify a live database from the development environment: the app applies and synchronizes the reset through its existing progress mechanism when the quest opens.

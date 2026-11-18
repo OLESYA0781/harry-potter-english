@@ -1,4 +1,4 @@
-import { BookOpen, Check, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles } from 'lucide-react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { assetUrl } from '../../assetUrl';
@@ -18,14 +18,12 @@ function numbered(items: readonly ReactNode[]) {
   </ol>;
 }
 
-export default function HomeworkTwo({ state, setState, canTeach = false }: LessonProps) {
+export default function HomeworkTwo({ canTeach = false }: Pick<LessonProps, 'canTeach'>) {
   const [teacherRequested, setTeacherRequested] = useState(false);
   const teacher = canTeach && teacherRequested;
   useEffect(() => { if (!canTeach) setTeacherRequested(false); }, [canTeach]);
 
   function section(number: number, title: string, instructions: string[], children: ReactNode) {
-    const key = `homework-2/completed/${number}`;
-    const completed = state.answers[key] === true;
     return <section className="hw1-task" aria-labelledby={`hw2-title-${number}`}>
       <h2 id={`hw2-title-${number}`}>
         <span className="hw1-number" aria-hidden="true">{number}</span>
@@ -36,13 +34,6 @@ export default function HomeworkTwo({ state, setState, canTeach = false }: Lesso
       </div>
       {children}
       {teacher && <Suspense fallback={null}><TeacherAnswers task={number} /></Suspense>}
-      <button type="button" className="hw2-done" aria-pressed={completed}
-        onClick={() => setState(previous => ({
-          ...previous,
-          answers: { ...previous.answers, [key]: previous.answers[key] !== true },
-        }))}>
-        <Check size={22} aria-hidden="true" />Выполнено
-      </button>
     </section>;
   }
 
@@ -54,7 +45,6 @@ export default function HomeworkTwo({ state, setState, canTeach = false }: Lesso
         <p className="hw1-subtitle" lang="ru">Дело о пропавшем письме</p>
       </div>
     </div>
-    <img className="hw2-banner" src={assetUrl('/art/lesson-2/homework/investigation.webp')} alt="" />
     <div className="hw1-links">
       <a href="#/lessons/lesson-2">← Lesson 2</a>
       <a href="#/vocabulary"><BookOpen size={23} aria-hidden="true" />My Vocabulary</a>
@@ -116,7 +106,6 @@ export default function HomeworkTwo({ state, setState, canTeach = false }: Lesso
       'Прочитай показания трёх свидетелей.',
       'Затем прочитай утверждения.',
       'В тетради запиши номер и True или False.',
-      'Если утверждение неверное, обязательно напиши правильное предложение на английском языке.',
     ], <div lang="en">
       <div className="hw2-witnesses">
         {witnesses.map(({ job, image, statement }, index) => <article key={job} className="hw1-written-card">

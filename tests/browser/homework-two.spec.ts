@@ -34,14 +34,9 @@ for (const width of [320, 390, 1440]) {
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
 
-    const done = tasks.getByRole('button', { name: 'Выполнено', exact: true });
-    await expect(done).toHaveCount(6);
-    await done.nth(0).click();
-    await done.nth(4).click();
-    await page.reload();
-    for (let index = 0; index < 6; index++) {
-      await expect(done.nth(index)).toHaveAttribute('aria-pressed', String(index === 0 || index === 4));
-    }
+    await expect(tasks.getByRole('button', { name: 'Выполнено', exact: true })).toHaveCount(0);
+    await expect(page.locator('main img')).toHaveCount(3);
+    await expect(tasks.nth(4).getByText(/Если утверждение неверное/)).toHaveCount(0);
     const teacherPanels = tasks.getByRole('complementary', { name: 'Teacher’s Mode' });
     await expect(teacherPanels).toHaveCount(0);
     await page.getByRole('button', { name: 'Teacher mode', exact: true }).click();

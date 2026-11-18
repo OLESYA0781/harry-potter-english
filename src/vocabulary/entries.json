@@ -96,6 +96,14 @@
     "lessonSources": []
   },
   {
+    "id": "library",
+    "english": "library",
+    "russian": "библиотека",
+    "example": "We go to the library after school.",
+    "group": "places",
+    "lessonSources": []
+  },
+  {
     "id": "museum",
     "english": "museum",
     "russian": "музей",

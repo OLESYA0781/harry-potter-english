@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { findWords, groups, vocabulary } from './model';
 
 describe('My Vocabulary content', () => {
-  it('contains 72 unique complete entries in five valid groups', () => {
-    expect(vocabulary).toHaveLength(72);
-    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(72);
-    expect(new Set(vocabulary.map(word => word.id)).size).toBe(72);
+  it('contains 73 unique complete entries in five valid groups', () => {
+    expect(vocabulary).toHaveLength(73);
+    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(73);
+    expect(new Set(vocabulary.map(word => word.id)).size).toBe(73);
     expect(new Set(vocabulary.map(word => word.group))).toEqual(new Set(groups.map(group => group.id)));
     for (const word of vocabulary) {
       expect(word.russian.trim()).not.toBe('');
@@ -27,7 +27,8 @@ describe('My Vocabulary content', () => {
     expect(findWords('БОЛЬНИЦА').map(word => word.english)).toEqual(['hospital']);
     expect(findWords('train', 'places')).toEqual([]);
     expect(findWords('train', 'transport').map(word => word.english)).toEqual(['train']);
-    expect(findWords('')).toHaveLength(72);
+    expect(findWords('')).toHaveLength(73);
+    expect(findWords('библиотека', 'places').map(word => word.english)).toEqual(['library']);
     expect(findWords('несуществующее')).toEqual([]);
   });
 });

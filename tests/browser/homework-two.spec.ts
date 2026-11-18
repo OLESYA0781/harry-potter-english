@@ -25,6 +25,7 @@ for (const width of [320, 390, 1440]) {
     await expect(tasks.nth(3).locator('.hw2-blank')).toHaveText(
       Array.from({ length: 14 }, (_, i) => '(' + (i + 1) + ') ___'),
     );
+    await expect(tasks.nth(3).getByText(/library is big/)).toBeVisible();
     await expect(tasks.nth(4).locator('article')).toHaveCount(3);
     await expect(tasks.nth(4).locator('ol > li')).toHaveCount(8);
     await expect(tasks.locator('input, textarea, select, [draggable="true"], [contenteditable="true"]')).toHaveCount(0);
@@ -42,7 +43,7 @@ for (const width of [320, 390, 1440]) {
     await page.getByRole('button', { name: 'Teacher mode', exact: true }).click();
     await expect(teacherPanels).toHaveCount(6);
     for (const [index, answer] of [
-      '5 — How', 'Does the artist work at a museum?', 'Where are they?',
+      '5 — How', 'Does the bus driver work at a stadium?', 'Where are they?',
       '14 — —', 'False — The doctor starts work at eight.', 'What does she do?',
     ].entries()) {
       await expect(teacherPanels.nth(index).getByText(answer, { exact: true })).toBeVisible();

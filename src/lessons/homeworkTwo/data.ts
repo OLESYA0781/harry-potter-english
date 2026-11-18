@@ -3,7 +3,7 @@ export const warmup = [
   '___ does your dad do?',
   '___ does he work?',
   '___ does he wear at work?',
-  '___ does he have lunch?',
+  '___ does he start work?',
   '___ does he travel to work?',
 ];
 

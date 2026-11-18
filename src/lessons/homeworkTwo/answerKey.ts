@@ -1,0 +1,63 @@
+export const answerKeys = [
+  [
+    '1 — What', '2 — Where', '3 — What', '4 — When', '5 — How',
+  ],
+  [
+    'Where does the doctor work?',
+    'Do you go to school by bus? ✓',
+    'What does your father do?',
+    'Does Hermione read books every day?',
+    'Is your brother a pilot? ✓',
+    'How does the teacher go to school?',
+    'Do they work at a hospital?',
+    'Who works at the museum? ✓',
+    'Does the museum open at nine?',
+    'Does she work at a bank?',
+    'Are your friends tired? ✓',
+    'Does the artist work at a museum?',
+  ],
+  [
+    'Where do you work?',
+    'How does she go to work?',
+    'When does the museum open?',
+    'What does your brother do?',
+    'Who grows vegetables?',
+    'Does she work at a hospital?',
+    'Are they teachers?',
+    'Is he a pilot?',
+    'Do you play tennis every week?',
+    'Where are they?',
+  ],
+  [
+    '1 — an', '2 — a', '3 — the', '4 — —', '5 — an', '6 — a', '7 — the',
+    '8 — a', '9 — —', '10 — a', '11 — a', '12 — the', '13 — a', '14 — —',
+  ],
+  [
+    'True.',
+    'False — The chef starts work at nine.',
+    'False — The artist works at a museum.',
+    'False — The doctor usually goes to work by bus.',
+    'True.',
+    'True.',
+    'False — The doctor starts work at eight.',
+    'True.',
+  ],
+  [
+    'Hello!',
+    'My name is Anna. I am an artist.',
+    'I work at a museum. The museum opens at nine.',
+    'My brother is a doctor. He works at a hospital.',
+    "He doesn't go to work by car. He usually goes by bus.",
+    'Where does your mother work?',
+    'What does she do?',
+  ],
+];
+
+export const explanations = [
+  'What спрашивает о профессии или предмете, where — о месте, when — о времени, how — о способе. Who означает «кто» и здесь не используется.',
+  'С he, she, it в вопросах используется does, после которого глагол стоит в начальной форме. В вопросах с to be ставим is или are перед подлежащим. В вопросе к подлежащему Who works …? вспомогательный глагол не нужен.',
+  'С обычным глаголом используем do / does и начальную форму, а с to be ставим is / are перед подлежащим. В Who grows vegetables? who само является подлежащим. Допускаются другие грамматически правильные вопросы, если они соответствуют смыслу ответа.',
+  'A / an вводят один предмет или профессию. An ставится перед гласным звуком. The указывает на уже упомянутый предмет или человека. В by bus, play tennis и перед именем Emma артикль не нужен.',
+  'В утверждениях Present Simple с he или she глагол получает -s или -es. Usually, always и sometimes стоят перед основным глаголом. В исправлениях сохраняем детали из показаний.',
+  'С I употребляем am и work, с he / she — is и глагол с -s или -es. После does / doesn’t используем начальную форму глагола. В вопросах ставим вопросительное слово перед does. Перед профессией или впервые упомянутым местом нужен a / an, а при повторном упоминании музея — the.',
+];

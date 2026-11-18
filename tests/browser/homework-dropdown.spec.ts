@@ -11,7 +11,7 @@ for (const [width, height] of [[320, 568], [360, 740], [390, 844], [430, 932], [
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     expect(box.y + box.height).toBeLessThanOrEqual(height);
-    for (const title of ['Homework 0', 'Homework 1']) {
+    for (const title of ['Homework — Lesson 2', 'Homework — Lesson 1', 'Homework — Lesson 0']) {
       const link = menu.getByRole('link', { name: new RegExp(title) });
       await link.scrollIntoViewIfNeeded();
       await expect(link).toBeVisible();
@@ -19,7 +19,7 @@ for (const [width, height] of [[320, 568], [360, 740], [390, 844], [430, 932], [
       expect(linkBox.x).toBeGreaterThanOrEqual(0);
       expect(linkBox.x + linkBox.width).toBeLessThanOrEqual(width);
     }
-    await menu.getByRole('link', { name: /Homework 1/ }).click();
+    await menu.getByRole('link', { name: /Homework — Lesson 1/ }).click();
     await expect(page.getByRole('heading', { name: 'Lesson 1 — Present Simple Homework', exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   });

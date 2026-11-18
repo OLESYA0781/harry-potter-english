@@ -614,3 +614,34 @@ test('Golden Key quest restores guardian drafts on another device and retains al
  await rpc({}, {id:'golden-key-cloud',fields:{'answers:@vika/lesson/lesson-2':{version:1,data:{...initial,answers}},'answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts':'Keep homework'}});await route(context);await login(page,'/#/lessons/lesson-2');await page.locator('#guardian-answer').fill('  My own free answer.\n ');await page.getByRole('button',{name:'Next Question',exact:true}).click();await page.locator('#guardian-answer').fill('  Another ungraded answer.\n ');await sync(page);const second=await browser.newContext();await route(second);try{const other=await second.newPage();await login(other,'/#/lessons/lesson-2');await expect(other.locator('#guardian-answer')).toHaveValue('  Another ungraded answer.\n ');await other.getByRole('button',{name:'Previous Question',exact:true}).click();await expect(other.locator('#guardian-answer')).toHaveValue('  My own free answer.\n ');await other.reload();await expect(other.locator('#guardian-answer')).toHaveValue('  My own free answer.\n ');await sync(other);const saved=await rpc();const actual=saved.fields['answers:@vika/lesson/lesson-2'].value.data.answers;for(const key of ['match/hospital','question/hospital','interview/hospital','letter/hospital','exclude/hospital','lock/0'])expect(actual[prefix+key]).toEqual(answers[prefix+key]);expect(saved.fields['answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts'].value).toBe('Keep homework');}finally{await second.close();}
 });
 test('requested Golden Key reset syncs once and preserves replay on a second device',async({page,context,browser})=>{const key='answers:@vika/lesson/lesson-2',prefix='golden-key/v1/';await rpc({}, {id:'quest-reset-request',fields:{[key]:{version:1,data:{...initial,answers:{'articles/v1/page':11,'articles/v1/missing/0':'an',[prefix+'phase']:5,[prefix+'completed-v2']:true,[prefix+'guardian-v2/0']:'Keep old answer in archive'}}},'answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts':'Keep homework'}});await route(context);await login(page,'/#/lessons/lesson-2');await expect(page.locator('.gk-people-bank .gk-token')).toHaveCount(6);await sync(page);await page.getByRole('button',{name:'Житель doctor',exact:true}).click();await page.getByRole('button',{name:'Здание Hospital',exact:true}).click({position:{x:10,y:10}});await sync(page);const second=await browser.newContext();await route(second);try{const other=await second.newPage();await login(other,'/#/lessons/lesson-2');await expect(other.locator('.gk-inhabited')).toHaveCount(1);await other.reload();await expect(other.locator('.gk-inhabited')).toHaveCount(1);const saved=await rpc(),answers=saved.fields[key].value.data.answers;expect(answers['golden-key-reset/2026-11-14-request-1']).toBe(true);expect(answers['golden-key-archive/2026-11-14-request-1'][prefix+'guardian-v2/0']).toBe('Keep old answer in archive');expect(answers['articles/v1/missing/0']).toBe('an');expect(saved.fields['answers:@vika/lesson/lesson-0-homework/written/profile/hogwarts'].value).toBe('Keep homework');}finally{await second.close();}});
+
+test('Homework Lesson 2 syncs independent completion marks and hides keys for Vika', async ({ page, context }) => {
+  await route(context);
+  await page.goto('/#/homework/2');
+  await page.locator('.cloud-progress > summary').click();
+  await page.getByLabel('Email', { exact: true }).fill('ddarya.rr@gmail.com');
+  await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
+  await page.getByRole('button', { name: 'Войти', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+
+  const done = page.getByRole('button', { name: 'Выполнено', exact: true });
+  await done.nth(1).click();
+  await done.nth(5).click();
+  await sync(page);
+  const stored = await rpc();
+  expect(Object.keys(stored.fields).filter(key => key.startsWith('answers:homework-2/')).sort()).toEqual([
+    'answers:homework-2/completed/2', 'answers:homework-2/completed/6',
+  ]);
+
+  await page.evaluate(authKey => {
+    const auth = localStorage.getItem(authKey)!;
+    localStorage.clear();
+    localStorage.setItem(authKey, auth);
+  }, authKey);
+  await page.reload();
+  for (let index = 0; index < 6; index++) {
+    await expect(done.nth(index)).toHaveAttribute('aria-pressed', String(index === 1 || index === 5));
+  }
+  await expect(page.getByRole('complementary', { name: 'Teacher’s Mode' })).toHaveCount(0);
+});

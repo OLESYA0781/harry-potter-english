@@ -19,16 +19,16 @@ describe('My Vocabulary content', () => {
   it('includes every Common Objects word and practical language from Lesson 3', () => {
     const lesson = findWords('', 'all', 'lesson-3').map(word => word.english);
     expect(lesson).toEqual(expect.arrayContaining([
-      ...objects.map(([english]) => english),
-      'PM', 'please PM me', 'UK', 'UK passport', 'lost and found', 'found', 'key ring', 'bus stop',
+      ...objects.map(([english]) => english).filter(english=>dictionary.find(word=>word.english===english)?.introducedIn==='lesson-3'),
+      'PM', 'please PM me', 'UK', 'UK passport', 'lost and found', 'found', 'key ring',
     ]));
     expect(findWords('private message', 'all', 'lesson-3')).toEqual([
       expect.objectContaining({ english: 'PM', expansion: 'private message', russian: 'личное сообщение' }),
     ]);
     expect(findWords('banana', 'all', 'lesson-1')).toEqual([]);
-    for (const id of ['lesson-0', 'lesson-1', 'lesson-3'] as const) {
-      expect(findWords('hospital', 'all', id).map(word => word.english)).toContain('hospital');
-    }
+    expect(findWords('hospital','all','lesson-0').map(word=>word.english)).toContain('hospital');
+    expect(findWords('hospital','all','lesson-3')).toEqual([]);
+
   });
 
   it('searches English and Russian with case, whitespace and accent normalization', () => {
@@ -47,4 +47,10 @@ it('preserves the fifteen jobs in the existing Lesson 1 dictionary', () => {
     'artist','builder','bus driver','chef','doctor','farmer','footballer','nurse','office worker','pilot',
     'police officer','shop assistant','singer','teacher','vet',
   ]);
+});
+
+it('assigns each word to exactly one first lesson instead of repeating revision words',()=>{
+ for(const word of dictionary){expect(vocabularyLessons.filter(lesson=>findWords('', 'all',lesson.id).some(entry=>entry.id===word.id))).toHaveLength(1);}
+ const lesson3=findWords('', 'all','lesson-3').map(word=>word.english);
+ expect(lesson3).not.toContain('hospital');expect(lesson3).not.toContain('teacher');expect(lesson3).not.toContain('by bus');expect(lesson3).not.toContain('book');expect(lesson3).not.toContain('phone');expect(lesson3).toContain('key ring');expect(lesson3).toContain('PM');
 });

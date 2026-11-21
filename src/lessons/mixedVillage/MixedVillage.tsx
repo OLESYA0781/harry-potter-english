@@ -42,7 +42,7 @@ export default function MixedVillage({ state, setState, canTeach = false }: Less
         <h1 ref={lessonTitle} tabIndex={-1}>Lesson 3 — The Mixed-Up Village</h1>
         <p lang="ru">Урок 3 — Перепутанная деревня</p>
       </div>
-      <a href="#/vocabulary"><BookOpen size={20} aria-hidden="true" />My Vocabulary</a>
+      <a href="#/vocabulary/lesson-3"><BookOpen size={20} aria-hidden="true" />My Vocabulary</a>
       {canTeach && <button type="button" className={`teacher-toggle ${teacher ? 'enabled' : ''}`}
         aria-pressed={teacher} onClick={() => { setRequested(!requested); setResetting(false); }}>
         {teacher ? 'Exit teacher mode' : 'Teacher mode'}

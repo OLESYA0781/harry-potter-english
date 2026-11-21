@@ -1,5 +1,5 @@
-import MixedVillage from './mixedVillage/MixedVillage';
-import { villageSummary } from './mixedVillage/model';
+import BagLesson from './bags/BagLesson';
+import { bagSummary } from './bags/state';
 import { diagnose, initial } from '../data';
 import TrialLesson from './TrialLesson';
 import ToBeLesson from './ToBeLesson';
@@ -58,9 +58,9 @@ export const mysteryLesson: LessonDefinition = {
  id:'lesson-2', title:'Lesson 2 — The Hogwarts Mystery: Questions & Articles', subtitle:'Урок 2 — Тайна Хогвартса', addedAt:'2026-11-14T00:00:00Z', description:'', initialState:structuredClone(initial), Component:LessonTwo, summarize:articleSummary,
 };
 export const villageLesson: LessonDefinition = {
-  id: 'lesson-3', title: 'Lesson 3 — The Mixed-Up Village', subtitle: 'Урок 3 — Перепутанная деревня',
+  id: 'lesson-3', title: "Lesson 3 — What's in Your Bag?", subtitle: 'Урок 3 — Что у тебя в сумке?',
   addedAt: '2026-11-21T00:00:00Z', description: '', initialState: structuredClone(initial),
-  Component: MixedVillage, summarize: villageSummary,
+  Component: BagLesson, summarize: bagSummary,
 };
 // Explicit display order shared by the main menu and lesson picker.
 // Keep Trial Lesson last; publication dates do not determine the teaching order.

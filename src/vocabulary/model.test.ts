@@ -37,7 +37,7 @@ describe('My Vocabulary content', () => {
     expect(findWords('train', 'places')).toEqual([]);
     expect(findWords('train', 'transport').map(word => word.english)).toEqual(['train']);
     expect(findWords('библиотека', 'places').map(word => word.english)).toEqual(['library']);
-    expect(findWords("I don't know").map(word => word.english)).toContain('I don’t know the name in English');
+    expect(findWords("it's mine").map(word => word.english)).toContain('it’s mine');
     expect(findWords('несуществующее')).toEqual([]);
   });
 });

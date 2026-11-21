@@ -23,7 +23,7 @@ export const vocabularyLessons = [
   { id: 'trial', title: 'Trial Lesson', russian: 'Пробное занятие' },
 ] as const;
 
-type Lesson = typeof vocabularyLessons[number]['id'];
+export type Lesson = typeof vocabularyLessons[number]['id'];
 type DictionaryEntry = {
   id: string; english: string; russian: string; group: string;
   lessons: readonly Lesson[]; expansion?: string;
@@ -55,6 +55,15 @@ const sharedGroups: Partial<Record<Lesson, readonly string[]>> = {
   'lesson-2': ['jobs'],
 };
 const reusedInEarlierLessons: Readonly<Record<string, readonly Lesson[]>> = {
+  phone: ['trial'],
+  'hi': ['trial'], 'thank you': ['trial'], 'small': ['trial'], 'old': ['trial'],
+  black: ['trial'], blue: ['trial'], green: ['trial'], red: ['trial'], brown: ['trial'], purple: ['trial'], yellow: ['trial'],
+  'at home': ['lesson-0'], 'to start work': ['lesson-1'],
+  'to have': ['lesson-1'], 'have / has': ['lesson-1'], 'do / does': ['lesson-1'],
+  'I don’t have': ['lesson-1'], 'yes, she does': ['lesson-1'], 'no, she doesn’t': ['lesson-1'],
+  'yes, he does': ['lesson-1'], 'no, he doesn’t': ['lesson-1'],
+  'you / your': ['trial'], 'every morning': ['trial'],
+  house: ['lesson-2'], door: ['lesson-2'], article: ['lesson-2'], detective: ['lesson-2'],
   book: ['trial','lesson-1','lesson-2'],
   sandwich: ['trial'],
   bag: ['trial','lesson-2'],
@@ -74,9 +83,16 @@ const reusedInEarlierLessons: Readonly<Record<string, readonly Lesson[]>> = {
   'by underground': ['lesson-1','lesson-2'],
 };
 
+const storyTerms: DictionaryEntry[] = [
+ {id:'lesson-2/guardian',english:'guardian',russian:'стражник',group:'general',lessons:['lesson-2']},
+ {id:'lesson-2/golden-key',english:'golden key',russian:'золотой ключ',group:'general',lessons:['lesson-2']},
+ {id:'lesson-2/secret-room',english:'secret room',russian:'секретная комната',group:'general',lessons:['lesson-2']},
+];
+
 const knownWords = new Set(entries.map(entry => normalize(entry.english)));
 
-export const dictionary: readonly DictionaryEntry[] = [
+const allEntries: readonly DictionaryEntry[] = [
+  ...storyTerms,
   ...entries.map(({ id, english, russian, group }) => ({
     id, english, russian, group,
     lessons: vocabularyLessons.map(lesson => lesson.id).filter(lesson =>
@@ -90,9 +106,13 @@ export const dictionary: readonly DictionaryEntry[] = [
     }))),
 ];
 
+// Lesson membership records use/revision; introducedIn records first teaching.
+const teachingOrder:readonly Lesson[]=['trial','lesson-0','lesson-1','lesson-2','lesson-3'];
+export const dictionary=allEntries.map(entry=>({...entry,introducedIn:teachingOrder.find(id=>entry.lessons.includes(id))!}));
+
 export function findWords(query: string, group = 'all', lesson: Lesson | 'all' = 'all') {
   const term = normalize(query);
   return dictionary.filter(entry => (group === 'all' || entry.group === group) &&
-    (lesson === 'all' || entry.lessons.includes(lesson)) &&
+    (lesson === 'all' || entry.introducedIn === lesson) &&
     (!term || [entry.english, entry.russian, entry.expansion ?? ''].some(value => normalize(value).includes(term))));
 }

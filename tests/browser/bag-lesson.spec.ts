@@ -75,3 +75,39 @@ test('final challenge checks vocab and grammar and awaits teacher speaking appro
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Mission Complete!' })).toBeVisible();
 });
+
+test('source activities contain all interview prompts and the Grammar Bank counts', async ({ page }) => {
+  await page.goto('/#/lessons/lesson-3');
+  const nav = page.getByRole('navigation', { name: 'Lesson 3 sections' });
+  await nav.getByRole('button', { name: '4 Street Interviews' }).click();
+  const names = page.getByRole('heading', { name: 'B. Name Detective' }).locator('..');
+  await expect(names.getByRole('textbox')).toHaveCount(9);
+  await expect(names.getByLabel('Исправление: Simnit')).toBeVisible();
+  const things = page.getByRole('heading', { name: 'D. Who Has What?' }).locator('..');
+  await expect(things.getByRole('combobox')).toHaveCount(6);
+  await expect(things.getByLabel('3. A laptop and two books.', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Ключ, сверенный по оригинальной записи')).toHaveCount(0);
+
+  await nav.getByRole('button', { name: '7 Have or Has?' }).click();
+  const mixed = page.getByRole('heading', { name: '4A. A / An / Have / Has' }).locator('..');
+  for (const [i, key] of ['an', 'have a a', 'have a', 'have', 'has'].entries()) {
+    await mixed.locator('form').getByRole('textbox').nth(i).fill(key);
+  }
+  await mixed.locator('form').getByRole('button', { name: 'Проверить' }).click();
+  await expect(mixed.getByText('Верно 5 из 5.')).toBeVisible();
+
+  await nav.getByRole('button', { name: '8 Grammar Bank Challenge' }).click();
+  const plural = page.getByRole('heading', { name: 'Round 2. Singular and Plural Nouns' }).locator('..');
+  await expect(plural.locator('form').getByRole('textbox')).toHaveCount(10);
+  await expect(plural.getByLabel('one American city → six …')).toBeVisible();
+  const pictures = page.getByRole('heading', { name: 'Round 3. I have… / My city has…' }).locator('..');
+  await expect(pictures.locator('form').getByRole('textbox')).toHaveCount(8);
+  await expect(pictures.getByRole('img', { name: 'Количество зданий: 3' })).toBeVisible();
+
+  await nav.getByRole('button', { name: '9 Speaking: Compare the Bags' }).click();
+  await expect(page.getByRole('heading', { name: '5A. List What You Have' }).locator('..').getByRole('textbox')).toHaveCount(6);
+  await expect(page.getByRole('heading', { name: '6A–C. Compare Your Bags' })).toBeVisible();
+  await nav.getByRole('button', { name: '10 Writing: Lost & Found' }).click();
+  await expect(page.getByRole('button', { name: /Evi · LOST.*High Street/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Jim · FOUND.*Adastra Park/ })).toBeVisible();
+});

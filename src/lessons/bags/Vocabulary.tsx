@@ -31,7 +31,7 @@ function Listen() {
   const submitted = read('listen/choice');
   const done = read('listen/done') === true;
   return <section className="bag-task"><h3>C. Listen and Find</h3>
-    <p>Слово {round + 1} из {words.length}. Послушай и выбери картинку.</p>
+    <p>Слово {round + 1} из {words.length}. Послушай озвучку браузера и выбери картинку.</p>
     {audio.available ? <button onClick={() => audio.pronounce(words[correct])}>Послушать слово</button>
       : <p>Попроси преподавателя прочитать слово из ключа.</p>}
     <p role="status">{audio.message}</p>
@@ -93,11 +93,11 @@ export default function Vocabulary() {
       <Sort id="match" instruction="Соедини слова с картинками."
         cards={[...words].reverse().map(word => ({ id: word, label: word, target: word }))}
         targets={[4,10,3,11,5,0,12,6,8,1,9,7,2].map((index, i) => ({
-          id: words[index], label: <Picture word={words[index]} />, name: `Картинка ${i + 1}`,
+          id: words[index], label: <><strong>{String.fromCharCode(65 + i)}</strong><Picture word={words[index]} /></>, name: `Картинка ${i + 1}`,
         }))} />
     </section>
     <Listen /><Missing />
-    <Oral id="word-speaking" title="E. Say the Word" instruction="Назови предмет вслух." model={<p>{words[oralIndex]}</p>}>
+    <Oral id="word-speaking" title="E. Say the Word" instruction="Пусть преподаватель покажет предмет. Назови его вслух." model={<p>{words[oralIndex]}</p>}>
       <div className="bag-oral-picture"><Picture word={words[oralIndex] as ObjectWord} /></div>
       <button onClick={() => write({ 'word-speaking/index': (oralIndex + 1) % words.length, 'word-speaking': false })}>Другой предмет</button>
     </Oral>

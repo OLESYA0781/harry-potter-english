@@ -24,10 +24,18 @@ export const articlePractice: readonly Prompt[] = [
   ['taxi driver','a'], ['sandwich','a'],
 ];
 export const pluralPractice: readonly Prompt[] = [
-  ['one book → two …','books'], ['one phone → four …','phones'], ['one key → three …','keys'],
-  ['one box → two …','boxes'], ['one sandwich → three …','sandwiches'], ['one bus → five …','buses'],
-  ['one watch → two …','watches'], ['one country → six …','countries'], ['one city → three …','cities'],
-  ['one nationality → four …','nationalities'],
+  ['one photo → two …','photos'], ['one restaurant → four …','restaurants'],
+  ['one Indian name → three …','Indian names'], ['one nationality → two …','nationalities'],
+  ['one phone number → three …','phone numbers'], ['one address → five …','addresses'],
+  ['one shop assistant → two …','shop assistants'], ['one American city → six …','American cities'],
+  ['one taxi driver → three …','taxi drivers'], ['one sandwich → four …','sandwiches'],
+];
+export const mixedGrammar: readonly Prompt[] = [
+  ['I have ___ umbrella.','an'],
+  ['I ___ ___ notebook and ___ pen.','have a a'],
+  ['They ___ ___ laptop.','have a'],
+  ['We ___ two sandwiches.','have'],
+  ['Emma ___ three keys.','has'],
 ];
 export const havePractice: readonly Prompt[] = [
   ['Emma / umbrella','Emma has an umbrella.'], ['Harry / two books','Harry has two books.'],
@@ -47,16 +55,16 @@ export type Rule = {
 export const rules: Record<'articles'|'plural'|'have'|'questions', Rule> = {
   articles: {
     title:'A or An? — Как выбрать правильный артикль',
-    rule:'Когда речь об одном исчисляемом предмете, часто ставим a или an. A ставим перед согласным звуком, an — перед гласным. Слушай первый звук следующего слова. University начинается со звука /j/, как русское «й».',
+    rule:'Когда речь об одном исчисляемом предмете, часто ставим a или an. A ставим перед согласным звуком, an — перед гласным. Слушай первый звук следующего слова. Артикль ставится и перед прилагательным, если после него идёт существительное в единственном числе: a small bag, an old phone. University и UK начинаются со звука /j/, как русское «й»: a university, a UK passport.',
     columns:['A','AN'], rows:[['a book','an umbrella'],['a phone','an actor'],['a banana','an apple'],['a university','an office worker']],
-    examples:[['I have a book.','У меня есть книга.'],['This is an umbrella.','Это зонт.'],['It is a university.','Это университет.']],
-    remember:'Правильно: a phone и an umbrella. Формы an phone и a umbrella ошибочны.',
+    examples:[['I have a book.','У меня есть книга.'],['This is an umbrella.','Это зонт.'],['It is a university.','Это университет.'],['It is a small bag.','Это небольшая сумка.']],
+    remember:'Правильно: a phone и an umbrella. Формы an phone и a umbrella ошибочны. Артикль the указывает на предмет, который уже понятен из ситуации: the board — доска в классе.',
     quick:[['___ umbrella','an'],['___ phone','a'],['___ actor','an'],['___ university','a']],start:'Start the A/An Challenge',
   },
   plural: {
     title:'One or Many? — Один предмет или несколько',
-    rule:'Когда предметов несколько, обычно добавляем -s. После -s, -x, -sh и -ch обычно добавляем -es. После согласной меняем -y на -ies. В key перед y стоит гласная, поэтому key → keys.',
-    columns:['One','Many'], rows:[['book','books'],['phone','phones'],['key','keys'],['box','boxes'],['sandwich','sandwiches'],['bus','buses'],['watch','watches'],['country','countries'],['city','cities'],['nationality','nationalities']],
+    rule:'Когда предметов несколько, обычно добавляем -s. После -s, -ss, -x, -sh и -ch обычно добавляем -es. После согласной меняем -y на -ies. В key перед y стоит гласная, поэтому key → keys.',
+    columns:['One','Many'], rows:[['book','books'],['phone','phones'],['key','keys'],['box','boxes'],['sandwich','sandwiches'],['bus','buses'],['watch','watches'],['glass','glasses'],['dish','dishes'],['country','countries'],['city','cities'],['nationality','nationalities'],['university','universities']],
     examples:[['I have two books.','У меня две книги.'],['She has three sandwiches.','У неё три сэндвича.'],['They visit two countries.','Они посещают две страны.']],
     remember:'С множественным числом артикль a/an не ставим. A book → two books.',
     quick:[['One sandwich → two …','sandwiches'],['One country → three …','countries'],['One phone → four …','phones']],

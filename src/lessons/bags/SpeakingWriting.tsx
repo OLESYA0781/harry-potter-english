@@ -38,12 +38,41 @@ const questions = [
   ['Узнай, есть ли у Эммы телефон.', 'Does Emma have a phone? Yes, she does.'],
   ['Спроси, что находится в сумке Гарри.', `What does Harry have in his bag? ${harryModel}`],
 ];
+function MyBag() {
+  const { read, write } = useBag();
+  const lines = Array.from({ length: 5 }, (_, index) => String(read('my-bag/' + index) ?? ''));
+  return <section className="bag-task">
+    <h3>5A. List What You Have</h3>
+    <p>Запиши не менее пяти предметов из своей сумки, кошелька или карманов. Можно добавить другие предметы после пятого.</p>
+    <div className="bag-fields">{lines.map((line, index) => <label key={index}>Предмет {index + 1}
+      <input value={line} onChange={event => write({
+        ['my-bag/' + index]: event.target.value, 'my-bag/done': false,
+      })} /></label>)}</div>
+    <label>Другие предметы<textarea rows={2} value={String(read('my-bag/other') ?? '')}
+      onChange={event => write({ 'my-bag/other': event.target.value })} /></label>
+    <button disabled={lines.some(line => !line.trim()) || read('my-bag/done') === true}
+      onClick={() => write({ 'my-bag/done': true })}>{read('my-bag/done') === true ? 'Список готов' : 'Отметить список как готовый'}</button>
+    <Review id="my-bag" answers="Проверьте названия предметов в списке. У каждой ученицы список будет своим." />
+  </section>;
+}
+function UsefulPhrases() {
+  return <section className="bag-explanation">
+    <h3>5B. Useful Phrases</h3>
+    <p>Один предмет называй с a/an, несколько — с числом. Чтобы сказать, что у тебя чего-то нет, используй I don’t have.</p>
+    <ul>
+      <li>I have one notebook and two pens. — У меня один блокнот и две ручки.</li>
+      <li>I don’t have a bag, but I have a key in my pocket. — У меня нет сумки, но в кармане есть ключ.</li>
+      <li>I don’t know the name in English. — Я не знаю, как это называется по-английски.</li>
+    </ul>
+  </section>;
+}
 export function Speaking() {
   const { read } = useBag();
   return <>
     <Reminder id="speaking-rule-have" rule={rules.have} />
     <Reminder id="speaking-rule-plural" rule={rules.plural} />
     <Reminder id="speaking-rule-articles" rule={rules.articles} />
+    <MyBag /><UsefulPhrases />
     <div className="bag-pair">
       <Oral id="describe-a" title="A. Describe Bag A" instruction="Look at Emma’s bag. Tell your teacher what Emma has." model={emmaModel}>
         <Bag owner="Bag A — Emma" cell={7} items={emmaBag} />
@@ -69,17 +98,22 @@ export function Speaking() {
         model={<ol>{questions.map(([,answer]) => <li key={answer}>{answer}</li>)}</ol>}>
         <ol>{questions.map(([goal]) => <li key={goal}>{goal}</li>)}</ol>
       </Oral>
+      <Oral id="compare-interview" title="6A–C. Compare Your Bags"
+        instruction="Расспроси преподавателя о его сумке. Посчитайте, сколько одинаковых предметов у вас двоих. Затем расскажи, что есть у преподавателя, используя has, и назови одну вещь, которая есть у всех участников."
+        model={<><p>How many things do we both have? We both have two things: a phone and a notebook.</p>
+          <p>My teacher has a notebook and two pens. We all have a notebook.</p>
+          <p>Это примеры. Сверяйте ответ с фактическим содержимым сумок.</p></>} />
     </Practice>
   </>;
 }
 
 const firstMessages = [
-  { id:'keys', label:'Hi Jim! I lost three keys at the park. Where can we meet?', target:'jim' },
-  { id:'wallet', label:'Hi Evi! I found a black wallet. There’s a card and some money inside.', target:'evi' },
+  { id:'keys', label:'Hi Jim! I lost a key ring with three keys in Adastra Park. Where can we meet?', target:'jim' },
+  { id:'wallet', label:'Hi Evi! I found a small black purse on High Street. There’s a card and some money inside.', target:'evi' },
 ];
 const posts = [
-  { id:'evi', label:'Evi · LOST: I lost a small black wallet. It has a bank card and about five euros inside.' },
-  { id:'jim', label:'Jim · FOUND: I found a set of three keys in the park.' },
+  { id:'evi', label:'Evi · LOST: I lost a small black purse on High Street. It has a bank card and about five euros inside.' },
+  { id:'jim', label:'Jim · FOUND: I found a key ring with three keys in Adastra Park.' },
 ];
 const matches = [
   { id:'sam', label:'Sam: Hi! I found your green umbrella near the station.', target:'umbrella' },

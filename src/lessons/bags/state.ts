@@ -4,8 +4,8 @@ import { villageSummary } from '../mixedVillage/model';
 export const bagPrefix = 'bag-lesson/v1/';
 const milestones = [
   'intro-a-seen','intro-b-seen','learn','match/done','listen/done','missing/done','word-speaking',
-  'street/done','articles/done','plural/done','have/done','bank-a/done','bank-p/done','bank-pictures/done',
-  'describe-a','describe-b','same/done','same-speaking','difference','questions-speaking',
+  'street/done','articles/done','plural/done','have/done','mixed-grammar/done','bank-a/done','bank-p/done','bank-pictures/done',
+  'my-bag/done','describe-a','describe-b','same/done','same-speaking','difference','questions-speaking','compare-interview',
   'writing-first/done','post-done','message-done','writing-match/done','final-vocab/done','final-grammar/done','final-speaking',
 ];
 

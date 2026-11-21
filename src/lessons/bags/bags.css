@@ -1,0 +1,89 @@
+.bag-shell { display:grid; grid-template-columns:270px minmax(0,1fr); align-items:start; max-width:1600px; margin:auto; color:#294a3d; }
+.bag-sidebar { max-height:calc(100dvh - var(--platform-bar-height,110px)); overflow-y:auto; }
+.bag-sidebar-title { display:block; padding:0 14px 12px; font:700 23px Georgia,serif; }
+.bag-sidebar button { text-align:left; font:inherit; cursor:pointer; }
+.bag-content { min-width:0; }
+.bag-main { max-width:1110px; margin:auto; padding:24px clamp(13px,3vw,32px) 60px; font:18px/1.55 system-ui,sans-serif; }
+.bag-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:24px; padding:20px; border:1px solid #c4ab70; border-radius:20px; background:#f8ebc5; }
+.bag-main h1,.bag-main h2,.bag-main h3 { margin:0 0 10px; font-family:Georgia,serif; color:#254938; }
+.bag-main h1 { font-size:clamp(30px,4vw,45px); }
+.bag-main h3 { font-size:clamp(22px,3vw,29px); }
+.bag-main p { margin:8px 0 14px; }
+.bag-main button,.bag-section-nav button,.bag-main select,.bag-main input,.bag-main textarea {
+  min-height:44px; padding:8px 13px; border:1px solid #b6a475; border-radius:10px; background:#fffbed; color:inherit; font:inherit;
+}
+.bag-main button,.bag-section-nav button,.bag-main summary { cursor:pointer; }
+.bag-main button:disabled { opacity:.6; cursor:default; }
+.bag-main button[aria-pressed=true],.bag-main .bag-destination { background:#e8d399; }
+.bag-main :is(button,input,select,textarea,summary):focus-visible,.bag-sidebar button:focus-visible { outline:3px solid #966496; outline-offset:3px; }
+.bag-main label { display:grid; gap:5px; margin:8px 0; }
+.bag-main :is(input,textarea,select) { width:100%; min-width:0; background:#fffefa; }
+.bag-task,.bag-explanation,.bag-review,.bag-display {
+  min-width:0; margin:15px 0; padding:clamp(11px,2vw,21px); border:1px solid #cbbd91; border-radius:17px; background:#fff9ea;
+}
+.bag-explanation { border:2px solid #59836a; background:#f7fbf2; box-shadow:0 4px 0 #d9e5d5; }
+.bag-explanation table { width:100%; border-collapse:collapse; margin:14px 0; }
+.bag-explanation :is(td,th) { padding:7px 10px; border:1px solid #c0d2bd; text-align:left; }
+.bag-explanation th { background:#dfecdc; }
+.bag-examples,.bag-row,.bag-section-nav,.bag-person-items { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.bag-examples .bag-picture { width:76px; }
+.bag-examples ul,.bag-section-nav { margin:8px 0; }
+.bag-section-nav { justify-content:space-between; padding:12px; }
+.bag-quick { max-width:320px; }
+.bag-remember,.bag-progress { padding:10px 14px; margin:10px 0; background:#e8efdf; border-radius:10px; }
+.bag-practice { scroll-margin-top:calc(var(--platform-bar-height,110px) + 12px); }
+.bag-review { background:#f2edf4; border-color:#c8b7cc; }
+.bag-review summary { font-weight:700; }
+.bag-review .bag-row { margin-top:10px; }
+.bag-paper { white-space:normal; background:#fff5d5; border-left:4px solid #b09656; padding:12px; }
+.bag-pre { white-space:pre-wrap; overflow-wrap:anywhere; }
+.bag-picture { display:block; width:min(100%,108px); height:auto; aspect-ratio:1; object-fit:contain; border-radius:10px; flex:none; background-color:#fff5de; }
+.bag-atlas { background-size:300% 300%; }
+.bag-building { background-size:300% 200%; }
+.bag-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.bag-display > .bag-picture,.bag-image-button > .bag-picture { width:min(100%,220px); margin:auto; }
+.bag-image-button { display:grid; justify-items:center; gap:8px; width:100%; }
+.bag-items { display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+.bag-item { display:flex; align-items:center; gap:3px; padding:4px; border:1px solid #d6c6a1; border-radius:10px; background:#fffefa; }
+.bag-item .bag-picture { width:clamp(34px,5vw,62px); }
+.bag-display .bag-items { margin-top:12px; }
+.bag-pictures,.bag-cards,.bag-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr)); gap:8px; }
+.bag-cards article { display:grid; justify-items:center; gap:4px; padding:10px; text-align:center; border:1px solid #d8c49a; border-radius:12px; background:#fffdf5; }
+.bag-pictures button,.bag-memory { min-height:68px; padding:5px; border:1px solid #d8c49a; border-radius:10px; background:#fffdf5; }
+.bag-pictures .bag-picture { margin:auto; }
+.bag-bank { margin:12px 0; min-height:48px; }
+.bag-targets { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr)); gap:8px; margin-bottom:12px; }
+.bag-target { display:flex; flex-direction:column; min-width:0; gap:6px; padding:8px; border:1px dashed #b69c64; border-radius:12px; background:#f8efdb; }
+.bag-target button,.bag-bank button { max-width:100%; overflow-wrap:anywhere; }
+.bag-target .bag-row button { font-size:16px; padding:6px; }
+.bag-target .bag-destination .bag-picture,.bag-bank .bag-picture,.bag-target .bag-row .bag-picture { width:62px; margin:auto; }
+.bag-noticeboard .bag-targets { grid-template-columns:repeat(auto-fit,minmax(min(100%,225px),1fr)); }
+.bag-input-list { padding-left:28px; }
+.bag-input-list li { margin-bottom:10px; }
+.bag-input-list li > .bag-picture,.bag-oral-picture { margin-bottom:6px; }
+.bag-person-items > :is(img,.character-art) { width:68px; border-radius:8px; }
+.bag-heading .teacher-toggle { color:#294a3d; }
+@media(max-width:980px) { .bag-shell { grid-template-columns:220px minmax(0,1fr); } }
+@media(max-width:760px) { .bag-shell { display:block; } .bag-sidebar { display:none; } .bag-content > .ar-mobile-menu { display:block; } }
+@media(max-width:520px) {
+  .bag-main { font-size:16px; }
+  .bag-pair { grid-template-columns:1fr; gap:4px; }
+  .bag-pictures,.bag-cards,.bag-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .bag-section-nav button { flex:1 1 100%; }
+}
+
+.bag-video { display:block; width:100%; max-height:60vh; background:#223f35; border-radius:12px; }
+
+.bag-main .bag-picture.art-icon { width:min(100%,108px); }
+.bag-main .bag-item .bag-picture.art-icon { width:clamp(34px,5vw,62px); }
+.bag-main .bag-destination .bag-picture.art-icon,
+.bag-main .bag-bank .bag-picture.art-icon,
+.bag-main .bag-target .bag-row .bag-picture.art-icon { width:62px; }
+.bag-main .bag-display > .bag-picture.art-icon { width:min(100%,180px); }
+.bag-article-baskets .bag-target {
+  min-height:100px;
+  border:2px solid #b29962;
+  border-radius:12px 12px 24px 24px;
+  background:repeating-linear-gradient(135deg,#f2e4bf 0 4px,#f7edcf 4px 10px);
+}
+.bag-article-baskets .bag-destination { font:700 26px Georgia,serif; }

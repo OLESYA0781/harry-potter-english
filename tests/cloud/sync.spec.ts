@@ -656,3 +656,23 @@ test('Lesson 3 saves an interview and plaque through Supabase and hides teacher 
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
   await expect(page.getByText('Where do you work?', { exact: true })).toHaveCount(0);
 });
+
+test('Lesson 3 bag writing keeps the village record and restores the draft through Supabase', async ({ page, context }) => {
+  await route(context);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, '/#/lessons/lesson-3');
+  await page.getByRole('button', { name: 'Emma', exact: true }).click();
+  await page.getByLabel('Choose Lesson 3 section').selectOption('9');
+  await page.getByLabel('Твоё объявление').fill('A small notebook. Please PM me!');
+  await sync(page);
+  const saved = (await rpc()).fields['answers:@vika/lesson/lesson-3'].value.data.answers;
+  expect(saved['mixed-village/v1'].active).toBe('Emma');
+  expect(saved['bag-lesson/v1/post/text']).toBe('A small notebook. Please PM me!');
+  await page.evaluate(key => {
+    const session = localStorage.getItem(key)!;
+    localStorage.clear();
+    localStorage.setItem(key, session);
+  }, authKey);
+  await page.reload();
+  await expect(page.getByLabel('Твоё объявление')).toHaveValue('A small notebook. Please PM me!');
+});

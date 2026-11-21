@@ -47,7 +47,8 @@ test('a teacher and learner restore all eight homes by drag and tap, then reopen
       await expect(page.getByRole('button', { name: 'House 4, Sophie' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Confirm placement' })).toBeDisabled();
     }
-    await page.getByRole('button', { name: `House ${house}`, exact: true }).click();
+    // dnd-kit discards the click synthesized immediately after mouseup for 50 ms.
+    await page.getByRole('button', { name: `House ${house}`, exact: true }).click({ delay: name === 'Sophie' ? 100 : 0 });
     await expect(page.getByRole('button', { name: `House ${house}, ${name}`, exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Confirm placement' }).click();
     await expect(page.getByText('The Article Challenge', { exact: true })).toBeVisible();

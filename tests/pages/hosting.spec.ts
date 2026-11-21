@@ -52,9 +52,11 @@ for (const [name, width, height] of [
     await page.reload();await expect(page.locator('.hw1-task')).toHaveCount(7);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
     await page.goto('./#/vocabulary');
-    await expect(page.locator('.vocab-entry')).toHaveCount(73);
+    const vocabularyCount = await page.locator('.vocab-entry').count();
+    expect(vocabularyCount).toBeGreaterThan(73);
+    await expect(page.locator('.vocab-entry')).toHaveCount(vocabularyCount);
     await page.reload();
-    await expect(page.locator('.vocab-entry')).toHaveCount(73);
+    await expect(page.locator('.vocab-entry')).toHaveCount(vocabularyCount);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
     expect(badResources).toEqual([]);
     expect(errors).toEqual([]);

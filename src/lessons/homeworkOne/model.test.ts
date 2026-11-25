@@ -5,9 +5,9 @@ import {homeworkOneSummary,placeJob,readAgency,shuffleJobs} from './model';
 import {homeworks,sortHomeworks} from '../homeworkCatalog';
 import {lessons} from '../registry';
 it('sorts new homework above old by publication metadata without reordering lessons or mutating inputs',()=>{
- expect(homeworks.map(item=>item.id)).toEqual(['homework-2','homework-1','homework-0']);
- const input=[...homeworks,{id:'newest',title:'A title',subtitle:'',href:'#/homework/3',createdAt:'2026-11-18T00:00:00Z',sequence:3}];
- const before=structuredClone(input);expect(sortHomeworks(input).map(item=>item.id)).toEqual(['newest','homework-2','homework-1','homework-0']);expect(input).toEqual(before);
+ expect(homeworks.map(item=>item.id)).toEqual(['homework-3','homework-2','homework-1','homework-0']);
+ const input=[...homeworks,{id:'newest',title:'A title',subtitle:'',href:'#/homework/4',createdAt:'2026-11-25T00:00:00Z',sequence:4}];
+ const before=structuredClone(input);expect(sortHomeworks(input).map(item=>item.id)).toEqual(['newest','homework-3','homework-2','homework-1','homework-0']);expect(input).toEqual(before);
  expect(lessons.map(item=>item.id)).toEqual(['lesson-2','lesson-1','lesson-0','trial']);
 });
 it('moves and returns jobs without duplicates, displacing a previous occupant back to the bank',()=>{

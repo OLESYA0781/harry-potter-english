@@ -8,6 +8,7 @@ import {vocabularyLessons} from './vocabulary/model';
 import MyVocabulary from './vocabulary/MyVocabulary';
 import HomeworkZero from './lessons/homeworkZero/HomeworkZero';
 import HomeworkOne from './lessons/homeworkOne/HomeworkOne';
+import HomeworkThree from './lessons/homeworkThree/HomeworkThree';
 import HomeworkTwo from './lessons/homeworkTwo/HomeworkTwo';
 import {homeworks} from './lessons/homeworkCatalog';
 import './lessons/homework.css';
@@ -61,6 +62,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
   const Component = active?.Component;
   const homeworkZero = route === 'homework-0';
   const homeworkOne = route === 'homework-1';
+  const homeworkThree = route === 'homework-3';
   const homeworkTwo = route === 'homework-2';
   const vocabularyOpen = route?.startsWith('vocabulary')||false;
   const vocabularyScope=vocabularyLessons.find(l=>window.location.hash===`#/vocabulary/${l.id}`)?.id;
@@ -80,10 +82,10 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
     </nav>
     <div className="platform-cloud"><CloudProgress progress={progress} /></div>
     {progress.error && <p role="alert" className="platform-error">{progress.error}</p>}
-    {route && !active && !homeworkZero && !homeworkOne && !homeworkTwo && !vocabularyOpen && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
+    {route && !active && !homeworkZero && !homeworkOne && !homeworkTwo && !homeworkThree && !vocabularyOpen && <p role="status" className="platform-error">Этот урок пока недоступен. Выбери урок из списка.</p>}
     {active?.id === 'trial' && <div className="trial-tabs" role="tablist" aria-label="Trial Lesson sections"><button role="tab" aria-selected={trialTab === 'lesson'} onClick={() => setTrialTab('lesson')}>Lesson</button><button role="tab" aria-selected={trialTab === 'homework'} onClick={() => setTrialTab('homework')}>Homework 1</button></div>}
     {active?.id === 'trial' && current?.state && trialTab === 'homework' ? <main className="homework-zero"><section className="panel"><h1>Homework 1</h1></section></main> : active && current?.state && Component ? <TransferredContext.Provider value={active.id==='lesson-2'?{canTeach,state:readLesson(progress.state,presentSimpleLesson),setState:action=>progress.setState(root=>updateLesson(root,presentSimpleLesson,action))}:null}><Component key={active.id} canTeach={canTeach} state={current.state} setState={action => progress.setState(root => updateLesson(root, active, action))} /></TransferredContext.Provider>
       : active && current?.error ? <main><p role="alert">{current.error}</p><a className="btn" href="#/">Main Menu</a></main>
-      : vocabularyOpen ? <MyVocabulary key={vocabularyScope||'all'} lessonScope={vocabularyScope} /> : homeworkTwo ? <HomeworkTwo canTeach={canTeach} /> : homeworkOne ? <HomeworkOne state={progress.state} setState={progress.setState} /> : homeworkZero ? <HomeworkZero state={progress.state} setState={progress.setState} /> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
+      : vocabularyOpen ? <MyVocabulary key={vocabularyScope||'all'} lessonScope={vocabularyScope} /> : homeworkThree ? <HomeworkThree canTeach={canTeach} state={progress.state} setState={progress.setState} /> : homeworkTwo ? <HomeworkTwo canTeach={canTeach} /> : homeworkOne ? <HomeworkOne state={progress.state} setState={progress.setState} /> : homeworkZero ? <HomeworkZero state={progress.state} setState={progress.setState} /> : <LessonHome items={items} selected={selected} onSelect={setSelected} onOpen={open} />}
   </div>;
 }

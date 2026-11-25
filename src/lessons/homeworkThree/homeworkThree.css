@@ -1,0 +1,74 @@
+.hw3-homework select,
+.hw3-bank button,
+.hw3-table button {
+  min-height: 44px;
+  padding: 5px 10px;
+  border: 1px solid #a79868;
+  border-radius: 8px;
+  background: #fff7df;
+  color: #29483a;
+  font: inherit;
+}
+.hw3-homework select:focus-visible {
+  outline: 3px solid #9772b6;
+  outline-offset: 2px;
+}
+.hw3-audio { margin: 16px 0 22px; }
+.hw3-audio p { margin: 6px 0; font-size: .85em; }
+.hw3-audio audio { display: block; width: min(100%, 420px); }
+.hw3-pictures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+.hw3-pictures figure {
+  margin: 0;
+  overflow: hidden;
+  text-align: center;
+  border: 1px solid #cbb878;
+  border-radius: 14px;
+  background: #fff5d8;
+}
+.hw3-pictures img { display: block; width: 100%; height: auto; }
+.hw3-pictures figcaption { padding: 4px; font-weight: 750; }
+.hw3-matches, .hw3-bank { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.hw3-bank { margin-bottom: 16px; }
+.hw3-bank button { cursor: grab; }
+.hw3-bank button[aria-pressed="true"] {
+  background: #e5edda;
+  outline: 2px solid #6c8c63;
+  outline-offset: 2px;
+}
+.hw3-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.hw3-table th, .hw3-table td { padding: 8px; border-bottom: 1px solid #dfd2b6; text-align: left; }
+.hw3-table tr > :first-child { width: 26%; overflow-wrap: anywhere; }
+.hw3-table select, .hw3-table button { width: 100%; }
+.hw3-table-choice { display: grid; position: relative; }
+.hw3-table-choice select, .hw3-table-choice span { grid-area: 1 / 1; }
+.hw3-table-choice select {
+  appearance: none;
+  color: transparent;
+  cursor: pointer;
+}
+.hw3-table-choice select option { color: #29483a; }
+.hw3-table-choice span {
+  z-index: 1;
+  align-self: center;
+  padding: 5px 8px;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+.hw3-table button { cursor: pointer; overflow-wrap: anywhere; }
+.hw3-example, .hw3-key { margin: 22px 0; }
+.hw3-key ol, .hw3-key ul, .hw3-example ul { padding-inline-start: 1.4em; }
+.hw3-key ol { list-style: decimal; }
+.hw3-key ul, .hw3-example ul { list-style: disc; }
+
+@media (max-width: 650px) {
+  .hw3-pictures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hw3-table { font-size: clamp(14px, 4vw, 19px); }
+  .hw3-table th, .hw3-table td { padding: 6px 2px; }
+  .hw3-table tr > :first-child { width: 32%; }
+  .hw3-table select, .hw3-table button { padding-inline: 3px; }
+}

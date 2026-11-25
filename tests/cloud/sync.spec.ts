@@ -42,10 +42,10 @@ async function route(context: BrowserContext) {
     throw new Error(`Unexpected Supabase endpoint ${path.pathname}`);
   });
 }
-async function login(page: Page, location = '/#/lessons/trial') {
+async function login(page: Page, location = '/#/lessons/trial', email = 'learner@example.test') {
   await page.goto(location);
   await page.locator('.cloud-progress > summary').click();
-  await page.getByLabel('Email', { exact: true }).fill('learner@example.test');
+  await page.getByLabel('Email', { exact: true }).fill(email);
   await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
   await page.getByRole('button', { name: 'Войти', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Выйти', exact: true })).toBeVisible();
@@ -628,6 +628,51 @@ test('Homework Lesson 2 hides keys for Vika after signing in and reloading', asy
   await page.reload();
   await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
   await expect(page.getByRole('complementary', { name: 'Teacher’s Mode' })).toHaveCount(0);
+});
+
+test('Homework Lesson 3 syncs answers and independent notebook marks for the learner', async ({ page, context, browser }) => {
+  const location = '/#/homework/3';
+  const learner = 'ddarya.rr@gmail.com';
+  const changed = [
+    ['Sentence 14, article 1', 'an'],
+    ['Sentence 14, article 2', 'a'],
+    ['Ralph', 'B'],
+    ['Ralph — Job', 'digital designer'],
+    ['Statement 6, True or False', 'False'],
+  ];
+  await route(context);
+  await login(page, location, learner);
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+  for (const [name, value] of changed) {
+    await page.getByRole('combobox', { name, exact: true }).selectOption(value);
+  }
+  const marks = page.getByRole('checkbox', { name: 'Done in my notebook' });
+  await marks.nth(0).check();
+  await marks.nth(3).check();
+  await sync(page);
+
+  const second = await browser.newContext();
+  await route(second);
+  try {
+    const other = await second.newPage();
+    await login(other, location, learner);
+    for (const [name, value] of changed) {
+      await expect(other.getByRole('combobox', { name, exact: true })).toHaveValue(value);
+    }
+    const otherMarks = other.getByRole('checkbox', { name: 'Done in my notebook' });
+    await expect(otherMarks).toHaveCount(4);
+    await expect(otherMarks.nth(0)).toBeChecked();
+    await expect(otherMarks.nth(1)).not.toBeChecked();
+    await expect(otherMarks.nth(2)).not.toBeChecked();
+    await expect(otherMarks.nth(3)).toBeChecked();
+    await expect(other.getByRole('complementary', { name: 'Teacher’s Mode' })).toHaveCount(0);
+    await other.getByRole('combobox', { name: 'Ralph — Job' }).selectOption('');
+    await sync(other);
+    await sync(page);
+    await expect(page.getByRole('combobox', { name: 'Ralph — Job' })).toHaveValue('');
+  } finally {
+    await second.close();
+  }
 });
 
 test('Lesson 3 saves an interview and plaque through Supabase and hides teacher controls for Vika', async ({ page, context }) => {

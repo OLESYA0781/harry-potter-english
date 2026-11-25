@@ -6,7 +6,7 @@ for (const width of [320, 390, 1440]) {
     await page.goto('/');
     const menu = page.locator('.homework-menu');
     await menu.locator('summary').click();
-    const latest = menu.getByRole('link').first();
+    const latest = menu.getByRole('link', { name: /Homework — Lesson 2/ });
     await expect(latest).toHaveAttribute('href', '#/homework/2');
     await latest.click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Homework — Lesson 2: The Hogwarts Investigation');

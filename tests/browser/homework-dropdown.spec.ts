@@ -11,7 +11,7 @@ for (const [width, height] of [[320, 568], [360, 740], [390, 844], [430, 932], [
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(width);
     expect(box.y + box.height).toBeLessThanOrEqual(height);
-    for (const title of ['Homework — Lesson 2', 'Homework — Lesson 1', 'Homework — Lesson 0']) {
+    for (const title of ['Homework — Lesson 3', 'Homework — Lesson 2', 'Homework — Lesson 1', 'Homework — Lesson 0']) {
       const link = menu.getByRole('link', { name: new RegExp(title) });
       await link.scrollIntoViewIfNeeded();
       await expect(link).toBeVisible();

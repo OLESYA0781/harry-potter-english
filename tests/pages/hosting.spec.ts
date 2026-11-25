@@ -58,6 +58,16 @@ for (const [name, width, height] of [
     await page.reload();
     await expect(page.locator('.vocab-entry')).toHaveCount(vocabularyCount);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
+    await page.goto('./#/homework/3');
+    await expect(page.getByRole('heading', { name: 'Homework — Lesson 3', exact: true })).toBeVisible();
+    await expect(page.locator('.hw3-task')).toHaveCount(8);
+    const listeningPicture = page.locator('.hw3-pictures img').first();
+    await listeningPicture.scrollIntoViewIfNeeded();
+    await expect.poll(() => listeningPicture.evaluate(img => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+    await expect(listeningPicture).toHaveAttribute('src', '/harry-potter-english/art/homework-3/picture-a.webp');
+    await page.reload();
+    await expect(page.locator('.hw3-task')).toHaveCount(8);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
     expect(badResources).toEqual([]);
     expect(errors).toEqual([]);
   });

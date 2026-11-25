@@ -1,38 +1,56 @@
 import { describe, expect, it } from 'vitest';
-import { findWords, groups, vocabulary } from './model';
+import { objects } from '../lessons/bags/data';
+import { dictionary, findWords, groups, vocabulary, vocabularyLessons } from './model';
 
 describe('My Vocabulary content', () => {
-  it('contains 73 unique complete entries in five valid groups', () => {
+  it('keeps existing entries and uses unique IDs and lesson memberships', () => {
     expect(vocabulary).toHaveLength(73);
-    expect(new Set(vocabulary.map(word => word.english.toLowerCase())).size).toBe(73);
-    expect(new Set(vocabulary.map(word => word.id)).size).toBe(73);
-    expect(new Set(vocabulary.map(word => word.group))).toEqual(new Set(groups.map(group => group.id)));
-    for (const word of vocabulary) {
+    expect(new Set(dictionary.map(word => word.english.toLowerCase())).size).toBe(dictionary.length);
+    expect(new Set(dictionary.map(word => word.id)).size).toBe(dictionary.length);
+    expect(new Set(dictionary.map(word => word.group))).toEqual(new Set(groups.map(group => group.id)));
+    for (const word of dictionary) {
       expect(word.russian.trim()).not.toBe('');
-      expect(word.example).toMatch(/^[A-Z].+[.!?]$/);
-      expect(word.example.split(/\s+/).length).toBeGreaterThanOrEqual(5);
-      expect(word.example).not.toMatch(/\b(?:this is|these are)\b/i);
+      expect(word.lessons.length).toBeGreaterThan(0);
+      expect(word).not.toHaveProperty('example');
     }
+    for (const { id } of vocabularyLessons) expect(findWords('', 'all', id).length).toBeGreaterThan(0);
   });
-  it('keeps infinitives for all verb entries', () => {
-    expect(vocabulary.filter(word => word.english.startsWith('to ')).map(word => word.english)).toEqual([
-      'to paint', 'to sleep', 'to write a letter', 'to rest',
-      'to spend time with my family', 'to clean my room', 'to drink', 'to sit',
-      'to wash', 'to enjoy', 'to work', 'to write', 'to travel', 'to eat', 'to hate', 'to have lunch', 'to have dinner', 'to train', 'to go to work',
+
+  it('includes every Common Objects word and practical language from Lesson 3', () => {
+    const lesson = findWords('', 'all', 'lesson-3').map(word => word.english);
+    expect(lesson).toEqual(expect.arrayContaining([
+      ...objects.map(([english]) => english).filter(english=>dictionary.find(word=>word.english===english)?.introducedIn==='lesson-3'),
+      'PM', 'please PM me', 'UK', 'UK passport', 'lost and found', 'found', 'key ring',
+    ]));
+    expect(findWords('private message', 'all', 'lesson-3')).toEqual([
+      expect.objectContaining({ english: 'PM', expansion: 'private message', russian: 'личное сообщение' }),
     ]);
-    expect(findWords('to sit')[0].example).toBe('Ron sits on the sofa.');
+    expect(findWords('banana', 'all', 'lesson-1')).toEqual([]);
+    expect(findWords('hospital','all','lesson-0').map(word=>word.english)).toContain('hospital');
+    expect(findWords('hospital','all','lesson-3')).toEqual([]);
+
   });
-  it('searches English/Russian with case, whitespace and accent normalization', () => {
+
+  it('searches English and Russian with case, whitespace and accent normalization', () => {
     expect(findWords('  CAFE  ').map(word => word.english)).toEqual(['café']);
     expect(findWords('БОЛЬНИЦА').map(word => word.english)).toEqual(['hospital']);
     expect(findWords('train', 'places')).toEqual([]);
     expect(findWords('train', 'transport').map(word => word.english)).toEqual(['train']);
-    expect(findWords('')).toHaveLength(73);
     expect(findWords('библиотека', 'places').map(word => word.english)).toEqual(['library']);
+    expect(findWords("it's mine").map(word => word.english)).toContain('it’s mine');
     expect(findWords('несуществующее')).toEqual([]);
   });
 });
 
-it('includes all fifteen Jobs words from the verified Go Getter page six',()=>{
- expect(vocabulary.filter(word=>word.group==='jobs').map(word=>word.english)).toEqual(['artist','builder','bus driver','chef','doctor','farmer','footballer','nurse','office worker','pilot','police officer','shop assistant','singer','teacher','vet']);
+it('preserves the fifteen jobs in the existing Lesson 1 dictionary', () => {
+  expect(vocabulary.filter(word => word.group === 'jobs').map(word => word.english)).toEqual([
+    'artist','builder','bus driver','chef','doctor','farmer','footballer','nurse','office worker','pilot',
+    'police officer','shop assistant','singer','teacher','vet',
+  ]);
+});
+
+it('assigns each word to exactly one first lesson instead of repeating revision words',()=>{
+ for(const word of dictionary){expect(vocabularyLessons.filter(lesson=>findWords('', 'all',lesson.id).some(entry=>entry.id===word.id))).toHaveLength(1);}
+ const lesson3=findWords('', 'all','lesson-3').map(word=>word.english);
+ expect(lesson3).not.toContain('hospital');expect(lesson3).not.toContain('teacher');expect(lesson3).not.toContain('by bus');expect(lesson3).not.toContain('book');expect(lesson3).not.toContain('phone');expect(lesson3).toContain('key ring');expect(lesson3).toContain('PM');
 });

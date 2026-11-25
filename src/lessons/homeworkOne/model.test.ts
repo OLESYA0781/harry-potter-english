@@ -8,7 +8,7 @@ it('sorts new homework above old by publication metadata without reordering less
  expect(homeworks.map(item=>item.id)).toEqual(['homework-3','homework-2','homework-1','homework-0']);
  const input=[...homeworks,{id:'newest',title:'A title',subtitle:'',href:'#/homework/4',createdAt:'2026-11-25T00:00:00Z',sequence:4}];
  const before=structuredClone(input);expect(sortHomeworks(input).map(item=>item.id)).toEqual(['newest','homework-3','homework-2','homework-1','homework-0']);expect(input).toEqual(before);
- expect(lessons.map(item=>item.id)).toEqual(['lesson-2','lesson-1','lesson-0','trial']);
+ expect(lessons.map(item=>item.id)).toEqual(['lesson-3','lesson-2','lesson-1','lesson-0','trial']);
 });
 it('moves and returns jobs without duplicates, displacing a previous occupant back to the bank',()=>{
  const first=placeJob(readAgency(undefined),'artist','paint');const next=placeJob(first,'chef','houses');

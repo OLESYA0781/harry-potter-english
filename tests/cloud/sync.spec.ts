@@ -674,3 +674,50 @@ test('Homework Lesson 3 syncs answers and independent notebook marks for the lea
     await second.close();
   }
 });
+
+test('Lesson 3 saves an interview and plaque through Supabase and hides teacher controls for Vika', async ({ page, context }) => {
+  await route(context);
+  await login(page, '/#/lessons/lesson-3');
+  await page.getByRole('button', { name: 'Teacher mode', exact: true }).click();
+  await page.getByRole('button', { name: 'Emma', exact: true }).click();
+  await page.getByRole('button', { name: 'Interview completed' }).click();
+  await page.getByRole('button', { name: 'House 4', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm placement' }).click();
+  await page.getByRole('button', { name: 'Confirm article challenge' }).click();
+  await sync(page);
+  expect((await rpc()).fields['answers:@vika/lesson/lesson-3'].value.data.answers['mixed-village/v1'].interviewed.Emma)
+    .toEqual({ house: 4, placed: true, articles: true });
+
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  if (!await page.getByRole('button', { name: 'Войти', exact: true }).isVisible()) {
+    await page.locator('.cloud-progress > summary').click();
+  }
+  await page.getByLabel('Email', { exact: true }).fill('ddarya.rr@gmail.com');
+  await page.getByLabel('Пароль', { exact: true }).fill('test-only-password');
+  await page.getByRole('button', { name: 'Войти', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'House 4, Emma' })).toBeVisible();
+  await expect(page.getByText('Emma is home!')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Teacher mode', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Where do you work?', { exact: true })).toHaveCount(0);
+});
+
+test('Lesson 3 bag writing keeps the village record and restores the draft through Supabase', async ({ page, context }) => {
+  await route(context);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, '/#/lessons/lesson-3');
+  await page.getByRole('button', { name: 'Emma', exact: true }).click();
+  await page.getByLabel('Choose Lesson 3 section').selectOption('9');
+  await page.getByLabel('Твоё объявление').fill('A small notebook. Please PM me!');
+  await sync(page);
+  const saved = (await rpc()).fields['answers:@vika/lesson/lesson-3'].value.data.answers;
+  expect(saved['mixed-village/v1'].active).toBe('Emma');
+  expect(saved['bag-lesson/v1/post/text']).toBe('A small notebook. Please PM me!');
+  await page.evaluate(key => {
+    const session = localStorage.getItem(key)!;
+    localStorage.clear();
+    localStorage.setItem(key, session);
+  }, authKey);
+  await page.reload();
+  await expect(page.getByLabel('Твоё объявление')).toHaveValue('A small notebook. Please PM me!');
+});

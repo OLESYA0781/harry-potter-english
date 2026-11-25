@@ -1,0 +1,211 @@
+.village-lesson {
+  --village-ink: #234638;
+  --village-gold: #c6ae73;
+  width: min(1250px, 100%);
+  margin: 24px auto 60px;
+  padding: 0 clamp(12px, 3vw, 28px);
+  color: var(--village-ink);
+  font: 17px/1.55 system-ui, sans-serif;
+}
+.village-lesson h1, .village-lesson h2, .village-lesson h3, .village-lesson h4, .village-lesson p { margin: 0; }
+.village-lesson h1, .village-lesson h2, .village-lesson h3 { font-family: Georgia, serif; line-height: 1.18; }
+.village-lesson h1 { font-size: clamp(29px, 4vw, 46px); }
+.village-lesson h2 { font-size: clamp(23px, 3vw, 34px); }
+.village-lesson h3 { font-size: 25px; }
+.village-heading, .village-briefing, .village-interview, .village-finale, .village-overview, .village-teacher, .village-reset {
+  margin-bottom: 18px;
+  border: 1px solid var(--village-gold);
+  border-radius: 22px;
+  padding: clamp(15px, 2.5vw, 24px);
+  box-shadow: 0 4px 0 #d9cfb4;
+}
+.village-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: #fff2c9;
+  background: linear-gradient(120deg, #153a2e, #285a43);
+}
+.village-heading > div { margin-right: auto; }
+.village-heading h1, .village-heading p { color: inherit; }
+.village-heading a, .village-heading .teacher-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 7px 12px;
+  border: 1px solid #e6cb82;
+  border-radius: 10px;
+  background: #fff3cf;
+  color: #254638;
+  font-size: 16px;
+  text-decoration: none;
+}
+.village-heading .teacher-toggle.enabled { background: #efdce8; color: #592a41; }
+.village-briefing, .village-interview, .village-finale {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 20px);
+  background: #fff8e5;
+}
+.village-briefing { flex-wrap: wrap; }
+.village-briefing > div:nth-child(2) { flex: 1 1 240px; }
+.village-hermione { width: clamp(66px, 10vw, 115px); flex: none; }
+.village-hermione .character-art { display: block; width: 100%; height: auto; border-radius: 13px; }
+.village-briefing blockquote { margin: 8px 0 0; color: #6e3048; font-weight: 700; }
+.village-count { display: flex; align-items: center; gap: 7px; align-self: start; font-weight: 700; }
+.village-board { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; margin-bottom: 18px; }
+.village-board section { min-width: 0; border: 1px solid var(--village-gold); border-radius: 20px; padding: 14px; background: #f8f1df; }
+.village-board h3 { margin-bottom: 8px; }
+.village-map-scroll {
+  margin-top: 12px;
+  overflow-x: auto;
+  border: 2px solid #ad8f52;
+  border-radius: 14px;
+  scrollbar-color: #a48145 #f7eaca;
+}
+.village-map { position: relative; min-width: 660px; aspect-ratio: 3 / 2; isolation: isolate; }
+.village-landscape { display: block; width: 100%; height: 100%; }
+.village-house-target {
+  position: absolute;
+  z-index: 2;
+  width: 12%;
+  height: 17%;
+}
+.village-house {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #fff5d4;
+}
+.village-house[data-ready="true"] { cursor: pointer; }
+.village-house[data-ready="true"]:hover, .village-house[data-over="true"] { background: #ffe69a24; outline: 2px dashed #ffdf82; }
+.village-number, .village-plaque { border: 1px solid #ebcb82; box-shadow: 0 2px 4px #261a15bb; font-weight: 800; }
+.village-number { min-width: 28px; padding: 0 4px; border-radius: 50%; text-align: center; background: #672d42; }
+.village-plaque { min-width: 80%; padding: 1px 4px; border-radius: 5px; text-align: center; background: #244b37; font-size: 15px; }
+.village-map-hint { display: none; padding-top: 6px; font-size: 14px; }
+.village-residents { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.village-resident {
+  display: grid;
+  grid-template-rows: auto min-content;
+  gap: 3px;
+  padding: 4px 4px 6px;
+  border: 1px solid #bdab80;
+  border-radius: 11px;
+  background: #fffbef;
+  color: var(--village-ink);
+  font-size: 16px;
+  cursor: pointer;
+}
+.village-resident[aria-pressed="true"] { outline: 3px solid #4c7e5d; outline-offset: -2px; background: #e1eedc; }
+.village-resident[data-dragging="true"] { opacity: .4; }
+.village-movable { cursor: grab; }
+.village-portrait {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background-repeat: no-repeat;
+  border-radius: 8px;
+}
+.village-ron { overflow: hidden; background: #dbcaac; }
+.village-ron .character-art { display: block; width: 100%; height: 100%; }
+.village-drag-preview {
+  width: 100px;
+  padding: 4px;
+  border: 2px solid #dbb86b;
+  border-radius: 10px;
+  background: #fff3d3;
+  color: #234638;
+  text-align: center;
+  box-shadow: 0 8px 18px #172d25aa;
+  pointer-events: none;
+}
+.village-interview > .village-portrait { flex: none; width: clamp(75px, 16vw, 156px); }
+.village-interview p + p, .village-finale p + p { margin-top: 6px; }
+.village-prompt { margin-top: 4px !important; color: #6e3048; font-size: 20px; font-weight: 750; }
+.village-lesson button:not(.village-house):not(.village-resident):not(.teacher-toggle) {
+  min-height: 44px;
+  padding: 8px 13px;
+  border: 1px solid #b99e66;
+  border-radius: 10px;
+  background: #f8eaca;
+  color: #234638;
+  font: inherit;
+  font-weight: 650;
+}
+.village-lesson button:not(:disabled):not(.village-house):not(.village-movable) { cursor: pointer; }
+.village-lesson button:disabled { opacity: .55; }
+.village-lesson :is(button, a, [tabindex]):focus-visible { outline: 3px solid #a16698; outline-offset: 3px; }
+.village-lesson .village-map-jump { margin-top: 10px; }
+.village-teacher { background: #ecefe3; }
+.village-teacher > *, .village-case-notes > * { margin-top: 10px !important; }
+.village-teacher > h3 { margin-top: 0 !important; }
+.village-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.village-active-notes, .village-reset { padding: 14px; border-radius: 12px; background: #fffaf0; }
+.village-teacher details { padding: 8px 0; }
+.village-teacher details details { padding-left: 13px; }
+.village-teacher summary { font-weight: 700; cursor: pointer; }
+.village-key { columns: 2; }
+.village-case-notes dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 6px; }
+.village-case-notes dl > div { padding: 6px 8px; border-radius: 8px; background: #f2eddd; }
+.village-case-notes dt { font-weight: 700; }
+.village-case-notes dd { margin: 0; }
+.village-case-notes li { margin-bottom: 4px; }
+.village-reset button { margin: 8px 8px 0 0; }
+.village-overview { background: #fff8e5; }
+.village-finale { background: #e1eddb; }
+.village-finale button { margin-top: 10px; }
+.village-window {
+  position: absolute;
+  z-index: 1;
+  width: 5.5%;
+  height: 8%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, #fff6bcbd 5%, #ffc34f7d 42%, #ffd88000 73%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.village-lit .village-plaque { background: #805535; color: #ffefb7; }
+.village-lights {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 19%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 34% 48%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 60% 14%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 81% 51%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 21% 66%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 71% 89%, #fff7c7 0 2px, transparent 8px),
+    radial-gradient(circle at 91% 72%, #fff7c7 0 2px, transparent 8px);
+  animation: village-glimmer 3s ease-in-out infinite alternate;
+}
+@keyframes village-glimmer { from { opacity: .55; } to { opacity: 1; } }
+.village-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 1030px) {
+  .village-board { grid-template-columns: 1fr; }
+  .village-residents { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+@media (max-width: 740px) {
+  .village-map-hint { display: block; }
+  .village-residents { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 390px) {
+  .village-resident { font-size: 14px; }
+  .village-briefing > div:nth-child(2) { flex-basis: 140px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .village-lights { animation: none; }
+}

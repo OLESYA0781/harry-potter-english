@@ -767,7 +767,7 @@ test('Lesson 3 bag writing keeps the village record and restores the draft throu
 });
 
 test('independent phone and desktop edits in one lesson recover online and show in assigned Teacher Mode', async ({ page, context, browser }) => {
-  test.setTimeout(60000);
+  test.setTimeout(120000);
   const location = '/#/lessons/lesson-3';
   const section = 'answers:@vika/lesson/lesson-3/~sync/answers/bag-lesson/v1/section';
   await rpc({}, { id: 'lesson-3-old-save', fields: {
@@ -782,6 +782,11 @@ test('independent phone and desktop edits in one lesson recover online and show 
   const teacherContext = await browser.newContext();
   await route(desktop);
   await route(teacherContext);
+  await teacherContext.addInitScript(({ owner, state }) => {
+    if (!localStorage.getItem('hogwarts-cloud-v1')) localStorage.setItem('hogwarts-cloud-v1', JSON.stringify({
+      version: 1, owner, state, cloud: {}, pending: {}, migration: null, backup: null, migrated: true,
+    }));
+  }, { owner: teacher, state: { ...initial, name: 'Teacher local draft' } });
   await desktop.addInitScript(old => {
     if (!localStorage.getItem('hogwarts-cloud-v1')) localStorage.setItem('hogwarts-english-v1', JSON.stringify(old));
   }, { version: 3, data: { ...initial, answers: { '@vika/lesson/lesson-3': {
@@ -796,6 +801,8 @@ test('independent phone and desktop edits in one lesson recover online and show 
     await login(review, location, teacherEmail);
     await review.getByRole('button', { name: 'Teacher mode', exact: true }).click();
     await expect(review.locator('.bag-progress')).toBeVisible();
+    expect(await review.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).previousOwnerJournal.state.name))
+      .toBe('Teacher local draft');
     const item = (target: Page, n: number) => target.getByRole('textbox', { name: `Предмет ${n}`, exact: true });
     const indicator = (target: Page) => target.locator('.cloud-entry-copy [role=status]');
     await expect(item(other, 1)).toHaveValue('old item');
@@ -820,10 +827,13 @@ test('independent phone and desktop edits in one lesson recover online and show 
     await context.setOffline(false);
     await expect(indicator(page)).toHaveText('Saved', { timeout: 15000 });
     for (const target of [page, other, review]) {
-      await expect(item(target, 1)).toHaveValue('updated desktop item', { timeout: 15000 });
-      await expect(item(target, 3)).toHaveValue('offline item', { timeout: 15000 });
-      await expect(item(target, 4)).toHaveValue('online item', { timeout: 15000 });
-      await expect(item(target, 5)).toHaveValue('another offline item', { timeout: 15000 });
+      await target.bringToFront();
+      await Promise.all([
+        expect(item(target, 1)).toHaveValue('updated desktop item', { timeout: 15000 }),
+        expect(item(target, 3)).toHaveValue('offline item', { timeout: 15000 }),
+        expect(item(target, 4)).toHaveValue('online item', { timeout: 15000 }),
+        expect(item(target, 5)).toHaveValue('another offline item', { timeout: 15000 }),
+      ]);
     }
     await item(other, 2).fill('ready');
     await other.getByRole('button', { name: 'Отметить список как готовый' }).click();

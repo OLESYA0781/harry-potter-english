@@ -20,6 +20,15 @@ it('backs up legacy progress once and refuses rebinding to another user', () => 
   expect(j.backup).toEqual(initial);
   expect(() => bind(j, 'other')).toThrow(/другой/);
 });
+it('archives a teacher’s previous journal when binding to the assigned learner', () => {
+  const previous = bind(newJournal({ ...initial, name: 'Teacher data' }), 'teacher');
+  const assigned = bind(previous, 'learner', 'teacher');
+  expect(assigned.owner).toBe('learner');
+  expect(assigned.state).toEqual(initial);
+  expect(assigned.migration).toBeNull();
+  expect(assigned.previousOwnerJournal).toEqual(previous);
+  expect(() => bind(previous, 'learner', 'another-teacher')).toThrow(/другой/);
+});
 it('queues answers and checks together without dropping consecutive edits', () => {
   let j = start();
   j = edit(j, { ...j.state, answers: { a: 2 } });

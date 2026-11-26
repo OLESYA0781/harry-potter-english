@@ -91,14 +91,7 @@ export function useProgress() {
         access.current = { actor, owner: result.user_id };
       }
       const learner = access.current.owner;
-      const snapshot = await transact(j => {
-        if (readSession()?.user.id !== actor) return j;
-        const bound = bind(j, learner);
-        if (j.owner === learner || actor === learner) return bound;
-        // The teacher's pre-login browser data is retained as a backup.
-        // Only learner devices can import unversioned data into learner records.
-        return { ...reconcile(bound, {}, {}), migrated: true };
-      });
+      const snapshot = await transact(j => readSession()?.user.id === actor ? bind(j, learner, actor) : j);
       if (snapshot.owner !== learner || readSession()?.user.id !== actor) return;
       setOwner(learner);
       let more = true;
@@ -167,9 +160,7 @@ export function useProgress() {
       if (id) void setTimeout(() => void sync(), 0);
     });
     void transact(j => j).catch(() => {});
-    const timer = supabase && window.setInterval(() => {
-      if (document.visibilityState === 'visible') void sync();
-    }, 5000);
+    const timer = supabase && window.setInterval(() => void sync(), 5000);
     window.addEventListener('online', refresh);
     window.addEventListener('offline', refresh);
     window.addEventListener('focus', refresh);

@@ -13,6 +13,7 @@ export type Journal = {
   version: 1 | 2; owner: string | null; state: LessonState; cloud: Fields;
   pending: Record<string, Change>; migration: { id: string; fields: Record<string, unknown> } | null;
   backup: LessonState | null; migrated: boolean;
+  previousOwnerJournal?: Journal;
   legacyPending?: Record<string, Change>;
   superseded?: Record<string, { key: string; change: Change; cloud?: Field }>;
   flight?: { id: string; changes: Record<string, Change>; migration: Journal['migration'] };
@@ -95,9 +96,20 @@ export function loadLegacy(storage: Pick<Storage, 'getItem'>): LessonState {
 export function newJournal(state: LessonState): Journal {
   return { version: 2, owner: null, state, cloud: {}, pending: {}, migration: null, backup: null, migrated: false };
 }
-export function bind(j: Journal, owner: string): Journal {
-  if (j.owner && j.owner !== owner) throw new Error('Этот браузер связан с другой ученицей. Локальный прогресс сохранён; войдите в прежнюю учётную запись.');
-  if (j.owner) return j;
+export function bind(j: Journal, owner: string, actor = owner): Journal {
+  if (j.owner === owner) return j;
+  if (j.owner && j.owner !== actor) {
+    throw new Error('Этот браузер связан с другой ученицей. Локальный прогресс сохранён; войдите в прежнюю учётную запись.');
+  }
+  if (actor !== owner) {
+    // An assigned teacher may have a journal from before the accounts were
+    // linked. Preserve it in the export of the newly bound journal.
+    return {
+      ...newJournal(structuredClone(initial)), owner, migrated: true,
+      backup: j.owner ? null : structuredClone(j.state),
+      previousOwnerJournal: j.owner ? j : undefined,
+    };
+  }
   return { ...j, owner, backup: structuredClone(j.state), migration: { id: crypto.randomUUID(), fields: flatten(j.state) } };
 }
 export function edit(j: Journal, state: LessonState): Journal {

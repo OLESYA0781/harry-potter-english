@@ -22,3 +22,20 @@ it('combines independent durable operations from different tabs', () => {
   writeOperation(local, j, { ...initial, ratings: { reading: 2 } });
   expect(readDurable(local).journal.state).toMatchObject({ name: 'Tab A', ratings: { reading: 2 } });
 });
+it('migrates only the edited answers from an old whole-lesson outbox', () => {
+  const local = storage();
+  const lesson = 'answers:@vika/lesson/lesson-1';
+  const response = 'answers:@sync/lesson-1/responses/question~11~0';
+  const record = (answer: string) => ({ version: 1, data: { ...initial, answers: {
+    'present-simple:v2': { schemaVersion: 2, activePage: 'first', seen: [], responses: { 'question/1~': answer, archived: 'keep' } },
+  } } });
+  const journal = bind(newJournal(initial), 'learner');
+  local.setItem(journalKey, JSON.stringify({ ...journal, cloud: { [lesson]: { value: record('Before'), revision: 9, mutation: 'old' } } }));
+  local.setItem('hogwarts-outbox:old', JSON.stringify({ owner: 'learner', time: 1, changes: {
+    [lesson]: { value: record('After'), base: 9, mutation: 'pending' },
+  } }));
+  const recovered = readDurable(local).journal;
+  expect(recovered.pending).toEqual({ [response]: { value: 'After', base: 9, mutation: 'pending' } });
+  expect(recovered.cloud[response].value).toBe('Before');
+  expect(recovered.cloud['answers:@sync/lesson-1/responses/archived'].value).toBe('keep');
+});

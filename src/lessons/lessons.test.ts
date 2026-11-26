@@ -31,7 +31,9 @@ it('uses independent RPC fields and preserves all lessons through existing recon
   let state = updateLesson(original, next, { ...initial, answers: { draft: 'One' } });
   state = updateLesson(state, other, { ...initial, answers: { draft: 'Two' } });
   const j = edit(base, state);
-  expect(Object.keys(j.pending)).toEqual([`answers:${lessonKey(next.id)}`, `answers:${lessonKey(other.id)}`]);
+  expect(j.pending[`answers:@sync/${next.id}/answers/draft`].value).toBe('One');
+  expect(j.pending[`answers:@sync/${other.id}/answers/draft`].value).toBe('Two');
+  expect(j.pending[`answers:${lessonKey(next.id)}`]).toBeUndefined();
   const fields = Object.fromEntries(Object.entries(flatten(state)).map(([key, value]) => [key, { value, revision: 1, mutation: j.pending[key]?.mutation || 'old-cloud' }]));
   const recovered = reconcile(j, fields, j.pending);
   expect(recovered.pending).toEqual({});

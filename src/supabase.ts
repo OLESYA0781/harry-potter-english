@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Fields } from './progress';
 import type { Session } from '@supabase/supabase-js';
 import { normalizeSupabaseUrl, signInErrorMessage } from './supabaseConfig.js';
 export type { Session };
@@ -22,8 +23,8 @@ export async function signOut() {
   const { error } = await supabase!.auth.signOut({ scope: 'local' });
   if (error) throw new Error('Не удалось завершить сессию. Проверьте подключение и повторите выход.');
 }
-export async function syncProgress(body: { p_changes: unknown; p_import: unknown }) {
-  const { data, error } = await supabase!.rpc('sync_lesson', body);
+export async function syncProgress(body: { p_changes: unknown; p_import: unknown }): Promise<{ user_id: string; fields: Fields; import_skipped: number; read_only?: boolean }> {
+  const { data, error } = await supabase!.rpc('sync_lesson_v2', body);
   if (error) {
     if (error.code === '42501') throw new Error('Нет доступа для этой учётной записи. Проверьте список разрешённых пользователей Supabase.');
     throw new Error(`Синхронизация недоступна (${error.code || 'ошибка сети'}). Изменения остаются в этом браузере. Проверьте вход и повторите попытку.`);

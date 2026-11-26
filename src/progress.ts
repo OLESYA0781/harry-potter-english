@@ -1,16 +1,18 @@
 import { initial, stages } from './data';
 import type { LessonState } from './data';
+import { answerFields, joinFields, splitField } from './progressFields';
 import { agencyKey } from './lessons/homeworkOne/data';
 import { readAgency } from './lessons/homeworkOne/model';
 
 export const legacyKey = 'hogwarts-english-v1';
 export const journalKey = 'hogwarts-cloud-v1';
-export type Field = { value: unknown; revision: number; mutation: string };
+export type Field = { value: unknown; revision: number; mutation: string; updated_at?: string };
 export type Fields = Record<string, Field>;
 export type Change = { value: unknown; base: number; mutation: string };
 export type Journal = {
   version: 1; owner: string | null; state: LessonState; cloud: Fields;
   pending: Record<string, Change>; migration: { id: string; fields: Record<string, unknown> } | null;
+  inFlight?: Record<string, Change>;
   backup: LessonState | null; migrated: boolean;
 };
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -48,13 +50,14 @@ function merge(local: unknown, cloud: unknown, base: { value: unknown } | undefi
 export function flatten(s: LessonState): Record<string, unknown> {
   return Object.fromEntries([
     ['name', s.name], ['step', s.step],
-    ...(['answers', 'scores', 'ratings'] as const).flatMap(group =>
+    ...Object.entries(answerFields(s)),
+    ...(['scores', 'ratings'] as const).flatMap(group =>
       Object.entries(s[group]).map(([key, value]) => [`${group}:${key}`, value])),
   ]);
 }
 export function expand(values: Record<string, unknown>): LessonState {
   const state = structuredClone(initial);
-  for (const [key, value] of Object.entries(values)) {
+  for (const [key, value] of Object.entries(joinFields(values))) {
     if (value === null) continue; // Tombstones keep the revision after restart.
     if (key === 'name' && typeof value === 'string') state.name = value;
     else if (key === 'step' && Number.isInteger(value) && Number(value) >= 0 && Number(value) < stages.length) state.step = Number(value);
@@ -82,6 +85,27 @@ export function loadLegacy(storage: Pick<Storage, 'getItem'>): LessonState {
 export function newJournal(state: LessonState): Journal {
   return { version: 1, owner: null, state, cloud: {}, pending: {}, migration: null, backup: null, migrated: false };
 }
+// Upgrade old outbox entries against the exact snapshot they were based on.
+export function upgradeJournal(j: Journal): Journal {
+  const cloud = Object.fromEntries(Object.entries(j.cloud).flatMap(([key, field]) =>
+    Object.entries(splitField(key, field.value)).map(([path, value]) => [path, { ...field, value }])));
+  const pending: Journal['pending'] = {};
+  for (const [key, change] of Object.entries(j.pending)) {
+    const before = j.cloud[key] ? splitField(key, j.cloud[key].value) : {};
+    const after = splitField(key, change.value);
+    if (Object.hasOwn(after, key) && (Object.hasOwn(before, key) || !Object.keys(before).length)) {
+      pending[key] = change;
+      continue;
+    }
+    for (const path of new Set([...Object.keys(before), ...Object.keys(after)])) {
+      if (path === key || equal(before[path], after[path])) continue;
+      pending[path] = { ...change, value: after[path] ?? null,
+        base: change.base === (j.cloud[key]?.revision ?? 0) ? cloud[path]?.revision ?? 0 : -1 };
+    }
+  }
+  return { ...j, cloud, pending };
+}
+
 export function bind(j: Journal, owner: string): Journal {
   if (j.owner && j.owner !== owner) throw new Error('Этот браузер связан с другой ученицей. Локальный прогресс сохранён; войдите в прежнюю учётную запись.');
   if (j.owner) return j;
@@ -101,7 +125,10 @@ export function reconcile(j: Journal, fields: Fields, sent: Record<string, Chang
   // Another tab can persist a newer revision before this response is applied.
   fields = { ...fields };
   for (const [key, known] of Object.entries(j.cloud)) {
-    if (known.revision > (fields[key]?.revision ?? 0)) fields[key] = known;
+    const incoming = fields[key];
+    if (!incoming || known.revision > incoming.revision ||
+      (known.revision === incoming.revision && known.updated_at && incoming.updated_at &&
+        Date.parse(known.updated_at) > Date.parse(incoming.updated_at))) fields[key] = known;
   }
   const pending = { ...j.pending };
   for (const [key, change] of Object.entries(pending)) {

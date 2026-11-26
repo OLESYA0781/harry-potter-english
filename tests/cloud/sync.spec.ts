@@ -2,7 +2,10 @@ import { test, expect } from '@playwright/test';
 import type { Page, BrowserContext } from '@playwright/test';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
+import { joinFields } from '../../src/progressFields';
 const user = '00000000-0000-0000-0000-000000000001';
+const teacherId = '00000000-0000-0000-0000-000000000002';
+const teacherEmail = 'teacher@example.test';
 const authKey = `hogwarts-auth:${process.env.TEST_SUPABASE_URL || 'https://supabase.test'}`;
 let db: PGlite;
 let lostReply = false;
@@ -10,12 +13,21 @@ let refreshes = 0;
 let calls = 0;
 let tail = Promise.resolve();
 const initial = { step: 0, name: '', answers: {}, scores: {}, ratings: {} };
-async function rpc(changes: object = {}, migration: object | null = null) {
+async function callRpc(changes: object, migration: object | null, actor: string) {
   const run = async () => {
-    const result = await db.query<{ result: any }>('select public.sync_lesson($1::jsonb, $2::jsonb) as result', [JSON.stringify(changes), migration ? JSON.stringify(migration) : null]);
+    await db.query("select set_config('request.jwt.claim.sub', $1, false)", [actor]);
+    const result = await db.query<{ result: any }>('select public.sync_lesson_v2($1::jsonb, $2::jsonb) as result', [JSON.stringify(changes), migration ? JSON.stringify(migration) : null]);
     return result.rows[0].result;
   };
   const result = tail.then(run); tail = result.then(() => {}, () => {}); return result;
+}
+// Reconstruct the lesson view for existing assertions; endpoints send wire fields.
+async function rpc(changes: object = {}, migration: object | null = null) {
+  const result = await callRpc(changes, migration, user);
+  const values = joinFields(Object.fromEntries(Object.entries(result.fields).map(([key, field]) =>
+    [key, (field as { value: unknown }).value])));
+  return { ...result, fields: { ...result.fields, ...Object.fromEntries(Object.entries(values)
+    .filter(([key]) => !(key in result.fields)).map(([key, value]) => [key, { value }])) } };
 }
 async function route(context: BrowserContext) {
   await context.route('https://supabase.test/**', async route => {
@@ -26,16 +38,19 @@ async function route(context: BrowserContext) {
       const body = request.postDataJSON();
       if (path.searchParams.get('grant_type') === 'refresh_token') refreshes++;
       else if (body.password !== 'test-only-password') return route.fulfill({ status: 400, headers, json: { error: 'invalid_grant', error_description: 'Invalid login credentials' } });
+      const actor = body.email === teacherEmail || body.refresh_token === 'teacher-refresh' ? teacherId : user;
       const expires = Math.floor(Date.now() / 1000) + 3600;
-      const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: user, exp: expires, role: 'authenticated' })).toString('base64url'), 'test-signature'].join('.');
-      return route.fulfill({ headers, json: { access_token: token, refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: user, email: body.email || 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
+      const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: actor, exp: expires, role: 'authenticated' })).toString('base64url'), 'test-signature'].join('.');
+      return route.fulfill({ headers, json: { access_token: token, refresh_token: actor === teacherId ? 'teacher-refresh' : 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: actor, email: body.email || 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
     }
     if (path.pathname.includes('/logout')) return route.fulfill({ status: 204, headers });
     if (path.pathname.includes('/user')) return route.fulfill({ headers, json: { id: user, email: 'learner@example.test' } });
-    if (path.pathname.endsWith('/rpc/sync_lesson')) {
+    if (path.pathname.endsWith('/rpc/sync_lesson_v2')) {
       calls++;
       const body = request.postDataJSON();
-      const result = await rpc(body.p_changes, body.p_import);
+      const jwt = request.headers().authorization?.split('.')[1];
+      const actor = jwt ? JSON.parse(Buffer.from(jwt, 'base64url').toString()).sub : '';
+      const result = await callRpc(body.p_changes, body.p_import, actor);
       if (lostReply && Object.keys(body.p_changes).length) { lostReply = false; return route.abort('failed'); }
       return route.fulfill({ headers, json: result });
     }
@@ -63,7 +78,8 @@ test.beforeEach(async () => {
     create function auth.uid() returns uuid language sql stable as 'select nullif(current_setting(''request.jwt.claim.sub'', true), '''')::uuid';
     grant usage on schema auth, public to anon, authenticated;`);
   await db.exec(await readFile('supabase/migrations/202610260001_lesson_sync.sql', 'utf8'));
-  await db.exec(`insert into auth.users values ('${user}'); insert into public.lesson_students values ('${user}'); set role authenticated; select set_config('request.jwt.claim.sub', '${user}', false);`);
+  await db.exec(await readFile('supabase/migrations/202611260001_answer_sync.sql', 'utf8'));
+  await db.exec(`insert into auth.users values ('${user}'), ('${teacherId}'); insert into public.lesson_students values ('${user}'); insert into public.lesson_teachers values ('${teacherId}', '${user}'); set role authenticated; select set_config('request.jwt.claim.sub', '${user}', false);`);
 });
 test.afterEach(async () => { await tail; await db.close(); });
 
@@ -390,10 +406,11 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
   await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
-  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Write your journeys/}).click();
+  await other.goto('/#/lessons/lesson-2');
+  await other.locator('.ar-sidebar button').nth(10).click();
   await other.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
   await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
-  await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);
+  await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await page.goto('/#/lessons/lesson-2');await sync(page);
   await expect(page.locator('.ps2-journey-pair textarea').nth(0)).toHaveValue('How do you usually get to school?');
   await expect(page.locator('.ps2-journey-pair textarea').nth(1)).toHaveValue('  I usually go by tram.\n ');
 
@@ -438,8 +455,9 @@ test('unreachable Supabase does not block lessons or lose locally queued answers
  })).toBeGreaterThan(0);
  if(!await page.getByRole('button',{name:'Синхронизировать',exact:true}).isVisible())await page.locator('.cloud-progress > summary').click();
  await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
- await expect(page.getByRole('status').filter({hasText:/Синхронизация недоступна/})).toBeVisible();
- await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'The Magic of Everyday Life',exact:true})).toBeVisible();
+ await expect(page.locator('.cloud-entry-copy')).toContainText('Sync error');
+ await expect(page.getByRole('alert').filter({hasText:/Синхронизация недоступна/})).toBeVisible();
+ await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'Warm-up — Back to Hogwarts!',exact:true})).toBeVisible();
  await page.goto('/#/lessons/trial');await expect(page.getByRole('heading',{name:'Welcome to Hogwarts!',exact:true})).toBeVisible();
  // The API failure has not been disguised as successful cloud synchronization.
  const stored=await rpc();expect(stored.fields['answers:@vika/lesson/lesson-0']?.value?.data?.answers?.['question:gg3-p5-hospital-clean']).not.toBe(draft);
@@ -537,14 +555,15 @@ test('private homework photos upload, sync metadata and open on another device; 
  }finally{await second.close();}
 });
 
-test('standalone Question Machine restores drafts while preserving retired Workshop answers',async({page,context,browser})=>{
+test('transferred Question Machine restores drafts while preserving retired Workshop answers',async({page,context,browser})=>{
  await rpc({}, {id:'jobs-page-six-pupil',fields:{'answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{'present-simple:v2':{schemaVersion:2,activePage:'jobs-lab/jobs-groups/gg6-groups-artist',seen:['jobs-lab'],responses:{'affirm-translate-01':'Keep my earlier translation','gg6-groups-artist':'["Work outdoors","Work indoors"]'}}}}}}});
- await route(context);await login(page,'/#/lessons/lesson-1');
+ await route(context);await login(page,'/#/lessons/lesson-2');
+ await page.locator('.ar-sidebar button').nth(9).click();
  await expect(page.locator('.ps2-heading h1')).toHaveText('The Question Machine');
  const machine=page.locator('.ps2-question-machine').first();await machine.locator('.ps2-chunk-bank button').nth(2).click();await machine.locator('.ps2-chunk-bank button').nth(3).click();await sync(page);
  const second=await browser.newContext();await route(second);
  try{
-  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-question-machine').first().locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-2');await expect(other.locator('.ps2-question-machine').first().locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
   const saved=await rpc();const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;expect(responses['affirm-translate-01']).toBe('Keep my earlier translation');expect(responses['gg6-groups-artist']).toBe('["Work outdoors","Work indoors"]');
  }finally{await second.close();}
 });
@@ -719,4 +738,104 @@ test('Lesson 3 bag writing keeps the village record and restores the draft throu
   }, authKey);
   await page.reload();
   await expect(page.getByLabel('Твоё объявление')).toHaveValue('A small notebook. Please PM me!');
+});
+
+test('two contexts merge simultaneous changes inside the same lesson after reconnect', async ({ page, context, browser }) => {
+  const location = '/#/lessons/lesson-0';
+  await route(context);
+  await login(page, location);
+  await page.getByRole('navigation', { name: 'Lesson 0 stages' }).getByRole('button', { name: /Negative Sentences/ }).click();
+  await sync(page);
+  const second = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await route(second);
+  try {
+    const other = await second.newPage();
+    await login(other, location);
+    const response = (p: Page, index: number) => p.locator('.tb-panel textarea').nth(index);
+    const badge = (p: Page) => p.locator('.cloud-entry-copy');
+    await context.setOffline(true);
+    await second.setOffline(true);
+    await Promise.all([response(page, 0).fill('First device'), response(other, 1).fill('Second device')]);
+    await response(page, 2).fill('Another offline answer');
+    await expect(badge(page)).toContainText('Offline');
+    await expect(badge(other)).toContainText('Offline');
+    await Promise.all([context.setOffline(false), second.setOffline(false)]);
+    for (const device of [page, other]) {
+      await expect(response(device, 0)).toHaveValue('First device', { timeout: 15000 });
+      await expect(response(device, 1)).toHaveValue('Second device', { timeout: 15000 });
+      await expect(response(device, 2)).toHaveValue('Another offline answer');
+      await expect(badge(device)).toContainText('Saved');
+    }
+    await response(other, 0).fill('');
+    await expect(response(page, 0)).toHaveValue('', { timeout: 15000 });
+    await expect(badge(other)).toContainText('Saved');
+    await page.reload();
+    await expect(response(page, 0)).toHaveValue('');
+    await expect(response(page, 1)).toHaveValue('Second device');
+    const fields = (await callRpc({}, null, user)).fields;
+    const answers = Object.entries(fields).filter(([key]) => key.startsWith('answers:@sync/lesson-0/answers/'));
+    expect(answers.some(([, field]) => (field as { value: unknown }).value === 'Second device')).toBe(true);
+    expect(answers.some(([, field]) => (field as { value: unknown }).value === '')).toBe(true);
+  } finally { await second.close(); }
+});
+
+test('an authorized teacher sees the learner’s live homework without binding or changing her journal', async ({ page, context, browser }) => {
+  await route(context);
+  const location = '/#/homework/3';
+  await login(page, location, 'ddarya.rr@gmail.com');
+  const second = await browser.newContext();
+  await route(second);
+  try {
+    const other = await second.newPage();
+    await other.goto(location);
+    await other.locator('.cloud-progress > summary').click();
+    await other.getByLabel('Email', { exact: true }).fill(teacherEmail);
+    await other.getByLabel('Пароль', { exact: true }).fill('test-only-password');
+    await other.getByRole('button', { name: 'Войти', exact: true }).click();
+    await expect(other.locator('.cloud-entry-copy')).toContainText('Saved');
+    await other.getByRole('button', { name: 'Teacher mode', exact: true }).click();
+    await expect(other.getByRole('complementary', { name: 'Teacher’s Mode' }).first()).toBeVisible();
+
+    const job = (p: Page) => p.getByRole('combobox', { name: 'Ralph — Job', exact: true });
+    const done = (p: Page) => p.getByRole('checkbox', { name: 'Done in my notebook' }).first();
+    await job(page).selectOption('digital designer');
+    await done(page).check();
+    await expect(job(other)).toHaveValue('digital designer', { timeout: 15000 });
+    await expect(done(other)).toBeChecked();
+    await job(other).selectOption('');
+    await expect(job(other)).toHaveValue('digital designer');
+    await expect(job(page)).toHaveValue('digital designer');
+    expect(await other.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).owner)).toBeNull();
+    await other.reload();
+    await expect(job(other)).toHaveValue('digital designer', { timeout: 15000 });
+  } finally { await second.close(); }
+});
+
+test('Realtime notification refreshes a learner snapshot with polling paused', async ({ page, context }) => {
+  await route(context);
+  let notification: (() => void) | undefined;
+  await context.routeWebSocket(/wss:\/\/supabase\.test\/realtime\/v1\/websocket/, socket => {
+    socket.onMessage(message => {
+      const [joinRef, ref, topic, event, body] = JSON.parse(message.toString());
+      if (event !== 'phx_join') return;
+      const subscriptions = body.config.postgres_changes.map((filter: object) => ({ ...filter, id: 1 }));
+      expect(subscriptions[0].filter).toBe('user_id=eq.' + user);
+      socket.send(JSON.stringify([joinRef, ref, topic, 'phx_reply', {
+        status: 'ok', response: { postgres_changes: subscriptions },
+      }]));
+      notification = () => socket.send(JSON.stringify([joinRef, null, topic, 'postgres_changes', {
+        ids: [1], data: { type: 'UPDATE', schema: 'public', table: 'lesson_progress',
+          commit_timestamp: new Date().toISOString(), columns: [], record: {} },
+      }]));
+    });
+  });
+  await page.clock.install();
+  await login(page, '/#/homework/3');
+  await expect.poll(() => !!notification).toBe(true);
+  await page.clock.pauseAt(new Date(await page.evaluate(() => Date.now()) + 10));
+  const field = page.getByRole('combobox', { name: 'Ralph — Job', exact: true });
+  const key = 'answers:@vika/lesson/lesson-3-homework/v1/table-Ralph-Job';
+  await callRpc({ [key]: { value: 'digital designer', base: 0, mutation: 'live-notice-edit' } }, null, user);
+  notification!();
+  await expect(field).toHaveValue('digital designer');
 });

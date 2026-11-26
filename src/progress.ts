@@ -2,16 +2,20 @@ import { initial, stages } from './data';
 import type { LessonState } from './data';
 import { agencyKey } from './lessons/homeworkOne/data';
 import { readAgency } from './lessons/homeworkOne/model';
+import { joinFields, splitField, splitFields } from './progressFields';
 
 export const legacyKey = 'hogwarts-english-v1';
 export const journalKey = 'hogwarts-cloud-v1';
-export type Field = { value: unknown; revision: number; mutation: string };
+export type Field = { value: unknown; revision: number; mutation: string; updated_at?: string };
 export type Fields = Record<string, Field>;
-export type Change = { value: unknown; base: number; mutation: string };
+export type Change = { value: unknown; base: number; mutation: string; legacyRevision?: number };
 export type Journal = {
-  version: 1; owner: string | null; state: LessonState; cloud: Fields;
+  version: 1 | 2; owner: string | null; state: LessonState; cloud: Fields;
   pending: Record<string, Change>; migration: { id: string; fields: Record<string, unknown> } | null;
   backup: LessonState | null; migrated: boolean;
+  legacyPending?: Record<string, Change>;
+  superseded?: Record<string, { key: string; change: Change; cloud?: Field }>;
+  flight?: { id: string; changes: Record<string, Change>; migration: Journal['migration'] };
 };
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -45,14 +49,20 @@ function merge(local: unknown, cloud: unknown, base: { value: unknown } | undefi
     return value === undefined ? [] : [[key, value]];
   }));
 }
-export function flatten(s: LessonState): Record<string, unknown> {
+export function flattenLegacy(s: LessonState): Record<string, unknown> {
   return Object.fromEntries([
     ['name', s.name], ['step', s.step],
     ...(['answers', 'scores', 'ratings'] as const).flatMap(group =>
       Object.entries(s[group]).map(([key, value]) => [`${group}:${key}`, value])),
   ]);
 }
+export function flatten(state: LessonState): Record<string, unknown> {
+  return splitFields(flattenLegacy(state));
+}
 export function expand(values: Record<string, unknown>): LessonState {
+  return expandLegacy(joinFields(values));
+}
+export function expandLegacy(values: Record<string, unknown>): LessonState {
   const state = structuredClone(initial);
   for (const [key, value] of Object.entries(values)) {
     if (value === null) continue; // Tombstones keep the revision after restart.
@@ -68,7 +78,7 @@ export function expand(values: Record<string, unknown>): LessonState {
   }
   return state;
 }
-export function loadLegacy(storage: Pick<Storage, 'getItem'>): LessonState {
+export function readLegacy(storage: Pick<Storage, 'getItem'>): LessonState | null {
   try {
     const s = JSON.parse(storage.getItem(legacyKey) || 'null');
     if (s && [1, 2, 3].includes(s.version) && Number.isInteger(s.data?.step) &&
@@ -77,10 +87,13 @@ export function loadLegacy(storage: Pick<Storage, 'getItem'>): LessonState {
       return { ...s.data, step: (s.version === 1 && s.data.step === 11) || (s.version === 2 && s.data.step === 12) ? stages.length - 1 : s.data.step };
     }
   } catch { /* Keep working in memory if browser storage is unavailable. */ }
-  return structuredClone(initial);
+  return null;
+}
+export function loadLegacy(storage: Pick<Storage, 'getItem'>): LessonState {
+  return readLegacy(storage) ?? structuredClone(initial);
 }
 export function newJournal(state: LessonState): Journal {
-  return { version: 1, owner: null, state, cloud: {}, pending: {}, migration: null, backup: null, migrated: false };
+  return { version: 2, owner: null, state, cloud: {}, pending: {}, migration: null, backup: null, migrated: false };
 }
 export function bind(j: Journal, owner: string): Journal {
   if (j.owner && j.owner !== owner) throw new Error('Этот браузер связан с другой ученицей. Локальный прогресс сохранён; войдите в прежнюю учётную запись.');
@@ -92,35 +105,50 @@ export function edit(j: Journal, state: LessonState): Journal {
   const before = flatten(j.state), after = flatten(state), pending = { ...j.pending };
   for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
     if (!equal(before[key], after[key])) {
-      pending[key] = { value: after[key] ?? null, base: pending[key]?.base ?? j.cloud[key]?.revision ?? 0, mutation: crypto.randomUUID() };
+      pending[key] = {
+        value: after[key] ?? null, base: pending[key]?.base ?? j.cloud[key]?.revision ?? 0,
+        mutation: crypto.randomUUID(), legacyRevision: pending[key]?.legacyRevision,
+      };
     }
   }
   return { ...j, state, pending };
 }
 export function reconcile(j: Journal, fields: Fields, sent: Record<string, Change>, migrationId?: string): Journal {
-  // Another tab can persist a newer revision before this response is applied.
+  // A different tab can persist a newer server snapshot before this response arrives.
   fields = { ...fields };
   for (const [key, known] of Object.entries(j.cloud)) {
     if (known.revision > (fields[key]?.revision ?? 0)) fields[key] = known;
   }
   const pending = { ...j.pending };
+  const superseded = { ...j.superseded };
   for (const [key, change] of Object.entries(pending)) {
     const cloud = fields[key];
     const revision = cloud?.revision ?? 0;
     if (cloud && (cloud.mutation === change.mutation || equal(cloud.value, change.value))) {
       delete pending[key];
     } else if (cloud && (cloud.mutation === sent[key]?.mutation || cloud.mutation === migrationId)) {
-      // Keep newer edits made while a request was in flight.
-      pending[key] = { ...change, base: revision };
+      pending[key] = { ...change, base: revision, legacyRevision: undefined };
     } else if (revision !== change.base) {
+      // Preserve rejected drafts in the downloadable local backup.
+      superseded[`${key}:${change.mutation}`] = { key, change, cloud };
       const previous = j.cloud[key];
       const base = change.base === 0 || previous?.revision === change.base
         ? { value: previous?.revision === change.base ? previous.value : undefined }
         : undefined;
-      let value = merge(change.value, cloud?.value, base);
-      // Concurrent moves of the same job can put its card in two slots.
+      let value = cloud?.value;
+      // These boards have cross-slot uniqueness rules. Merge non-overlapping
+      // moves only when the resulting board still satisfies those rules.
       if (key === `answers:${agencyKey}`) {
-        try { readAgency(value); } catch { value = cloud?.value; }
+        const merged = merge(change.value, cloud?.value, base);
+        try { readAgency(merged); value = merged; } catch { /* Keep the confirmed board. */ }
+      }
+      if (key.endsWith('/~sync/answers/mixed-village/v1') && cloud?.value !== null) {
+        const merged = merge(change.value, cloud?.value, base);
+        if (isRecord(merged) && isRecord(merged.interviewed)) {
+          const houses = Object.values(merged.interviewed).flatMap(resident =>
+            isRecord(resident) && typeof resident.house === 'number' ? [resident.house] : []);
+          if (new Set(houses).size === houses.length) value = merged;
+        }
       }
       if (equal(value, cloud?.value)) delete pending[key];
       else pending[key] = { value: value ?? null, base: revision, mutation: crypto.randomUUID() };
@@ -128,5 +156,42 @@ export function reconcile(j: Journal, fields: Fields, sent: Record<string, Chang
   }
   const values = Object.fromEntries(Object.entries(fields).map(([key, f]) => [key, f.value]));
   for (const [key, change] of Object.entries(pending)) values[key] = change.value;
-  return { ...j, cloud: fields, pending, state: expand(values), migration: null, migrated: j.migrated || !!migrationId };
+  return {
+    ...j, cloud: fields, pending, state: expand(values), migration: null, migrated: j.migrated || !!migrationId,
+    superseded: Object.keys(superseded).length ? superseded : undefined,
+  };
+}
+// Upgrade already-consolidated v1 changes and write-ahead records without
+// promoting an old edit to a revision the device never saw.
+export function upgradeJournal(j: Journal): Journal {
+  if (j.version === 2) return j;
+  const cloud: Fields = {};
+  for (const [key, field] of Object.entries(j.cloud)) {
+    for (const [path, value] of Object.entries(splitField(key, field.value))) cloud[path] = { ...field, value };
+  }
+  const pending: Journal['pending'] = {};
+  const legacyPending: Journal['pending'] = {};
+  for (const [key, change] of Object.entries(j.pending)) {
+    const previous = j.cloud[key];
+    const before = splitField(key, previous?.value);
+    const after = splitField(key, change.value);
+    if (Object.hasOwn(before, key) && Object.hasOwn(after, key)) {
+      pending[key] = change;
+      continue;
+    }
+    legacyPending[key] = change;
+    for (const path of new Set([...Object.keys(before), ...Object.keys(after)])) {
+      if (path === key || equal(before[path], after[path])) continue;
+      pending[path] = {
+        ...change, value: after[path] ?? null,
+        legacyRevision: (previous?.revision ?? 0) === change.base ? change.base : undefined,
+        base: (previous?.revision ?? 0) === change.base ? cloud[path]?.revision ?? 0 : -1,
+      };
+    }
+  }
+  return {
+    ...j, version: 2, cloud, pending,
+    legacyPending: Object.keys(legacyPending).length ? legacyPending : undefined,
+    migration: j.migration && { ...j.migration, fields: splitFields(j.migration.fields) },
+  };
 }

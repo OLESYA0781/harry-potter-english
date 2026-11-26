@@ -24,7 +24,7 @@ function PhotoPreview({ local, cloud }: { local?: LocalPhoto; cloud?: Photo }) {
   }, [local?.file, cloud?.path]);
   return <>{url ? <a href={url} target="_blank" rel="noreferrer"><img src={url} alt={`Фото домашней работы: ${(local || cloud)!.name}`} /><span>Открыть фото</span></a> : <p>{error || 'Загружаем фото…'}</p>}</>;
 }
-export default function PhotoAttachments({ state, setState }: LessonProps) {
+export default function PhotoAttachments({ learnerId, state, setState }: LessonProps & { learnerId?: string }) {
   const input = useRef<HTMLInputElement>(null);
   const mounted = useRef(true);
   const uploading = useRef(new Set<string>());
@@ -39,8 +39,9 @@ export default function PhotoAttachments({ state, setState }: LessonProps) {
     return () => { mounted.current = false; subscription?.data.subscription.unsubscribe(); };
   }, []);
   const owner = session?.user.id;
-  const cloud = Object.entries(state.answers).filter(([key, value]) => key.startsWith(photoPrefix) && isPhoto(value)).map(([, value]) => value as Photo).filter(photo => photo.owner === owner);
-  const visibleLocal = local.filter(photo => (!photo.owner || photo.owner === owner) && !isDeletedPhoto(state.answers[photoPrefix + photo.id]));
+  const reviewing = !!owner && !!learnerId && owner !== learnerId;
+  const cloud = Object.entries(state.answers).filter(([key, value]) => key.startsWith(photoPrefix) && isPhoto(value)).map(([, value]) => value as Photo).filter(photo => photo.owner === (learnerId ?? owner));
+  const visibleLocal = reviewing ? [] : local.filter(photo => (!photo.owner || photo.owner === owner) && !isDeletedPhoto(state.answers[photoPrefix + photo.id]));
   const ids = [...new Set([...cloud.map(p => p.id), ...visibleLocal.map(p => p.id)])];
   useEffect(() => {
     // A synced deletion must also remove the cached Blob on another device.
@@ -122,13 +123,13 @@ export default function PhotoAttachments({ state, setState }: LessonProps) {
   };
   return <section className="hw0-task hw0-attachments" aria-labelledby="hw0-photos-title">
     <h2 id="hw0-photos-title"><Paperclip size={32} aria-hidden="true" />Фотографии домашней работы</h2>
-    <div className="hw0-photo-picker"><ImagePlus size={42} aria-hidden="true" /><button type="button" className="btn" onClick={() => input.current?.click()}><Paperclip size={24} aria-hidden="true" />Прикрепить фотографии</button><input ref={input} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Выбрать фотографии домашней работы" onChange={e => { const files = Array.from(e.target.files || []); e.target.value = ''; void add(files); }} /><p>JPG, PNG или WebP — до 8 МБ на фото.</p></div>
+    {!reviewing && <div className="hw0-photo-picker"><ImagePlus size={42} aria-hidden="true" /><button type="button" className="btn" onClick={() => input.current?.click()}><Paperclip size={24} aria-hidden="true" />Прикрепить фотографии</button><input ref={input} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Выбрать фотографии домашней работы" onChange={e => { const files = Array.from(e.target.files || []); e.target.value = ''; void add(files); }} /><p>JPG, PNG или WebP — до 8 МБ на фото.</p></div>}
     {!owner && <p>Войди в свой аккаунт, чтобы отправить фото в облако. Пока они сохраняются в этом браузере.</p>}
     {error && <p role="alert">{error}</p>}
     <div className="hw0-photo-grid">{ids.map(id => {
       const own = visibleLocal.find(photo => photo.id === id);
       const remote = cloud.find(photo => photo.id === id);
-      return <article className="hw0-photo" key={id}><PhotoPreview local={own?.file.size ? own : undefined} cloud={remote} /><p>{(own || remote)!.name}</p><p role="status">{busy.includes(id) ? own?.deleteRequested ? 'Удаляем…' : 'Отправляем…' : own?.deleteRequested ? 'Удаление не завершено — можно повторить' : remote ? 'Файл загружен. Облачный статус — в панели входа.' : 'Сохранено на этом устройстве'}</p>{own && !remote && owner && !own.deleteRequested && <button type="button" className="btn" disabled={busy.includes(id)} onClick={() => void upload(own)}><Upload size={22} aria-hidden="true" />Отправить в облако</button>}<button type="button" className="btn hw0-delete-photo" disabled={busy.includes(id)} aria-label={`Удалить фото ${photoName(own, remote)}`} onClick={() => void remove(own, remote)}><Trash2 size={22} aria-hidden="true" />{own?.deleteRequested ? 'Повторить удаление' : 'Удалить фото'}</button></article>;
+      return <article className="hw0-photo" key={id}><PhotoPreview local={own?.file.size ? own : undefined} cloud={remote} /><p>{(own || remote)!.name}</p><p role="status">{busy.includes(id) ? own?.deleteRequested ? 'Удаляем…' : 'Отправляем…' : own?.deleteRequested ? 'Удаление не завершено — можно повторить' : remote ? 'Файл загружен. Облачный статус — в панели входа.' : 'Сохранено на этом устройстве'}</p>{own && !remote && owner && !own.deleteRequested && <button type="button" className="btn" disabled={busy.includes(id)} onClick={() => void upload(own)}><Upload size={22} aria-hidden="true" />Отправить в облако</button>}{!reviewing && <button type="button" className="btn hw0-delete-photo" disabled={busy.includes(id)} aria-label={`Удалить фото ${photoName(own, remote)}`} onClick={() => void remove(own, remote)}><Trash2 size={22} aria-hidden="true" />{own?.deleteRequested ? 'Повторить удаление' : 'Удалить фото'}</button>}</article>;
     })}</div>
   </section>;
 }

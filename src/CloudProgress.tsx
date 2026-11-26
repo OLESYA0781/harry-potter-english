@@ -19,7 +19,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return <details className="panel cloud-progress" aria-label="Облачное сохранение">
-    <summary><span className="cloud-entry-icon" aria-hidden="true">{session ? <Cloud size={30} /> : <LogIn size={30} />}</span><span className="cloud-entry-copy"><strong>{session ? 'Облачное сохранение' : 'Войти'}</strong><span>{session ? (Object.keys(progress.journal.pending).length ? 'Есть несинхронизированные изменения' : progress.status || 'Подключение…') : 'Облачное сохранение'}</span></span><ChevronDown className="cloud-entry-chevron" size={24} aria-hidden="true" /></summary>
+    <summary><span className="cloud-entry-icon" aria-hidden="true">{session ? <Cloud size={30} /> : <LogIn size={30} />}</span><span className="cloud-entry-copy"><strong>{session ? 'Облачное сохранение' : 'Войти'}</strong><span role="status">{session ? progress.status : 'Облачное сохранение'}</span></span><ChevronDown className="cloud-entry-chevron" size={24} aria-hidden="true" /></summary>
     {!session ? <form onSubmit={async e => {
       e.preventDefault(); setBusy(true); setMessage('');
       try { setSession(await signIn(email, password)); setPassword(''); await progress.sync(); }
@@ -31,7 +31,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
       <button className="btn cloud-signin-button" disabled={busy}><LogIn size={23} aria-hidden="true" />{busy ? 'Входим…' : 'Войти'}</button>
     </form> : <>
       <p>{session.user.email}</p>
-      <p role="status">{progress.status}</p>
+      {progress.syncError && <p role="status">{progress.syncError}</p>}
       <button className="pill" onClick={() => void progress.sync()}>Синхронизировать</button>{' '}
       <button className="pill" disabled={busy} onClick={async () => {
         setBusy(true);
@@ -41,6 +41,7 @@ export default function CloudProgress({ progress }: { progress: ReturnType<typeo
     </>}
     {message && <p role="alert">{message}</p>}
     {progress.importSkipped > 0 && <p role="status">Перенос завершён. Для {progress.importSkipped} полей сохранена облачная версия. Исходный локальный прогресс доступен в резервной копии.</p>}
+    {progress.journal.superseded && <p>В конфликтующих полях показана подтверждённая облачная версия. Локальные черновики доступны в резервной копии.</p>}
     <button className="text-btn cloud-backup-icon" aria-label="Скачать резервную копию прогресса" title="Скачать резервную копию прогресса" onClick={backup}><Download size={23} aria-hidden="true" /></button>
   </details>;
 }

@@ -799,6 +799,7 @@ test('independent phone and desktop edits in one lesson recover online and show 
     const review = await teacherContext.newPage();
     await login(other, location, 'ddarya.rr@gmail.com');
     await login(review, location, teacherEmail);
+    await expect(review.getByRole('textbox', { name: 'Предмет 1', exact: true })).toHaveValue('old item', { timeout: 15000 });
     await review.getByRole('button', { name: 'Teacher mode', exact: true }).click();
     await expect(review.locator('.bag-progress')).toBeVisible();
     expect(await review.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).previousOwnerJournal.state.name))

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { initial } from './data';
 import { agencyKey } from './lessons/homeworkOne/data';
-import { bind, edit, expand, flatten, loadLegacy, newJournal, reconcile } from './progress';
+import { bind, edit, expand, flatten, loadLegacy, newJournal, reconcile, recordAttempts } from './progress';
 import type { Fields } from './progress';
 const start = () => bind(newJournal(structuredClone(initial)), 'learner');
 const field = (value: unknown, revision: number, mutation = 'remote') => ({ value, revision, mutation });
@@ -112,4 +112,15 @@ describe('conflicts and reset tombstones', () => {
     expect(j.state.answers).toEqual({});
     expect(j.cloud['answers:a'].revision).toBe(4);
   });
+});
+
+it('retains a newer edit after a lost reply, reload and idempotent retry', () => {
+  let journal = reconcile(start(), { name: field('Original', 1) }, {});
+  journal = recordAttempts(edit(journal, { ...journal.state, name: 'Sent' }));
+  const accepted = journal.pending.name.mutation;
+  journal = edit(journal, { ...journal.state, name: 'New while waiting' });
+  journal = recordAttempts(JSON.parse(JSON.stringify(journal)));
+  journal = reconcile(journal, { name: field('Sent', 2, accepted) }, journal.pending);
+  expect(journal.state.name).toBe('New while waiting');
+  expect(journal.pending.name.base).toBe(2);
 });

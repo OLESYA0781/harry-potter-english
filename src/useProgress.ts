@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SetStateAction } from 'react';
 import { initial } from './data';
 import type { LessonState } from './data';
-import { bind, journalKey, legacyKey, loadLegacy, newJournal, reconcile } from './progress';
+import { bind, journalKey, legacyKey, loadLegacy, newJournal, reconcile, recordAttempts } from './progress';
 import type { Fields, Journal } from './progress';
 import { readDurable, writeOperation } from './progressStorage';
-import { cloudConfigured, readSession, syncProgress } from './supabase';
+import { cloudConfigured, readSession, supabase, syncProgress } from './supabase';
 
 function safeLegacy(): LessonState {
   try { return loadLegacy(localStorage); } catch { return structuredClone(initial); }
@@ -20,9 +20,14 @@ export function useProgress() {
   const [error, setError] = useState(() => {
     try { readJournal(); return ''; } catch { return 'Локальное сохранение недоступно. Не очищайте данные браузера.'; }
   });
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Syncing...');
+  const [syncError, setSyncError] = useState('');
+  const [connected, setConnected] = useState(navigator.onLine);
+  const [actor, setActor] = useState(() => readSession()?.user.id);
+
   const [importSkipped, setImportSkipped] = useState(0);
   const busy = useRef(false);
+  const rerun = useRef(false);
   const serial = useRef(Promise.resolve());
   const transact = useCallback(async (fn: (j: Journal) => Journal): Promise<Journal> => {
     const run = () => {
@@ -54,8 +59,11 @@ export function useProgress() {
     const state = typeof action === 'function' ? action(current.current.state) : action;
     try {
       if (volatile.current) throw new Error('Storage unavailable');
-      current.current = writeOperation(localStorage, current.current, state);
-      setJournal(current.current);
+      const next = writeOperation(localStorage, current.current, state);
+      if (next === current.current) return;
+      current.current = next;
+      setJournal(next);
+      if (readSession()) setStatus('Saving...');
       void transact(j => j).catch(() => {});
     } catch {
       volatile.current = true;
@@ -64,59 +72,110 @@ export function useProgress() {
       setError('Прогресс не удалось сохранить в браузере. Оставьте страницу открытой и скачайте резервную копию.');
     }
   }, [transact]);
-  const sync = useCallback(async () => {
-    if (!cloudConfigured || !readSession() || busy.current) return;
+  const sync = useCallback(async function runSync() {
+    const actorId = readSession()?.user.id;
+    if (!cloudConfigured || !actorId || !navigator.onLine) return;
+    if (busy.current) {
+      rerun.current = true;
+      return;
+    }
     busy.current = true;
     try {
-      const session = readSession()!;
-      const local = await transact(j => j);
+      const local = await transact(j => j.owner === actorId ? recordAttempts(j) : j);
+      if (local.owner) bind(local, actorId, local.learner ?? actorId);
+      if (readSession()?.user.id !== actorId) return;
+      let snapshot = local;
       if (!local.owner) {
-        // Verify server authorization before binding an existing local lesson.
+        setStatus('Syncing...');
         const access = await syncProgress({ p_changes: {}, p_import: null });
-        if (access.user_id !== session.user.id || readSession()?.user.id !== session.user.id) return;
+        if (access.actor_id !== actorId || readSession()?.user.id !== actorId) return;
+        snapshot = await transact(j => {
+          const bound = bind(j, actorId, access.user_id);
+          // A teacher's unbound browser may contain unrelated local practice.
+          if (!j.owner && actorId !== access.user_id && bound.migration) {
+            bound.migration.fields = {};
+          }
+          return recordAttempts(bound);
+        });
       }
-      const snapshot = await transact(j => bind(j, session.user.id));
-      const sent = snapshot.pending;
-      setStatus('Синхронизация…');
-      const result: { user_id: string; fields: Fields; import_skipped: number } = await syncProgress({
-        p_changes: sent, p_import: snapshot.migration,
+      if (snapshot.owner !== actorId || readSession()?.user.id !== actorId) return;
+      const sent = Object.fromEntries(Object.entries(snapshot.pending).map(([key, { base, value, mutation }]) =>
+        [key, { base, value, mutation }]));
+      if (snapshot.migration || Object.keys(sent).length) setStatus('Saving...');
+      const result: { actor_id: string; user_id: string; fields: Fields; import_skipped: number } = await syncProgress({
+        p_changes: sent, p_import: snapshot.migration, p_learner: snapshot.learner ?? actorId,
       });
-      if (result.user_id !== snapshot.owner || readSession()?.user.id !== snapshot.owner) return;
+      if (result.actor_id !== actorId || readSession()?.user.id !== actorId) return;
+      const learner = snapshot.learner ?? snapshot.owner;
+      if (result.user_id !== learner) throw new Error('Облачная запись ученицы изменилась. Локальный прогресс сохранён.');
       const next = await transact(j => {
-        if (j.owner !== snapshot.owner) return j;
+        if (j.owner !== actorId || readSession()?.user.id !== actorId) return j;
         return reconcile(j, result.fields, sent, snapshot.migration?.id);
       });
       if (snapshot.migration) setImportSkipped(result.import_skipped);
-      setStatus(Object.keys(next.pending).length ? 'Синхронизация…' : 'Синхронизировано');
+      setSyncError('');
+      setStatus(Object.keys(next.pending).length || next.migration ? 'Saving...' : 'Saved');
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : 'Сеть недоступна. Изменения сохранены в этом браузере.');
-    } finally { busy.current = false; }
+      setStatus('Sync error');
+      setSyncError(e instanceof Error ? e.message : 'Не удалось подключиться к Supabase.');
+    } finally {
+      busy.current = false;
+      if (rerun.current) {
+        rerun.current = false;
+        void runSync();
+      }
+    }
   }, [transact]);
   useEffect(() => {
-    const onStorage = (event: Event) => {
-      if (volatile.current) return;
-      if (event instanceof StorageEvent && event.key !== journalKey) return;
-      try { const next = readJournal(); current.current = next; setJournal(current.current); } catch (e) { setError(String(e)); }
-      if (!(event instanceof StorageEvent)) void sync();
+    const onStorage = (event: StorageEvent) => {
+      if (volatile.current || event.key !== journalKey) return;
+      try { const next = readJournal(); current.current = next; setJournal(next); } catch (e) { setError(String(e)); }
     };
+    const onOnline = () => {
+      setConnected(true);
+      setStatus('Syncing...');
+      void sync();
+    };
+    const onOffline = () => setConnected(false);
+    const onVisible = () => { if (document.visibilityState === 'visible') void sync(); };
+    const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
+      setActor(session?.user.id);
+    });
     void transact(j => j).catch(() => {});
-    void sync();
     const timer = window.setInterval(() => void sync(), 5000);
-    window.addEventListener('online', onStorage);
-    window.addEventListener('focus', onStorage);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('focus', onVisible);
     window.addEventListener('storage', onStorage);
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       clearInterval(timer);
-      window.removeEventListener('online', onStorage);
-      window.removeEventListener('focus', onStorage);
+      subscription?.data.subscription.unsubscribe();
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('focus', onVisible);
       window.removeEventListener('storage', onStorage);
+      document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [sync]);
+  }, [sync, transact]);
+  useEffect(() => {
+    if (!actor || !supabase) return;
+    setStatus('Syncing...');
+    void sync();
+    const channel = supabase.channel('lesson-progress').on('postgres_changes', {
+      event: '*', schema: 'public', table: 'lesson_progress',
+    }, () => void sync()).subscribe(state => {
+      if (state === 'SUBSCRIBED') void sync();
+    });
+    return () => { void supabase?.removeChannel(channel); };
+  }, [actor, sync]);
   // Debounce small edits, while retaining the durable queue immediately.
   useEffect(() => {
-    if (!Object.keys(journal.pending).length) return;
+    if (!actor || !Object.keys(journal.pending).length) return;
     const timer = setTimeout(() => void sync(), 600);
     return () => clearTimeout(timer);
-  }, [JSON.stringify(journal.pending), sync]);
-  return { state: journal.state, setState, error, status, sync, journal, importSkipped };
+  }, [actor, JSON.stringify(journal.pending), sync]);
+  const visibleStatus = error ? 'Sync error' : !connected ? 'Offline' : !actor ? '' :
+    (Object.keys(journal.pending).length || journal.migration) && status === 'Saved' ? 'Saving...' : status;
+  return { state: journal.state, setState, error, status: visibleStatus, syncError, sync, journal, importSkipped };
 }

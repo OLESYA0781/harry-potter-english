@@ -22,8 +22,8 @@ export async function signOut() {
   const { error } = await supabase!.auth.signOut({ scope: 'local' });
   if (error) throw new Error('Не удалось завершить сессию. Проверьте подключение и повторите выход.');
 }
-export async function syncProgress(body: { p_changes: unknown; p_import: unknown }) {
-  const { data, error } = await supabase!.rpc('sync_lesson', body);
+export async function syncProgress(body: { p_changes: unknown; p_import: unknown; p_learner?: string }) {
+  const { data, error } = await supabase!.rpc('sync_lesson_answers', body);
   if (error) {
     if (error.code === '42501') throw new Error('Нет доступа для этой учётной записи. Проверьте список разрешённых пользователей Supabase.');
     throw new Error(`Синхронизация недоступна (${error.code || 'ошибка сети'}). Изменения остаются в этом браузере. Проверьте вход и повторите попытку.`);

@@ -2,6 +2,7 @@
 import { Pencil, Sparkles } from 'lucide-react';
 import { Fragment, lazy, Suspense, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import audioUrl from '../../../SO3_A1_WB_1D_Audio_1_12.mp3?url';
 import { assetUrl } from '../../assetUrl';
 import { lessonPrefix } from '../progress';
 import type { LessonProps } from '../types';
@@ -10,9 +11,6 @@ import '../homeworkOne/homeworkOne.css';
 import './homeworkThree.css';
 
 const TeacherAnswers = lazy(() => import('./TeacherAnswers'));
-const [audioUrl] = Object.values(import.meta.glob<string>('./SO3_A1_WB_1D_Audio_1_12.mp3', {
-  eager: true, import: 'default', query: '?url',
-}));
 
 function Numbered({ items, lang = 'en' }: { items: readonly ReactNode[]; lang?: string }) {
   return <ol className="hw1-numbered" role="list" lang={lang}>
@@ -27,7 +25,7 @@ function ListeningAudio() {
   return <div className="hw3-audio">
     <p>Audio 1.12</p>
     <audio aria-label="Audio 1.12" controls preload="metadata" src={audioUrl} onError={() => setFailed(true)} />
-    {(!audioUrl || failed) && <p lang="ru">Оригинальная аудиозапись пока недоступна.</p>}
+    {failed && <p lang="ru">Оригинальная аудиозапись пока недоступна.</p>}
   </div>;
 }
 

@@ -44,6 +44,7 @@ for (const width of [320, 390, 1440]) {
     for (const player of await players.all()) {
       await expect(player).toHaveJSProperty('controls', true);
       await expect(player).toHaveJSProperty('autoplay', false);
+      await expect.poll(() => player.evaluate((audio: HTMLAudioElement) => audio.duration)).toBeGreaterThan(0);
     }
 
     const match = tasks.nth(4).getByRole('combobox', { name: 'Ralph' });

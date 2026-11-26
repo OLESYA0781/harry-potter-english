@@ -1,5 +1,7 @@
 import { initial, stages } from './data';
 import type { LessonState } from './data';
+import { agencyKey } from './lessons/homeworkOne/data';
+import { readAgency } from './lessons/homeworkOne/model';
 
 export const legacyKey = 'hogwarts-english-v1';
 export const journalKey = 'hogwarts-cloud-v1';
@@ -11,7 +13,38 @@ export type Journal = {
   pending: Record<string, Change>; migration: { id: string; fields: Record<string, unknown> } | null;
   backup: LessonState | null; migrated: boolean;
 };
-export const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+export function equal(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((value, index) => equal(value, b[index]));
+  }
+  return isRecord(a) && isRecord(b) &&
+    Object.keys(a).length === Object.keys(b).length &&
+    Object.entries(a).every(([key, value]) => Object.hasOwn(b, key) && equal(value, b[key]));
+}
+
+// Merge independent edits using the last shared version. Older queues may
+// lack that version, so retain keys from both sides and prefer cloud on overlap.
+function merge(local: unknown, cloud: unknown, base: { value: unknown } | undefined): unknown {
+  if (equal(local, cloud) || (base && equal(local, base.value))) return cloud;
+  if (base && equal(cloud, base.value)) return local;
+  if (!isRecord(local) || !isRecord(cloud)) {
+    return !base && cloud === undefined ? local : cloud;
+  }
+  const previous = isRecord(base?.value) ? base.value : {};
+  const keys = new Set([...Object.keys(local), ...Object.keys(cloud)]);
+  return Object.fromEntries([...keys].flatMap(key => {
+    const value = merge(
+      Object.hasOwn(local, key) ? local[key] : undefined,
+      Object.hasOwn(cloud, key) ? cloud[key] : undefined,
+      base && { value: Object.hasOwn(previous, key) ? previous[key] : undefined },
+    );
+    return value === undefined ? [] : [[key, value]];
+  }));
+}
 export function flatten(s: LessonState): Record<string, unknown> {
   return Object.fromEntries([
     ['name', s.name], ['step', s.step],
@@ -65,25 +98,35 @@ export function edit(j: Journal, state: LessonState): Journal {
   return { ...j, state, pending };
 }
 export function reconcile(j: Journal, fields: Fields, sent: Record<string, Change>, migrationId?: string): Journal {
+  // Another tab can persist a newer revision before this response is applied.
+  fields = { ...fields };
+  for (const [key, known] of Object.entries(j.cloud)) {
+    if (known.revision > (fields[key]?.revision ?? 0)) fields[key] = known;
+  }
   const pending = { ...j.pending };
   for (const [key, change] of Object.entries(pending)) {
     const cloud = fields[key];
-    if (cloud?.mutation === change.mutation) delete pending[key];
-    // A newer edit made during the request must inherit the acknowledged revision.
-    else if (cloud && (cloud.mutation === sent[key]?.mutation || cloud.mutation === migrationId)) {
-      pending[key] = { ...change, base: cloud.revision };
+    const revision = cloud?.revision ?? 0;
+    if (cloud && (cloud.mutation === change.mutation || equal(cloud.value, change.value))) {
+      delete pending[key];
+    } else if (cloud && (cloud.mutation === sent[key]?.mutation || cloud.mutation === migrationId)) {
+      // Keep newer edits made while a request was in flight.
+      pending[key] = { ...change, base: revision };
+    } else if (revision !== change.base) {
+      const previous = j.cloud[key];
+      const base = change.base === 0 || previous?.revision === change.base
+        ? { value: previous?.revision === change.base ? previous.value : undefined }
+        : undefined;
+      let value = merge(change.value, cloud?.value, base);
+      // Concurrent moves of the same job can put its card in two slots.
+      if (key === `answers:${agencyKey}`) {
+        try { readAgency(value); } catch { value = cloud?.value; }
+      }
+      if (equal(value, cloud?.value)) delete pending[key];
+      else pending[key] = { value: value ?? null, base: revision, mutation: crypto.randomUUID() };
     }
   }
   const values = Object.fromEntries(Object.entries(fields).map(([key, f]) => [key, f.value]));
   for (const [key, change] of Object.entries(pending)) values[key] = change.value;
   return { ...j, cloud: fields, pending, state: expand(values), migration: null, migrated: j.migrated || !!migrationId };
-}
-export function conflicts(j: Journal) {
-  return Object.keys(j.pending).filter(key => (j.cloud[key]?.revision ?? 0) !== j.pending[key].base);
-}
-export function resolve(j: Journal, key: string, choice: 'cloud' | 'local'): Journal {
-  const pending = { ...j.pending };
-  if (choice === 'local') pending[key] = { ...pending[key], base: j.cloud[key]?.revision ?? 0, mutation: crypto.randomUUID() };
-  else delete pending[key];
-  return reconcile({ ...j, pending }, j.cloud, {});
 }

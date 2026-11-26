@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SetStateAction } from 'react';
 import { initial } from './data';
 import type { LessonState } from './data';
-import { bind, conflicts, journalKey, legacyKey, loadLegacy, newJournal, reconcile, resolve } from './progress';
+import { bind, journalKey, legacyKey, loadLegacy, newJournal, reconcile } from './progress';
 import type { Fields, Journal } from './progress';
 import { readDurable, writeOperation } from './progressStorage';
 import { cloudConfigured, readSession, syncProgress } from './supabase';
@@ -76,19 +76,18 @@ export function useProgress() {
         if (access.user_id !== session.user.id || readSession()?.user.id !== session.user.id) return;
       }
       const snapshot = await transact(j => bind(j, session.user.id));
-      const blocked = conflicts(snapshot);
-      const sent = Object.fromEntries(Object.entries(snapshot.pending).filter(([key]) => !blocked.includes(key)));
+      const sent = snapshot.pending;
       setStatus('Синхронизация…');
       const result: { user_id: string; fields: Fields; import_skipped: number } = await syncProgress({
         p_changes: sent, p_import: snapshot.migration,
       });
       if (result.user_id !== snapshot.owner || readSession()?.user.id !== snapshot.owner) return;
-      await transact(j => {
+      const next = await transact(j => {
         if (j.owner !== snapshot.owner) return j;
         return reconcile(j, result.fields, sent, snapshot.migration?.id);
       });
       if (snapshot.migration) setImportSkipped(result.import_skipped);
-      setStatus('Синхронизировано');
+      setStatus(Object.keys(next.pending).length ? 'Синхронизация…' : 'Синхронизировано');
     } catch (e) {
       setStatus(e instanceof Error ? e.message : 'Сеть недоступна. Изменения сохранены в этом браузере.');
     } finally { busy.current = false; }
@@ -115,12 +114,9 @@ export function useProgress() {
   }, [sync]);
   // Debounce small edits, while retaining the durable queue immediately.
   useEffect(() => {
-    if (!Object.keys(journal.pending).some(key => !conflicts(journal).includes(key))) return;
+    if (!Object.keys(journal.pending).length) return;
     const timer = setTimeout(() => void sync(), 600);
     return () => clearTimeout(timer);
   }, [JSON.stringify(journal.pending), sync]);
-  const choose = (key: string, choice: 'local' | 'cloud') => {
-    void transact(j => resolve(j, key, choice)).then(() => sync()).catch(() => {});
-  };
-  return { state: journal.state, setState, error, status, sync, journal, conflicts: conflicts(journal), choose, importSkipped };
+  return { state: journal.state, setState, error, status, sync, journal, importSkipped };
 }

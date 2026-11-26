@@ -86,7 +86,7 @@ test('imports legacy once after login; newer cloud wins; nested answers and back
   expect(Object.keys(rows.rows[0].imports)).toHaveLength(2);
 });
 
-test('offline edits survive immediate reload; stale same-field changes require a choice', async ({ page, context, browser }) => {
+test('offline edits survive immediate reload; stale same-field changes sync automatically', async ({ page, context, browser }) => {
   await route(context); await login(page);
   await page.locator('.nav-item').nth(1).click(); await sync(page);
   const second = await browser.newContext(); await route(second);
@@ -95,14 +95,11 @@ test('offline edits survive immediate reload; stale same-field changes require a
   await page.getByPlaceholder('Your name', { exact: true }).fill('Offline name');
   await page.reload().catch(() => {});
   // Offline navigation is unavailable without a service worker; restoring network
-  // loads the app and the durable queue, then detects the remote conflict.
+  // loads the app and the durable queue, then reconciles it automatically.
   await other.getByPlaceholder('Your name', { exact: true }).fill('Other device name'); await sync(other);
   await context.setOffline(false); await page.goto('/#/lessons/trial');
   await page.locator('.cloud-progress > summary').click();
-  await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
-  await expect(page.getByText(/Поле «name» изменено/)).toBeVisible();
-  await expect(page.getByPlaceholder('Your name', { exact: true })).toHaveValue('Offline name');
-  await page.getByRole('button', { name: 'Использовать облачную версию', exact: true }).click();
+  await expect(page.getByText('Есть конфликт', { exact: true })).toHaveCount(0);
   await expect(page.getByPlaceholder('Your name', { exact: true })).toHaveValue('Other device name');
   await second.close();
 });
@@ -208,7 +205,7 @@ test('lesson modules synchronize independently across devices and survive scoped
   await second.close();
 });
 
-test('same lesson edited offline retains both versions for explicit conflict resolution', async ({ page, context, browser }) => {
+test('same lesson edited offline converges automatically after reconnect', async ({ page, context, browser }) => {
   const home = '/tests/fixtures/platform.html#/lessons/word-quest';
   await route(context); await login(page, home);
   await page.getByLabel('Ответ нового урока').fill('Original'); await sync(page);
@@ -216,13 +213,15 @@ test('same lesson edited offline retains both versions for explicit conflict res
   const other = await second.newPage(); await login(other, home);
   await context.setOffline(true);
   await page.getByLabel('Ответ нового урока').fill('Offline lesson answer');
+  await page.getByRole('button', { name: 'Проверить новый урок' }).click();
   await other.getByLabel('Ответ нового урока').fill('New remote answer'); await sync(other);
   await context.setOffline(false);
-  await page.getByRole('button', { name: 'Синхронизировать', exact: true }).click();
-  await expect(page.getByText(/Поле «answers:@vika\/lesson\/word-quest» изменено/)).toBeVisible();
-  await expect(page.getByLabel('Ответ нового урока')).toHaveValue('Offline lesson answer');
-  await page.getByRole('button', { name: 'Использовать облачную версию', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Использовать облачную версию', exact: true })).toHaveCount(0);
   await expect(page.getByLabel('Ответ нового урока')).toHaveValue('New remote answer');
+  await expect.poll(async () => {
+    const saved = await rpc();
+    return saved.fields['answers:@vika/lesson/word-quest'].value.data;
+  }).toMatchObject({ answers: { draft: 'New remote answer' }, ratings: { teacher: 2 } });
   await second.close();
 });
 
@@ -309,9 +308,7 @@ test('rebuilt Lesson 1 restores new responses and resolves offline conflicts whi
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');
   const otherField=other.locator('.ps2-task textarea').first();await expect(otherField).toHaveValue(draft);
   await context.setOffline(true);await field.fill('Offline response');await otherField.fill('Other device response');await sync(other);
-  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
-  await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-1» изменено/)).toBeVisible();
-  await expect(field).toHaveValue('Offline response');await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();
+  await context.setOffline(false);
   await expect(field).toHaveValue('Other device response');await page.reload();await expect(field).toHaveValue('Other device response');
   await page.getByText('Ответы предыдущей версии урока',{exact:true}).click();await expect(page.getByLabel('Заметки по грамматике')).toHaveValue('  Old notes\n ');
   const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep old lesson');expect(saved.fields['ratings:reading'].value).toBe(2);expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Old homework draft');
@@ -330,8 +327,8 @@ test('Lesson 0 exact answers restore across devices; offline conflict preserves 
  try{
   const other=await second.newPage();await login(other,'/#/lessons/lesson-0');await expect(other.getByLabel('The café is open.',{exact:true})).toHaveValue(original);
   await context.setOffline(true);await page.getByLabel('The café is open.',{exact:true}).fill('Offline answer');await other.getByLabel('The café is open.',{exact:true}).fill('Other device answer');await sync(other);
-  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();await expect(page.getByText(/Поле «answers:@vika\/lesson\/lesson-0» изменено/)).toBeVisible();
-  await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('Offline answer');await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('Other device answer');await page.reload();await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('Other device answer');
+  await context.setOffline(false);
+  await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('Other device answer');await page.reload();await expect(page.getByLabel('The café is open.',{exact:true})).toHaveValue('Other device answer');
   const saved=await rpc();expect(saved.fields['answers:diary'].value).toBe('Keep trial');expect(saved.fields['answers:@vika/lesson/trial-homework/day'].value).toBe('Keep homework');expect(saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers.grammarNotes).toBe('Keep Lesson1');
  }finally{await second.close();}
 });
@@ -584,8 +581,10 @@ test('Lesson 1 homework syncs assignments and retains archived notebook answers 
   await other.reload();await expect(other.locator('#hw1-task-7')).toContainText('WRITE IN YOUR NOTEBOOK');
   await context.setOffline(true);await page.getByRole('button',{name:'Select pilot',exact:true}).click();await page.getByRole('button',{name:'Place selected job in description 2',exact:true}).click();
   await other.getByRole('button',{name:'Select teacher',exact:true}).click();await other.getByRole('button',{name:'Place selected job in description 3',exact:true}).click();await sync(other);
-  await context.setOffline(false);await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();await expect(page.getByText(`Поле «answers:${agency}» изменено на другом устройстве.`)).toBeVisible();
-  await page.getByRole('button',{name:'Использовать облачную версию',exact:true}).click();await expect(page.locator('[data-slot=paint]')).toContainText('pilot');await expect(page.locator('[data-slot=bus]')).toContainText('teacher');
+  await context.setOffline(false);
+  await expect(page.locator('[data-slot=houses]')).toContainText('pilot');
+  await expect(page.locator('[data-slot=bus]')).toContainText('teacher');
+  await expect(other.locator('[data-slot=houses]')).toContainText('pilot', { timeout: 10000 });
   const saved=await rpc();expect(saved.fields['answers:'+oldHw0].value).toBe('Keep Homework 0');expect(saved.fields['answers:'+oldTrial].value).toBe('Keep Trial homework');expect(saved.fields['answers:@vika/lesson/lesson-0'].value.data.answers['mistake:01']).toBe('Keep Lesson 0');
   expect(saved.fields['answers:'+prefix+'written/negatives/morning-tea'].value).toBe('Keep negative draft');expect(saved.fields['answers:'+prefix+'written/detective/she-works'].value).toBe('Keep detective draft');
   const placed=Object.values(saved.fields['answers:'+agency].value.placements);expect(new Set(placed).size).toBe(placed.length);

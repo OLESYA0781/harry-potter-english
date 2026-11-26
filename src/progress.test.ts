@@ -77,15 +77,16 @@ describe('conflicts and reset tombstones', () => {
     j = reconcile(j, { ...j.cloud, [lesson]: field(j.pending[lesson].value, 3, j.pending[lesson].mutation) }, j.pending);
     expect(j.pending).toEqual({});
   });
-  it('resolves old blocked queues without discarding answers unique to either device', () => {
+  it('keeps stale compound changes in the backup when their shared base is gone', () => {
     const key = 'answers:lesson';
     const cloud = { data: { step: 8, answers: { cloud: true } } };
     let j = reconcile(start(), { [key]: field(cloud, 3) }, {});
     j = edit(j, { ...j.state, answers: { lesson: { data: { step: 2, answers: { local: true } } } } });
     j.pending[key].base = 1;
     j = reconcile(JSON.parse(JSON.stringify(j)), j.cloud, j.pending);
-    expect(j.pending[key].base).toBe(3);
-    expect(j.state.answers.lesson).toEqual({ data: { step: 8, answers: { local: true, cloud: true } } });
+    expect(j.pending[key]).toBeUndefined();
+    expect(j.state.answers.lesson).toEqual(cloud);
+    expect(Object.values(j.superseded ?? {})[0].local.value).toEqual({ data: { step: 2, answers: { local: true } } });
   });
   it('keeps a valid job board when two devices place the same card in different slots', () => {
     const key = `answers:${agencyKey}`;

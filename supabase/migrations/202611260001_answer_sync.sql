@@ -130,7 +130,8 @@ declare
   skipped integer := 0;
 begin
   if learner is null or (p_learner is not null and learner <> p_learner)
-    or (p_learner is null and (p_changes <> '{}'::jsonb or p_import is not null)) then
+    or (p_learner is null and (p_changes <> '{}'::jsonb
+      or (p_import is not null and p_import <> 'null'::jsonb))) then
     raise insufficient_privilege using message = 'Learner is not authorized';
   end if;
   if jsonb_typeof(p_changes) is distinct from 'object' or octet_length(p_changes::text) > 2000000 then

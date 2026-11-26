@@ -29,21 +29,18 @@ export function equal(a: unknown, b: unknown): boolean {
     Object.entries(a).every(([key, value]) => Object.hasOwn(b, key) && equal(value, b[key]));
 }
 
-// Merge independent edits using the last shared version. Older queues may
-// lack that version, so retain keys from both sides and prefer cloud on overlap.
-function merge(local: unknown, cloud: unknown, base: { value: unknown } | undefined): unknown {
-  if (equal(local, cloud) || (base && equal(local, base.value))) return cloud;
-  if (base && equal(cloud, base.value)) return local;
-  if (!isRecord(local) || !isRecord(cloud)) {
-    return !base && cloud === undefined ? local : cloud;
-  }
-  const previous = isRecord(base?.value) ? base.value : {};
+// Merge independent edits only when their shared base is available.
+function merge(local: unknown, cloud: unknown, base: unknown): unknown {
+  if (equal(local, cloud) || equal(local, base)) return cloud;
+  if (equal(cloud, base)) return local;
+  if (!isRecord(local) || !isRecord(cloud)) return cloud;
+  const previous = isRecord(base) ? base : {};
   const keys = new Set([...Object.keys(local), ...Object.keys(cloud)]);
   return Object.fromEntries([...keys].flatMap(key => {
     const value = merge(
       Object.hasOwn(local, key) ? local[key] : undefined,
       Object.hasOwn(cloud, key) ? cloud[key] : undefined,
-      base && { value: Object.hasOwn(previous, key) ? previous[key] : undefined },
+      Object.hasOwn(previous, key) ? previous[key] : undefined,
     );
     return value === undefined ? [] : [[key, value]];
   }));
@@ -144,12 +141,12 @@ export function reconcile(j: Journal, fields: Fields, sent: Record<string, Chang
       // the downloadable backup, including deletions and unsuccessful board merges.
       superseded[key + ':' + change.mutation] = { key, local: change, cloud };
       const previous = j.cloud[key];
-      const base = change.base === 0 || previous?.revision === change.base
-        ? { value: previous?.revision === change.base ? previous.value : undefined }
-        : undefined;
-      // Preserve existing structured merge on legacy fields. Canonical answer
-      // records are atomic, e.g. a round's answer and its submitted flag.
-      let value = key.startsWith('answers:@sync/') ? cloud.value : merge(change.value, cloud.value, base);
+      const shared = previous?.revision === change.base ? previous : undefined;
+      // Only one confirmed remote transition can be compared with a shared base.
+      // A revision gap can conceal a clear, and canonical answers stay atomic.
+      const mergeable = cloud.revision === change.base + 1 && (shared || change.base === 0) &&
+        isRecord(change.value) && isRecord(cloud.value) && !key.startsWith('answers:@sync/');
+      let value = mergeable ? merge(change.value, cloud.value, shared?.value) : cloud.value;
       if (key === `answers:${agencyKey}`) {
         try { readAgency(value); } catch { value = cloud.value; }
       }

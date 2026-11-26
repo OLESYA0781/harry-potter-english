@@ -409,7 +409,7 @@ test('Lesson 1 stable matching and transferred writing IDs restore on a second d
   await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
   await other.goto('/#/lessons/lesson-2');
   await other.locator('.ar-sidebar button').nth(10).click();
-  await other.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
+  await other.getByLabel('Choose Lesson 2 subsection').selectOption({ label: 'Write your journeys · 1–4' });
   await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
   await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);
   await page.goto('/#/lessons/lesson-2');

@@ -37,7 +37,12 @@ try {
   await db.exec(await readFile('supabase/migrations/202611030002_homework_photos_delete.sql', 'utf8'));
   await role('', 'anon');
   assert.equal((await db.query('delete from storage.objects returning *')).rows.length,0);
+  await db.exec('reset role');
+  await db.exec(await readFile('supabase/migrations/202611260001_answer_sync.sql', 'utf8'));
+  await db.exec(`insert into public.lesson_teachers values ('${b}', '${a}');`);
   await role(b);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,2);
+  await assert.rejects(insert(`${a}/homework-0/teacher.jpg`));
   assert.equal((await db.query('delete from storage.objects where name=$1 returning *',[`${a}/homework-0/page.jpg`])).rows.length,0);
   assert.equal((await db.query('delete from storage.objects returning *')).rows.length,1);
   await db.exec(`reset role; delete from public.lesson_students where user_id='${a}';`);
@@ -49,5 +54,5 @@ try {
   assert.equal((await db.query('delete from storage.objects returning *')).rows.length,1);
   await db.exec('reset role');
   assert.equal((await db.query('select * from storage.objects')).rows.length,0);
-  console.log('Photo Storage SQL policies passed: private bucket, owner/member-only read/insert/delete; anonymous/cross-user/nonmember denied; updates remain denied.');
+  console.log('Photo Storage SQL policies passed: private bucket, read for owner/assigned teacher, insert/delete for owner; anonymous/cross-user/nonmember denied; updates remain denied.');
 } finally { await db.close(); }

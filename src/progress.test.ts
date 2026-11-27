@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { initial } from './data';
 import { agencyKey } from './lessons/homeworkOne/data';
-import { bind, edit, expand, flatten, loadLegacy, newJournal, reconcile } from './progress';
+import { bind, edit, expand, flatten, loadLegacy, newJournal, reconcile, upgradeJournal } from './progress';
 import type { Fields } from './progress';
 const start = () => bind(newJournal(structuredClone(initial)), 'learner');
 const field = (value: unknown, revision: number, mutation = 'remote') => ({ value, revision, mutation });
@@ -19,6 +19,15 @@ it('backs up legacy progress once and refuses rebinding to another user', () => 
   expect(bind(j, 'learner')).toBe(j);
   expect(j.backup).toEqual(initial);
   expect(() => bind(j, 'other')).toThrow(/другой/);
+});
+it('archives a teacher’s previous journal when binding to the assigned learner', () => {
+  const previous = bind(newJournal({ ...initial, name: 'Teacher data' }), 'teacher');
+  const assigned = bind(previous, 'learner', 'teacher');
+  expect(assigned.owner).toBe('learner');
+  expect(assigned.state).toEqual(initial);
+  expect(assigned.migration).toBeNull();
+  expect(assigned.previousOwnerJournal).toEqual(previous);
+  expect(() => bind(previous, 'learner', 'another-teacher')).toThrow(/другой/);
 });
 it('queues answers and checks together without dropping consecutive edits', () => {
   let j = start();
@@ -58,34 +67,37 @@ describe('conflicts and reset tombstones', () => {
     expect(j.pending).toEqual({});
     expect(j.state.name).toBe('Cloud');
   });
-  it('acknowledges reordered JSON and merges edits to different answers in a lesson', () => {
-    const lesson = 'answers:lesson';
-    const same = 'answers:job-agency';
-    const original = { version: 1, data: { removed: true, common: 'original' } };
-    let j = reconcile(start(), { [lesson]: field(original, 1) }, {});
-    j = edit(j, { ...j.state, answers: {
-      lesson: { version: 1, data: { common: 'local', local: true } },
-      'job-agency': { version: 1, placements: {} },
-    } });
-    j = reconcile(j, {
-      [lesson]: field({ data: { removed: true, common: 'cloud', cloud: true }, version: 1 }, 2),
-      [same]: field({ placements: {}, version: 1 }, 3),
-    }, j.pending);
-    expect(j.pending[same]).toBeUndefined();
-    expect(j.pending[lesson].base).toBe(2);
-    expect(j.state.answers.lesson).toEqual({ version: 1, data: { common: 'cloud', local: true, cloud: true } });
-    j = reconcile(j, { ...j.cloud, [lesson]: field(j.pending[lesson].value, 3, j.pending[lesson].mutation) }, j.pending);
-    expect(j.pending).toEqual({});
+  it('reconciles distinct lesson answers and keeps word order atomic', () => {
+    const lesson = '@vika/lesson/lesson-3';
+    const prefix = 'answers:' + lesson + '/~sync/';
+    const fields = {
+      [prefix + 'record']: field({ version: 1, data: {} }, 1),
+      [prefix + 'answers/order']: field(['I', 'am'], 1),
+      [prefix + 'answers/table/1']: field('old', 1),
+    };
+    let j = reconcile(start(), fields, {});
+    j = edit(j, { ...j.state, answers: { [lesson]: {
+      version: 1, data: { ...initial, answers: { order: ['am', 'I'], 'table/1': 'local' } },
+    } } });
+    // The other device changed the same word sequence, but not the table cell.
+    j = reconcile(j, { ...fields, [prefix + 'answers/order']: field(['I', 'am', 'happy'], 2) }, j.pending);
+    expect(j.pending[prefix + 'answers/order']).toBeUndefined();
+    expect(j.pending[prefix + 'answers/table/1'].value).toBe('local');
+    expect(Object.values(j.superseded!)[0].change.value).toEqual(['am', 'I']);
   });
-  it('resolves old blocked queues without discarding answers unique to either device', () => {
-    const key = 'answers:lesson';
-    const cloud = { data: { step: 8, answers: { cloud: true } } };
-    let j = reconcile(start(), { [key]: field(cloud, 3) }, {});
-    j = edit(j, { ...j.state, answers: { lesson: { data: { step: 2, answers: { local: true } } } } });
-    j.pending[key].base = 1;
-    j = reconcile(JSON.parse(JSON.stringify(j)), j.cloud, j.pending);
-    expect(j.pending[key].base).toBe(3);
-    expect(j.state.answers.lesson).toEqual({ data: { step: 8, answers: { local: true, cloud: true } } });
+  it('upgrades a version-one queue at answer granularity against its old revision', () => {
+    const key = 'answers:@vika/lesson/lesson-1';
+    const record = (a: string, b: string) => ({ version: 1, data: { ...initial, answers: {
+      'present-simple:v2': { schemaVersion: 2, activePage: 'practice', seen: ['intro'], responses: { a, b } },
+    } } });
+    const j = upgradeJournal({
+      ...start(), version: 1, cloud: { [key]: field(record('first', 'second'), 7) },
+      pending: { [key]: { value: record('', 'second'), base: 7, mutation: 'offline-v1' } },
+    });
+    expect(j.pending).toEqual({ [key + '/~sync/course/response/a']: {
+      value: '', base: 7, mutation: 'offline-v1', legacyRevision: 7,
+    } });
+    expect(j.legacyPending?.[key].mutation).toBe('offline-v1');
   });
   it('keeps a valid job board when two devices place the same card in different slots', () => {
     const key = `answers:${agencyKey}`;

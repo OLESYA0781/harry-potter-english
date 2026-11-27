@@ -28,7 +28,8 @@ function Listen() {
   const round = Math.min(Number(read('listen/round') ?? 0), listenOrder.length - 1);
   const correct = listenOrder[round];
   const choices = [correct, (correct + 3) % 13, (correct + 7) % 13, (correct + 11) % 13].sort((a,b) => a-b);
-  const submitted = read('listen/choice');
+  const choiceKey = `listen/choice/${round}`;
+  const submitted = read(choiceKey) ?? read('listen/choice');
   const done = read('listen/done') === true;
   return <section className="bag-task"><h3>C. Listen and Find</h3>
     <p>Слово {round + 1} из {words.length}. Послушай озвучку браузера и выбери картинку.</p>
@@ -36,10 +37,11 @@ function Listen() {
       : <p>Попроси преподавателя прочитать слово из ключа.</p>}
     <p role="status">{audio.message}</p>
     <div className="bag-pictures">{choices.map((index, i) => <button key={index} aria-label={`Картинка ${i + 1}`}
-      aria-pressed={submitted === index} disabled={done} onClick={() => write({ 'listen/choice': index })}><Picture word={words[index]} /></button>)}</div>
+      aria-pressed={submitted === index} disabled={done} onClick={() => write({ [choiceKey]: index, 'listen/choice': null })}><Picture word={words[index]} /></button>)}</div>
     {typeof submitted === 'number' && <p role="status">{submitted === correct ? 'Верно.' : 'Послушай ещё раз.'}</p>}
     <button disabled={done || submitted !== correct} onClick={() => write(round + 1 === words.length
-      ? { 'listen/done': true } : { 'listen/round': round + 1, 'listen/choice': null })}>{round + 1 === words.length ? 'Завершить' : 'Следующее слово'}</button>
+      ? { 'listen/done': true, [choiceKey]: submitted, 'listen/choice': null }
+      : { 'listen/round': round + 1, [choiceKey]: submitted, 'listen/choice': null })}>{round + 1 === words.length ? 'Завершить' : 'Следующее слово'}</button>
     <Review id="listen" answers={<p>Текущее слово: <strong>{words[correct]}</strong></p>} />
   </section>;
 }
@@ -49,7 +51,9 @@ function Missing() {
   const round = Math.min(Number(read('missing/round') ?? 0), missingRounds.length - 1);
   const items = missingRounds[round];
   const answer = items[removed[round]];
-  const selected = read('missing/choice');
+  const choiceKey = `missing/choice/${round}`;
+  // An explicit null is displayed as no choice by the saved-state codec.
+  const selected = read(choiceKey) ?? read('missing/choice');
   const done = read('missing/done') === true;
   useEffect(() => {
     if (phase !== 'looking') return;
@@ -57,16 +61,17 @@ function Missing() {
     return () => window.clearTimeout(timer);
   }, [phase]);
   return <section className="bag-task"><h3>D. What’s Missing?</h3><p>Раунд {round + 1} из {missingRounds.length}. Запомни шесть предметов.</p>
-    {phase === 'ready' && !done && <button onClick={() => { write({ 'missing/choice': null }); setPhase('looking'); }}>Показать предметы</button>}
+    {phase === 'ready' && !done && <button onClick={() => setPhase('looking')}>Показать предметы</button>}
     {phase !== 'ready' && <div className="bag-pictures">{items.map((index, i) => <div key={index} className="bag-memory" aria-label={`Место ${i + 1}`}>
       {(phase === 'looking' || index !== answer) && <Picture word={words[index]} />}
     </div>)}</div>}
     {phase === 'guess' && !done && <><p>Какой предмет исчез?</p>
       <div className="bag-row">{items.map(index => <button key={index} aria-pressed={selected === index}
-        onClick={() => write({ 'missing/choice': index })}>{words[index]}</button>)}</div>
+        onClick={() => write({ [choiceKey]: index, 'missing/choice': null })}>{words[index]}</button>)}</div>
       {typeof selected === 'number' && <p role="status">{selected === answer ? 'Верно.' : 'Попробуй ещё раз.'}</p>}
       <button disabled={selected !== answer} onClick={() => {
-        write(round + 1 === missingRounds.length ? { 'missing/done': true } : { 'missing/round': round + 1, 'missing/choice': null });
+        write(round + 1 === missingRounds.length ? { 'missing/done': true, [choiceKey]: selected, 'missing/choice': null }
+          : { 'missing/round': round + 1, [choiceKey]: selected, 'missing/choice': null });
         setPhase('ready');
       }}>{round + 1 === missingRounds.length ? 'Завершить' : 'Следующий раунд'}</button>
     </>}

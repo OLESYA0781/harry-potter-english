@@ -3,7 +3,7 @@ import PhotoAttachments from './PhotoAttachments';
 import type { LessonProps } from '../types';
 import { gapKey, gapTasks, translationDialogues, translationSentences, writtenKey } from './data';
 
-export default function HomeworkZero({ state, setState }: LessonProps) {
+export default function HomeworkZero({ learnerId, state, setState }: LessonProps & { learnerId?: string }) {
   const writtenField = (key: string, label: string, rows = 3) => <textarea className="hw0-written" aria-label={label} lang="en" rows={rows} value={typeof state.answers[key] === 'string' ? state.answers[key] as string : ''} onChange={e => { const answer = e.target.value; setState(previous => ({ ...previous, answers: { ...previous.answers, [key]: answer } })); }} spellCheck={false} autoCorrect="off" autoCapitalize="off" />;
   const gapTask = (task: typeof gapTasks[number]) => <section className="hw0-task" id={`hw0-task-${task.number}`} aria-labelledby={`hw0-title-${task.number}`}>
     <h2 id={`hw0-title-${task.number}`}><span className="hw0-number">{task.number}</span><span>Task {task.number}. {task.title}</span></h2>
@@ -21,6 +21,6 @@ export default function HomeworkZero({ state, setState }: LessonProps) {
     <section className="hw0-task" aria-labelledby="hw0-title-3"><h2 id="hw0-title-3"><span className="hw0-number">3</span><span>Task 3. Translate the Dialogues</span></h2><p className="hw0-instruction" lang="en">Translate the dialogues into English.</p><ol className="hw0-sentences" lang="ru">{translationDialogues.map((item, i) => <li key={item.id}>{item.text}{writtenField(writtenKey('dialogues', item.id), `Task 3, dialogue ${i + 1}, translation`, 4)}</li>)}</ol></section>
     {gapTask(gapTasks[1])}
     <section className="hw0-task" aria-labelledby="hw0-title-5"><h2 id="hw0-title-5"><span className="hw0-number">5</span><span>Task 5. My Hogwarts Profile</span></h2><p className="hw0-instruction" lang="en">Write 5 sentences about yourself as a pupil at Hogwarts.</p><p>Напиши пять самостоятельных предложений о своей воображаемой жизни в Хогвартсе.</p><ul><li>Используй am / is / are.</li><li>Используй минимум 5 слов из My Vocabulary.</li><li>Добавь хотя бы одно отрицательное предложение.</li></ul>{writtenField(writtenKey('profile'), 'Task 5, My Hogwarts Profile', 8)}</section>
-    <PhotoAttachments state={state} setState={setState} />
+    <PhotoAttachments learnerId={learnerId} state={state} setState={setState} />
   </main>;
 }

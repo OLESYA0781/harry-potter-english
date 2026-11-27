@@ -61,7 +61,7 @@ function Missing() {
     return () => window.clearTimeout(timer);
   }, [phase]);
   return <section className="bag-task"><h3>D. What’s Missing?</h3><p>Раунд {round + 1} из {missingRounds.length}. Запомни шесть предметов.</p>
-    {phase === 'ready' && !done && <button onClick={() => { write({ [choiceKey]: null, 'missing/choice': null }); setPhase('looking'); }}>Показать предметы</button>}
+    {phase === 'ready' && !done && <button onClick={() => setPhase('looking')}>Показать предметы</button>}
     {phase !== 'ready' && <div className="bag-pictures">{items.map((index, i) => <div key={index} className="bag-memory" aria-label={`Место ${i + 1}`}>
       {(phase === 'looking' || index !== answer) && <Picture word={words[index]} />}
     </div>)}</div>}

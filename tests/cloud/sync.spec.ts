@@ -884,6 +884,37 @@ test('Lesson 3 listening selection syncs and each round retains its own response
   } finally { await second.close(); }
 });
 
+test('opening a memory round on another device preserves the saved choice', async ({ page, context, browser }) => {
+  const location = '/#/lessons/lesson-3';
+  const section = 'answers:@vika/lesson/lesson-3';
+  const choice = 'bag-lesson/v1/missing/choice/0';
+  await rpc({}, { id: 'memory-round', fields: {
+    [section]: { version: 1, data: { ...initial, answers: { 'bag-lesson/v1/section': 2 } } },
+  } });
+  const memory = (target: Page) => target.getByRole('heading', { name: 'D. What’s Missing?' }).locator('..');
+  const show = (target: Page) => memory(target).getByRole('button', { name: 'Показать предметы' }).click();
+  await route(context);
+  await login(page, location);
+  await show(page);
+  const firstChoice = memory(page).locator('.bag-row button').first();
+  const choiceName = await firstChoice.textContent({ timeout: 10000 });
+  expect(choiceName).toBeTruthy();
+  await firstChoice.click();
+  await sync(page);
+
+  const second = await browser.newContext();
+  await route(second);
+  try {
+    const other = await second.newPage();
+    await login(other, location);
+    await show(other);
+    await expect(memory(other).getByRole('button', { name: choiceName ?? '', exact: true }))
+      .toHaveAttribute('aria-pressed', 'true', { timeout: 10000 });
+    const saved = await serverRpc({}, null, user, user);
+    expect(saved.fields[section + '/~sync/answers/' + choice].value).toBe(0);
+  } finally { await second.close(); }
+});
+
 test('Realtime invalidates an open page before its polling timer can run', async ({ page, context }) => {
   await route(context);
   await page.clock.install();

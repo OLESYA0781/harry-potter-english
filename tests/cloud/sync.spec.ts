@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import type { Page, BrowserContext } from '@playwright/test';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
+import { expand } from '../../src/progress';
+const teacher = '00000000-0000-0000-0000-000000000002';
 const user = '00000000-0000-0000-0000-000000000001';
 const authKey = `hogwarts-auth:${process.env.TEST_SUPABASE_URL || 'https://supabase.test'}`;
 let db: PGlite;
@@ -10,12 +12,22 @@ let refreshes = 0;
 let calls = 0;
 let tail = Promise.resolve();
 const initial = { step: 0, name: '', answers: {}, scores: {}, ratings: {} };
-async function rpc(changes: object = {}, migration: object | null = null) {
+async function requestSync(changes: object = {}, migration: object | null = null, actor = user, learner: string | null = user) {
   const run = async () => {
-    const result = await db.query<{ result: any }>('select public.sync_lesson($1::jsonb, $2::jsonb) as result', [JSON.stringify(changes), migration ? JSON.stringify(migration) : null]);
+    await db.query("select set_config('request.jwt.claim.sub', $1, false)", [actor]);
+    const result = await db.query<{ result: any }>('select public.sync_lesson_answers($1::jsonb, $2::jsonb, $3::uuid) as result', [JSON.stringify(changes), migration ? JSON.stringify(migration) : null, learner]);
     return result.rows[0].result;
   };
   const result = tail.then(run); tail = result.then(() => {}, () => {}); return result;
+}
+async function rpc(changes: object = {}, migration: object | null = null) {
+  const result = await requestSync(changes, migration);
+  // Inspect both the versioned fields and the reconstructed lesson state in regression tests.
+  const state = expand(Object.fromEntries(Object.entries(result.fields).map(([key, field]: [string, any]) => [key, field.value])));
+  for (const [key, value] of Object.entries(state.answers)) {
+    if (!result.fields['answers:' + key]) result.fields['answers:' + key] = { value };
+  }
+  return result;
 }
 async function route(context: BrowserContext) {
   await context.route('https://supabase.test/**', async route => {
@@ -26,16 +38,19 @@ async function route(context: BrowserContext) {
       const body = request.postDataJSON();
       if (path.searchParams.get('grant_type') === 'refresh_token') refreshes++;
       else if (body.password !== 'test-only-password') return route.fulfill({ status: 400, headers, json: { error: 'invalid_grant', error_description: 'Invalid login credentials' } });
+      const actor = body.email === 'teacher@example.test' || body.refresh_token === 'teacher-refresh' ? teacher : user;
       const expires = Math.floor(Date.now() / 1000) + 3600;
-      const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: user, exp: expires, role: 'authenticated' })).toString('base64url'), 'test-signature'].join('.');
-      return route.fulfill({ headers, json: { access_token: token, refresh_token: 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: user, email: body.email || 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
+      const token = [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: actor, exp: expires, role: 'authenticated' })).toString('base64url'), 'test-signature'].join('.');
+      return route.fulfill({ headers, json: { access_token: token, refresh_token: actor === teacher ? 'teacher-refresh' : 'test-refresh', token_type: 'bearer', expires_in: 3600, expires_at: expires, user: { id: actor, email: body.email || 'learner@example.test', aud: 'authenticated', created_at: '2026-01-01' } } });
     }
     if (path.pathname.includes('/logout')) return route.fulfill({ status: 204, headers });
     if (path.pathname.includes('/user')) return route.fulfill({ headers, json: { id: user, email: 'learner@example.test' } });
-    if (path.pathname.endsWith('/rpc/sync_lesson')) {
+    if (path.pathname.endsWith('/rpc/sync_lesson_answers')) {
       calls++;
       const body = request.postDataJSON();
-      const result = await rpc(body.p_changes, body.p_import);
+      const jwt = request.headers().authorization?.split('.')[1];
+      const actor = jwt ? JSON.parse(Buffer.from(jwt, 'base64url').toString()).sub : '';
+      const result = await requestSync(body.p_changes, body.p_import, actor, body.p_learner ?? null);
       if (lostReply && Object.keys(body.p_changes).length) { lostReply = false; return route.abort('failed'); }
       return route.fulfill({ headers, json: result });
     }
@@ -63,7 +78,8 @@ test.beforeEach(async () => {
     create function auth.uid() returns uuid language sql stable as 'select nullif(current_setting(''request.jwt.claim.sub'', true), '''')::uuid';
     grant usage on schema auth, public to anon, authenticated;`);
   await db.exec(await readFile('supabase/migrations/202610260001_lesson_sync.sql', 'utf8'));
-  await db.exec(`insert into auth.users values ('${user}'); insert into public.lesson_students values ('${user}'); set role authenticated; select set_config('request.jwt.claim.sub', '${user}', false);`);
+  await db.exec(await readFile('supabase/migrations/202611260001_answer_sync.sql', 'utf8'));
+  await db.exec(`insert into auth.users values ('${user}'), ('${teacher}'); insert into public.lesson_students values ('${user}'); insert into public.lesson_teachers values ('${teacher}', '${user}'); set role authenticated; select set_config('request.jwt.claim.sub', '${user}', false);`);
 });
 test.afterEach(async () => { await tail; await db.close(); });
 
@@ -372,7 +388,8 @@ test('reordered To Be topics restore legacy reading position and sync new practi
  }finally{await second.close();}
 });
 
-test('Lesson 1 stable matching and writing IDs restore after reload and on a second device',async({page,context,browser})=>{
+test('Lesson 1 stable matching and transferred writing IDs restore on a second device',async({page,context,browser})=>{
+ test.setTimeout(75000);
  const retired={version:1,data:{step:0,name:'',scores:{},ratings:{},answers:{'present-simple:v2':{schemaVersion:2,activePage:'places/town-museum/town-museum-where',seen:['places'],responses:{'place-gap-01':'old cinema','town-museum-where':'old museum draft','transport-match-bike':'bike','transport-gap-01':'old bus','transport-write-01':'old journey'}}}}};
  await rpc({}, {id:'retired-places',fields:{'answers:@vika/lesson/lesson-1':retired}});
  await route(context);await login(page,'/#/lessons/lesson-1');
@@ -390,10 +407,12 @@ test('Lesson 1 stable matching and writing IDs restore after reload and on a sec
   const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-task textarea').first()).toHaveValue(draft);
   await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Means of Transport/}).click();await other.getByRole('button',{name:'Next →',exact:true}).click();
   await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);await other.reload();await expect(other.getByRole('button',{name:'Next transport picture',exact:true}).locator('img')).toHaveAttribute('alt',picture!);
-  await other.getByRole('navigation',{name:'Lesson 1 topics'}).getByRole('button',{name:/Write your journeys/}).click();
-  await other.locator('.ps2-subnav a').filter({hasText:'Write your journeys · 1–4'}).click();
+  await other.goto('/#/lessons/lesson-2');
+  await other.locator('.ar-sidebar button').nth(10).click();
+  await other.getByLabel('Choose Lesson 2 subsection').selectOption({ label: 'Write your journeys · 1–4' });
   await other.locator('.ps2-journey-pair textarea').nth(0).fill('How do you usually get to school?');
   await other.locator('.ps2-journey-pair textarea').nth(1).fill('  I usually go by tram.\n ');await sync(other);await sync(page);
+  await page.goto('/#/lessons/lesson-2');
   await expect(page.locator('.ps2-journey-pair textarea').nth(0)).toHaveValue('How do you usually get to school?');
   await expect(page.locator('.ps2-journey-pair textarea').nth(1)).toHaveValue('  I usually go by tram.\n ');
 
@@ -438,11 +457,17 @@ test('unreachable Supabase does not block lessons or lose locally queued answers
  })).toBeGreaterThan(0);
  if(!await page.getByRole('button',{name:'Синхронизировать',exact:true}).isVisible())await page.locator('.cloud-progress > summary').click();
  await page.getByRole('button',{name:'Синхронизировать',exact:true}).click();
- await expect(page.getByRole('status').filter({hasText:/Синхронизация недоступна/})).toBeVisible();
- await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'The Magic of Everyday Life',exact:true})).toBeVisible();
+ await expect(page.locator('.cloud-entry-copy > span')).toHaveText('Sync error');
+ await expect(page.getByText(/Синхронизация недоступна/)).toBeVisible();
+ await page.goto('/#/lessons/lesson-1');await expect(page.getByRole('heading',{name:'Warm-up — Back to Hogwarts!',exact:true})).toBeVisible();
  await page.goto('/#/lessons/trial');await expect(page.getByRole('heading',{name:'Welcome to Hogwarts!',exact:true})).toBeVisible();
  // The API failure has not been disguised as successful cloud synchronization.
  const stored=await rpc();expect(stored.fields['answers:@vika/lesson/lesson-0']?.value?.data?.answers?.['question:gg3-p5-hospital-clean']).not.toBe(draft);
+ await context.unroute('https://supabase.test/**');
+ await route(context);
+ await expect(page.locator('.cloud-entry-copy > span')).toHaveText('Saved', { timeout: 12000 });
+ await page.goto('/#/lessons/lesson-0');
+ await expect(field).toHaveValue(draft);
 });
 
 test('Homework 0 gaps sync independently across devices without changing lesson records', async ({page,context,browser})=>{
@@ -537,14 +562,15 @@ test('private homework photos upload, sync metadata and open on another device; 
  }finally{await second.close();}
 });
 
-test('standalone Question Machine restores drafts while preserving retired Workshop answers',async({page,context,browser})=>{
+test('transferred Question Machine restores drafts while preserving retired Workshop answers',async({page,context,browser})=>{
  await rpc({}, {id:'jobs-page-six-pupil',fields:{'answers:@vika/lesson/lesson-1':{version:1,data:{...initial,answers:{'present-simple:v2':{schemaVersion:2,activePage:'jobs-lab/jobs-groups/gg6-groups-artist',seen:['jobs-lab'],responses:{'affirm-translate-01':'Keep my earlier translation','gg6-groups-artist':'["Work outdoors","Work indoors"]'}}}}}}});
- await route(context);await login(page,'/#/lessons/lesson-1');
+ await rpc({}, {id:'open-transferred-question-machine',fields:{'answers:@vika/lesson/lesson-2':{version:1,data:{...initial,answers:{'articles/v1/page':9}}}}});
+ await route(context);await login(page,'/#/lessons/lesson-2');
  await expect(page.locator('.ps2-heading h1')).toHaveText('The Question Machine');
  const machine=page.locator('.ps2-question-machine').first();await machine.locator('.ps2-chunk-bank button').nth(2).click();await machine.locator('.ps2-chunk-bank button').nth(3).click();await sync(page);
  const second=await browser.newContext();await route(second);
  try{
-  const other=await second.newPage();await login(other,'/#/lessons/lesson-1');await expect(other.locator('.ps2-question-machine').first().locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
+  const other=await second.newPage();await login(other,'/#/lessons/lesson-2');await expect(other.locator('.ps2-question-machine').first().locator('.ps2-chunk-answer button')).toHaveText(['Where','does']);
   const saved=await rpc();const responses=saved.fields['answers:@vika/lesson/lesson-1'].value.data.answers['present-simple:v2'].responses;expect(responses['affirm-translate-01']).toBe('Keep my earlier translation');expect(responses['gg6-groups-artist']).toBe('["Work outdoors","Work indoors"]');
  }finally{await second.close();}
 });
@@ -719,4 +745,133 @@ test('Lesson 3 bag writing keeps the village record and restores the draft throu
   }, authKey);
   await page.reload();
   await expect(page.getByLabel('Твоё объявление')).toHaveValue('A small notebook. Please PM me!');
+});
+
+test('two devices and a mapped teacher see independent answers, offline changes and clearing without manual sync', async ({ page, context, browser }) => {
+  test.setTimeout(65000);
+  const lesson = '/#/lessons/lesson-0';
+  await route(context);
+  await login(page, lesson, 'ddarya.rr@gmail.com');
+  await page.getByRole('navigation', { name: 'Lesson 0 stages' }).getByRole('button', { name: /Negative Sentences/ }).click();
+  const field = (p: Page, index: number) => p.locator('.tb-main .tb-tasks textarea').nth(index);
+  const status = (p: Page) => p.locator('.cloud-entry-copy > span');
+  await field(page, 0).fill('Answer sent from A');
+  await expect(status(page)).toHaveText('Saved', { timeout: 12000 });
+
+  const second = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const teacherContext = await browser.newContext();
+  await route(second);
+  await route(teacherContext);
+  try {
+    const other = await second.newPage();
+    await login(other, lesson, 'ddarya.rr@gmail.com');
+    await expect(field(other, 0)).toHaveValue('Answer sent from A');
+    await field(other, 1).fill('Answer sent from B');
+    await expect(field(page, 1)).toHaveValue('Answer sent from B', { timeout: 12000 });
+
+    await Promise.all([field(page, 0).fill('Concurrent A'), field(other, 1).fill('Concurrent B')]);
+    await expect(field(page, 1)).toHaveValue('Concurrent B', { timeout: 12000 });
+    await expect(field(other, 0)).toHaveValue('Concurrent A', { timeout: 12000 });
+
+    await context.setOffline(true);
+    await field(page, 2).fill('First offline answer');
+    await field(page, 3).fill('Second offline answer');
+    await expect(status(page)).toHaveText('Offline');
+    await field(other, 0).fill('Fresh server answer');
+    await expect(status(other)).toHaveText('Saved', { timeout: 12000 });
+    await context.setOffline(false);
+    await expect(field(page, 0)).toHaveValue('Fresh server answer', { timeout: 12000 });
+    await expect(field(other, 2)).toHaveValue('First offline answer', { timeout: 12000 });
+    await expect(field(other, 3)).toHaveValue('Second offline answer');
+
+    const teacherPage = await teacherContext.newPage();
+    await teacherPage.addInitScript(({ initial }) => {
+      if (!localStorage.getItem('hogwarts-english-v1')) {
+        localStorage.setItem('hogwarts-english-v1', JSON.stringify({ version: 3, data: { ...initial, name: 'Old practice' } }));
+      }
+    }, { initial });
+    await login(teacherPage, lesson, 'teacher@example.test');
+    await teacherPage.getByRole('button', { name: 'Teacher mode', exact: true }).click();
+    await expect(field(teacherPage, 0)).toHaveValue('Fresh server answer');
+    await expect(field(teacherPage, 3)).toHaveValue('Second offline answer');
+    const identity = await teacherPage.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+    expect([identity.owner, identity.learner]).toEqual([teacher, user]);
+    expect(identity.backup.name).toBe('Old practice');
+
+    await field(page, 0).fill('');
+    await expect(status(page)).toHaveText('Saved', { timeout: 12000 });
+    await expect(field(other, 0)).toHaveValue('', { timeout: 12000 });
+    await expect(field(teacherPage, 0)).toHaveValue('', { timeout: 12000 });
+    await other.reload();
+    await expect(field(other, 0)).toHaveValue('');
+    await expect(field(other, 1)).toHaveValue('Concurrent B');
+
+    // A third learner browser brings an old unversioned snapshot after clearing.
+    const staleContext = await browser.newContext();
+    try {
+      await route(staleContext);
+      const stalePage = await staleContext.newPage();
+      const stored = await rpc();
+      const snapshot = stored.fields['answers:@vika/lesson/lesson-0'].value;
+      snapshot.data.answers['negative:gg3-p5-cafe'] = 'Old cached answer';
+      await stalePage.addInitScript(snapshot => {
+        if (!localStorage.getItem('hogwarts-english-v1')) {
+          localStorage.setItem('hogwarts-english-v1', JSON.stringify({
+            version: 3, data: { name: '', step: 0, scores: {}, ratings: {}, answers: { '@vika/lesson/lesson-0': snapshot } },
+          }));
+        }
+      }, snapshot);
+      await login(stalePage, lesson, 'ddarya.rr@gmail.com');
+      await expect(field(stalePage, 0)).toHaveValue('');
+      await expect(field(stalePage, 1)).toHaveValue('Concurrent B');
+      const cached = await stalePage.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!).backup);
+      expect(cached.answers['@vika/lesson/lesson-0'].data.answers['negative:gg3-p5-cafe']).toBe('Old cached answer');
+    } finally { await staleContext.close(); }
+  } finally {
+    await second.close();
+    await teacherContext.close();
+  }
+});
+
+test('a Realtime database change refreshes the open page with polling disabled', async ({ page, context }) => {
+  await route(context);
+  await page.addInitScript(() => {
+    const interval = window.setInterval;
+    window.setInterval = (handler, timeout, ...args) =>
+      timeout === 5000 ? 0 : interval(handler, timeout, ...args);
+  });
+  let notify: (() => void) | undefined;
+  await context.routeWebSocket('wss://supabase.test/realtime/v1/websocket**', socket => {
+    socket.onMessage(message => {
+      const decoded = JSON.parse(String(message));
+      const array = Array.isArray(decoded);
+      const [joinRef, ref, topic, event, payload] = array
+        ? decoded : [decoded.join_ref, decoded.ref, decoded.topic, decoded.event, decoded.payload];
+      const send = (event: string, payload: object, replyRef: string | null = null) => socket.send(JSON.stringify(
+        array ? [joinRef, replyRef, topic, event, payload] : { join_ref: joinRef, ref: replyRef, topic, event, payload },
+      ));
+      if (event === 'heartbeat') send('phx_reply', { status: 'ok', response: {} }, ref);
+      if (event !== 'phx_join') return;
+      send('phx_reply', {
+        status: 'ok', response: {
+          postgres_changes: payload.config.postgres_changes.map((filter: object) => ({ ...filter, id: 42 })),
+        },
+      }, ref);
+      notify = () => send('postgres_changes', {
+        ids: [42],
+        data: { schema: 'public', table: 'lesson_progress', type: 'UPDATE', commit_timestamp: new Date().toISOString(), columns: [], record: {} },
+      });
+    });
+  });
+  await rpc({}, { id: 'realtime-baseline', fields: { step: 1, name: 'Before the event' } });
+  await login(page);
+  const name = page.getByPlaceholder('Your name', { exact: true });
+  await expect(name).toHaveValue('Before the event');
+  await expect.poll(() => !!notify).toBe(true);
+  await requestSync({ name: { value: 'After the event', base: 1, mutation: 'remote-realtime' } });
+  notify!();
+  await expect(name).toHaveValue('After the event');
+  await requestSync({ name: { value: 'After returning to the tab', base: 2, mutation: 'remote-focus' } });
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(name).toHaveValue('After returning to the tab');
 });

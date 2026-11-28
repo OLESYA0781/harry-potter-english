@@ -159,3 +159,14 @@
 .l4-overview,.ct-heading { height: auto; min-height: 0; position: static; }
 .l4-overview { border: 0; background: transparent; }
 .l4-overview:before,.ct-heading:before { display: none; }
+
+.ct-speaking-roles {display:flex;gap:12px;flex-wrap:wrap;margin-block:18px}
+.ct-speaking-roles button[aria-pressed="true"] {background:#254f40;color:#fff9df}
+.ct-speaking-card {min-width:0;border:2px solid #c9b678;border-radius:24px;padding:clamp(12px,3vw,28px);background:#fffdf5}
+.ct-speaking-card > h2 {color:#254f40;font-size:clamp(26px,4vw,36px)}
+.ct-speaking-facts {display:grid;gap:12px;padding:18px;background:#f0f4e7;border-radius:18px}
+.ct-speaking-facts div {display:grid;grid-template-columns:minmax(100px,1fr) 2fr;gap:12px}
+.ct-speaking-facts dt {font-weight:700}.ct-speaking-facts dd {margin:0;overflow-wrap:anywhere}
+.ct-speaking-fields {display:grid;gap:18px}.ct-speaking-fields label {display:grid;gap:8px;font-weight:700;min-width:0}
+.ct-speaking-fields .ct-gap {width:100%;max-width:100%;box-sizing:border-box}
+@media(max-width:480px){.ct-speaking-facts div{grid-template-columns:1fr;gap:4px}.ct-speaking-card .ct-exercise{padding:12px}}

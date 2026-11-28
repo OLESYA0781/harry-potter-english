@@ -48,7 +48,14 @@ for(const width of [320,390,820,1440])test(`original Lesson 4 tasks, labels and 
  await expect(page.getByLabel('Page 96, Exercise 2, sentence 2',{exact:true})).toHaveValue('My independent sentence.');
  await expect(page.locator('.ct-main')).not.toContainText(/Correct!|Incorrect!|Try again!/);await expect(page.locator('.ct-teacher')).toHaveCount(0);
  await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(page.locator('.ct-teacher')).toContainText('2 we’re');await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();await expect(page.locator('.ct-teacher')).toHaveCount(0);
- await go(page,'speaking');await expect(page.locator('#p19-7')).toContainText('Student A: Go to page 140. Student B: Go to page 143.');await expect(page.locator('#p19-7 input,#p19-7 textarea')).toHaveCount(0);
+ await go(page,'speaking');await expect(page.locator('#p19-7')).toContainText('Student A: Go to page 140. Student B: Go to page 143.');await expect(page.getByRole('article',{name:'Student A card'})).toBeVisible();
+ await page.getByRole('button',{name:'Show the information',exact:true}).click();await expect(page.locator('.ct-speaking-facts')).toContainText('Jamie, Mira, Keanu');await expect(page.locator('.ct-speaking-card')).not.toContainText('Sam, Cathy, Pete');
+ await page.getByLabel('Student A, Exercise 7C, Names',{exact:true}).fill('Vika, Ann, Emma');
+ await page.getByRole('button',{name:'Cover my information',exact:true}).click();await expect(page.getByLabel('Student A, Exercise 7C, Names',{exact:true})).not.toBeVisible();
+ await page.getByRole('button',{name:'Student B',exact:true}).click();await expect(page.locator('.ct-speaking-facts')).toHaveCount(0);await page.getByRole('button',{name:'Show the information',exact:true}).click();await expect(page.locator('.ct-speaking-facts')).toContainText('Sam, Cathy, Pete');await expect(page.locator('.ct-speaking-card')).not.toContainText('Jamie, Mira, Keanu');
+ await page.getByLabel('Student B, Exercise 7C, Names',{exact:true}).fill('My separate B draft');await page.reload();await expect(page.getByLabel('Student B, Exercise 7C, Names',{exact:true})).toHaveValue('My separate B draft');
+ await page.getByRole('button',{name:'Student A',exact:true}).click();await expect(page.getByLabel('Student A, Exercise 7C, Names',{exact:true})).toHaveValue('Vika, Ann, Emma');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
  await go(page,'reading');await expect(page.locator('[data-answer-id="p19/5d/1"]')).toHaveValue('my word');await expect(page.getByRole('group',{name:'Page 19, Exercise 5C, statement 2',exact:true}).getByRole('button',{name:'True',exact:true})).toHaveAttribute('aria-pressed','true');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect(media).toEqual([]);
  await page.screenshot({path:`work/lesson4-source/reading-${width}.png`});

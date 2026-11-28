@@ -1,18 +1,19 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import type { LessonProps } from '../types';
 import LostBagLesson from '../lostBag/LostBagLesson';
-import { blocks, speakingInstruction } from './data';
+import { blocks } from './data';
 import type { BlockId } from './data';
 import { key, lessonFourSummary } from './model';
-import { BookContext, Exercise } from './Controls';
+import { BookContext } from './Controls';
 import Countries from './Countries';
 import Hello from './Hello';
 import Reading from './Reading';
 import Adjectives from './Adjectives';
 import Grammar from './Grammar';
+import Speaking from './Speaking';
 import './countries.css';
 const TeacherAnswers=lazy(()=>import('./TeacherAnswers'));
-const components={countries:Countries,hello:Hello,reading:Reading,adjectives:Adjectives,grammar:Grammar};
+const components={countries:Countries,hello:Hello,reading:Reading,adjectives:Adjectives,grammar:Grammar,speaking:Speaking};
 const sourceLabels:Record<string,string>={countries:'Vocabulary Bank · page 125',hello:'Student’s Book · page 8 · Grammar Bank page 92',reading:'Student’s Book · page 19',adjectives:'Vocabulary Bank · page 127',grammar:'Student’s Book · page 19 · Grammar Bank page 96',speaking:'Student’s Book · page 19 · Student A page 140 · Student B page 143'};
 export default function LessonFour(props:LessonProps){
  const {state,setState,canTeach=false}=props;
@@ -30,7 +31,7 @@ export default function LessonFour(props:LessonProps){
  </header>
  {active.id==='warmup'?<LostBagLesson {...props}/>:<BookContext.Provider value={{read,write,go,teacher}}><main className="ct-main"><header className="ct-heading"><div><p>Block {index+1} · {sourceLabels[active.id]}</p><h1>{active.title}</h1></div>{canTeach&&<button type="button" className="teacher-toggle" aria-pressed={teacher} onClick={()=>setRequested(value=>!value)}>{teacher?'Exit teacher mode':'Teacher mode'}</button>}</header>
   <p className="ct-progress">{summary.detail}</p>
-  {Activity?<Activity/>:<Exercise id="p19-7" number="7" instruction={speakingInstruction}><div className="ct-source-pending"><p>This speaking activity will be available later.</p><p>This activity is not marked complete.</p></div></Exercise>}
+  {Activity&&<Activity/>}
   {teacher&&<Suspense fallback={<p>Loading teacher notes…</p>}><TeacherAnswers block={active.id}/></Suspense>}
   <div className="ct-block-controls"><button type="button" onClick={()=>go(blocks[index-1].id)}>← Block {index}</button><button type="button" onClick={()=>document.getElementById('l4-blocks')?.scrollIntoView({block:'start'})}>Back to blocks</button>{index<blocks.length-1&&<button type="button" onClick={()=>go(blocks[index+1].id)}>Block {index+2} →</button>}</div>
  </main></BookContext.Provider>}

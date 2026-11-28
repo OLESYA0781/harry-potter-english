@@ -1083,7 +1083,21 @@ test('Lesson 4 textbook responses use server acknowledgements and separate revis
   await other.getByLabel('Stress: country',{exact:true}).selectOption('colombia');await other.getByLabel('Stress: word',{exact:true}).selectOption('nationality');
   await expect(other.getByLabel('Stress: first letter',{exact:true})).toHaveValue('2');await expect(other.getByLabel('Stress: last letter',{exact:true})).toHaveValue('4');
   await other.reload();await expect(other.locator('[data-answer-id="p125/1a/brazil"]')).toHaveValue('Brazilian');await sync(other);
+  await go(page,'Speaking — Giving');await sync(page);await sync(other);await go(other,'Speaking — Giving');await sync(other);await sync(page);
+  await page.getByRole('button',{name:'Student A',exact:true}).click();await sync(page);await sync(other);
+  await context.setOffline(true);
+  await page.getByLabel('Student A, Exercise 7C, Names',{exact:true}).fill('Vika, Ann, Emma');
+  await page.getByLabel('Student A, Exercise 7C, Ages',{exact:true}).fill('all 24');
+  await other.getByRole('button',{name:'Student B',exact:true}).click();
+  await other.getByLabel('Student B, Exercise 7C, Names',{exact:true}).fill('My independent B draft');await sync(other);
+  await context.setOffline(false);await sync(page);await sync(other);
+  await other.reload();await expect(other.getByLabel('Student B, Exercise 7C, Names',{exact:true})).toHaveValue('My independent B draft');
+  await other.getByRole('button',{name:'Student A',exact:true}).click();
+  await expect(other.getByLabel('Student A, Exercise 7C, Names',{exact:true})).toHaveValue('Vika, Ann, Emma');
+  await expect(other.getByLabel('Student A, Exercise 7C, Ages',{exact:true})).toHaveValue('all 24');await sync(other);
   const result=await serverRpc({},null,user,user);
+  expect(result.fields[base+'speaking/a/7c/names'].value).toBe('Vika, Ann, Emma');
+  expect(result.fields[base+'speaking/b/7c/names'].value).toBe('My independent B draft');
   expect(result.fields[record]).toEqual(before);
   for(const [id,value] of [['p125/1a/australia','Australian'],['p125/1a/colombia','Colombian'],['p125/1b/stress/colombia/nationality/from',2],['p125/1b/stress/colombia/nationality/to',4],['p19/5c/2','False'],['p19/5d/1','old'],['p127/1a/1','E'],['p96/1/2','we’re'],['p96/3/2','What']] as const){expect(result.fields[base+id].value).toBe(value);expect(result.fields[base+id].revision).toBeGreaterThan(0);}
   const restored=joinFields(Object.fromEntries(Object.entries(result.fields as Fields).map(([id,field])=>[id,field.value]))) as Record<string,any>;

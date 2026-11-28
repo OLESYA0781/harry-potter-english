@@ -23,9 +23,14 @@ export const activities:readonly Activity[]=[
  {id:'p19-6a',fields:gapIds('p19/6a',grammar6a)},
  {id:'p96-1',fields:Array.from({length:7},(_,i)=>'p96/1/'+(i+2))},
  {id:'p96-2',fields:Array.from({length:7},(_,i)=>'p96/2/'+(i+2))},{id:'p96-3',fields:gapIds('p96/3',bank96conversation)},
- {id:'p140-p143-7',blocked:true},
+ {id:'p140-p143-7'},
 ];
 export function activityFraction(activity:Activity,answers:Record<string,unknown>){
+ if(activity.id==='p140-p143-7'){
+  const role=answers[key('speaking/role')]==='b'?'b':'a';
+  const fields=['names','ages','nationality','now'].map(id=>`speaking/${role}/7c/${id}`);
+  return (fields.filter(id=>typeof answers[key(id)]==='string'&&String(answers[key(id)]).trim()).length+Number(answers[key(`speaking/${role}/7b/done`)]===true)+Number(answers[key(`speaking/${role}/7d/done`)]===true))/6;
+ }
  if(activity.blocked)return 0;
  if(activity.done)return answers[key(activity.done)]===true?1:0;
  const fields=activity.fields||[];

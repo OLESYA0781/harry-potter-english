@@ -19,13 +19,19 @@ describe('Lesson 4 original textbook work',()=>{
   expect(blogMonths.map(([month])=>month)).toEqual(['MAY','JUNE','JULY']);
   expect(blogMonths[2][1]).toContain('Welsh people are very **friendly**.');
  });
- it('never completes missing Student A/B material and counts written answers without grading',()=>{
+ it('counts only the selected speaking card and preserves independent drafts without grading',()=>{
   const answers:Record<string,unknown>={};
   for(const activity of activities){if(activity.done)answers[key(activity.done)]=true;for(const id of activity.fields||[])answers[key(id)]='any ungraded response';}
-  expect(activities.filter(activity=>activity.blocked).map(activity=>activity.id)).toEqual(['p140-p143-7']);
+  expect(activities.filter(activity=>activity.blocked)).toHaveLength(0);
   expect(activityFraction(activities[0],answers)).toBe(1);expect(activityFraction(activities.at(-1)!,answers)).toBe(0);
   expect(lessonFourSummary({...initial,answers}).status).toBe('in-progress');
   expect(lessonFourSummary({...initial,answers}).percent).toBeLessThan(100);
+  const speaking=activities.at(-1)!;
+  for(const field of ['names','ages','nationality','now'])answers[key('speaking/a/7c/'+field)]='my own information';
+  answers[key('speaking/a/7b/done')]=true;answers[key('speaking/a/7d/done')]=true;
+  expect(activityFraction(speaking,answers)).toBe(1);
+  answers[key('speaking/role')]='b';expect(activityFraction(speaking,answers)).toBe(0);
+  answers[key('speaking/role')]='a';expect(activityFraction(speaking,answers)).toBe(1);
  });
  it('preserves warm-up and other lessons while producing independent answer revisions',()=>{
   const warmup={'lost-bag/v1/question/alice/name':'My saved question?','lost-bag/v1/reply/alice/name':true,'lost-bag/v1/note/emma/bag-colour':'brown'};

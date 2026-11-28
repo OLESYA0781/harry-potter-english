@@ -1,4 +1,5 @@
 import { useBook } from './Controls';
+import { speakingFields } from './Speaking';
 import { activities } from './model';
 import type { BlockId } from './data';
 const keys:Record<string,readonly string[]>={
@@ -34,8 +35,13 @@ const keys:Record<string,readonly string[]>={
   'Grammar Bank 96, Exercise 2: 1 They’re singers. (given); 2 We’re shop assistants.; 3 Are they from Scotland?; 4 They’re Mr Vega and Ms Fox.; 5 Where are you?; 6 They aren’t here.; 7 We’re at university.; 8 Are they here? Accept grammatically equivalent full forms.',
   'Grammar Bank 96, Exercise 3: 1 ’s (given); 2 What; 3 I; 4 ’m; 5 Where; 6 We’re; 7 you; 8 ’re; 9 Are; 10 n’t; 11 We; 12 it’s; 13 are.',
  ],
- speaking:['The last two leaves of the supplied PDF are blank apart from a footer. Printed pages 140 and 143, Student A/B data, photographs and answers cannot be verified. No replacement cards or keys have been invented.'],
+ speaking:[
+  'Communication Bank 2A speaking, page 140 (Student A): Jamie, Mira and Keanu; all 24; friends from university; British, German and Brazilian respectively; they are in London.',
+  'Communication Bank 2A speaking, page 143 (Student B): Sam, Cathy and Pete; 46, 25 and 25 respectively; friends from work; British, Italian and Swiss respectively; they are in Italy.',
+  '7B: Cover the information. Ask the learner to describe the three friends from memory. Example: They’re Jamie, Mira and Keanu. They’re all twenty-four. They’re friends from university. Jamie is British, Mira is German and Keanu is Brazilian. They’re in London now.',
+  '7C–7D: Open responses. The learner chooses a person to be and supplies their own information. Names, ages, nationalities and current location are not fixed answer keys. Accept grammatically correct alternatives. Cover the information for the speaking stage.',
+ ],
 };
 export default function TeacherAnswers({block}:{block:BlockId}){
- const {read}=useBook();return <aside className="ct-teacher" aria-label="Teacher’s Mode"><h2>Teacher’s Mode</h2>{(keys[block]||[]).map(line=><p key={line}>{line}</p>)}<p>Review manually. Accept grammatically correct alternatives in open responses. No automatic answer checking is applied.</p><h3>Written and selected responses</h3><dl>{activities.filter(activity=>activity.fields?.length).flatMap(activity=>activity.fields!.map(id=>({id,value:read(id)}))).filter(entry=>typeof entry.value==='string'&&entry.value.trim()).map(entry=><div key={entry.id}><dt>{entry.id}</dt><dd>{String(entry.value)}</dd></div>)}</dl></aside>;
+ const {read}=useBook();return <aside className="ct-teacher" aria-label="Teacher’s Mode"><h2>Teacher’s Mode</h2>{(keys[block]||[]).map(line=><p key={line}>{line}</p>)}<p>Review manually. Accept grammatically correct alternatives in open responses. No automatic answer checking is applied.</p><h3>Written and selected responses</h3><dl>{[...activities.flatMap(activity=>(activity.fields||[]).map(id=>({id,value:read(id)}))),...(['a','b'] as const).flatMap(role=>speakingFields.map(([field])=>{const id=`speaking/${role}/7c/${field}`;return {id,value:read(id)};}))].filter(entry=>typeof entry.value==='string'&&entry.value.trim()).map(entry=><div key={entry.id}><dt>{entry.id}</dt><dd>{String(entry.value)}</dd></div>)}</dl></aside>;
 }

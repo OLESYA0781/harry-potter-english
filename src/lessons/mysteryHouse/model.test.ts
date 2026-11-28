@@ -5,7 +5,7 @@ import {readDraft,completeDraft,roomDone,mysterySummary,moveToken} from './model
 import {mysteryLesson,lessons,trialLesson,toBeLesson,presentSimpleLesson} from '../registry';
 import {readLesson,updateLesson} from '../progress';
 it('registers only the new warm-up before existing lessons and keeps all twelve requested rounds',()=>{
- expect(lessons.map(x=>x.id)).toEqual(['lesson-3','lesson-2','lesson-1','lesson-0','trial']);expect(rooms).toHaveLength(6);expect(rooms.flatMap(x=>x.rounds)).toHaveLength(12);
+ expect(lessons.map(x=>x.id)).toEqual(['lesson-4','lesson-3','lesson-2','lesson-1','lesson-0','trial']);expect(rooms).toHaveLength(6);expect(rooms.flatMap(x=>x.rounds)).toHaveLength(12);
  expect(new Set(rooms.flatMap(room=>room.rounds.map(r=>roundKey(room.id,r.id)))).size).toBe(12);
  for(const room of rooms)for(const round of room.rounds){expect(round.read).toBeTruthy();expect(round.answer).toBeTruthy();expect(round.guide).toBeTruthy();}
 });

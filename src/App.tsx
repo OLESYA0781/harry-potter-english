@@ -77,7 +77,7 @@ export default function App({ catalog = lessons }: { catalog?: readonly LessonDe
           </a></li>)}</ul>
         </details>
         <details open={menu === 'homework'} className="lesson-menu homework-menu" key={`homework-${route}-${trialTab}`}><summary aria-expanded={menu === 'homework'} onClick={event => { event.preventDefault(); setMenu(previous => previous === 'homework' ? null : 'homework'); }}><BookOpen size={20} aria-hidden="true" />Homework<ChevronDown size={22} aria-hidden="true" /></summary><ul>{homeworks.map(homework=><li key={homework.id}><a href={homework.href} aria-current={route===homework.id?'page':undefined}><strong>{homework.title}</strong><span className="lesson-translation">{homework.subtitle}</span></a></li>)}</ul></details>
-        <a className="vocabulary-nav-link" href={active?`#/vocabulary/${active.id}`:'#/vocabulary'} aria-current={vocabularyOpen ? 'page' : undefined}><BookOpen size={22} aria-hidden="true" /><span>My Vocabulary</span></a>
+        <a className="vocabulary-nav-link" href={active?`#/vocabulary/${active.id === 'lesson-4' ? 'lesson-3' : active.id}`:'#/vocabulary'} aria-current={vocabularyOpen ? 'page' : undefined}><BookOpen size={22} aria-hidden="true" /><span>My Vocabulary</span></a>
       </div>
     </nav>
     <div className="platform-cloud"><CloudProgress progress={progress} /></div>

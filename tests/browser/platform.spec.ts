@@ -23,10 +23,10 @@ test('root opens classroom; trial resumes old answers and all twelve remaining c
   await expect(page.locator('.classroom-home')).not.toContainText('Каждая попытка');
   await expect(page.locator('.classroom-home')).not.toContainText('YOUR NEXT CHAPTER');
   await expect(page.locator('.classroom-home')).not.toContainText('Твоё путешествие продолжается');
-  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(["Lesson 4 — The Mystery of the Lost Bag · Ещё не начат", "Lesson 3 — What's in Your Bag? · Ещё не начат", 'Lesson 2 — The Hogwarts Mystery: Questions & Articles · Ещё не начат', 'Lesson 1 — Present Simple · Ещё не начат', 'Lesson 0 — To Be · Ещё не начат', 'Trial Lesson']);
-  await expect(page.locator('.lesson-card h3')).toHaveText(["Lesson 4 — The Mystery of the Lost Bag", "Lesson 3 — What's in Your Bag?",'Lesson 2 — The Hogwarts Mystery: Questions & Articles','Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
+  await expect(page.getByLabel('Выбери своё приключение').locator('option')).toHaveText(["Lesson 4 — Countries, Nationalities and People · Ещё не начат", "Lesson 3 — What's in Your Bag? · Ещё не начат", 'Lesson 2 — The Hogwarts Mystery: Questions & Articles · Ещё не начат', 'Lesson 1 — Present Simple · Ещё не начат', 'Lesson 0 — To Be · Ещё не начат', 'Trial Lesson']);
+  await expect(page.locator('.lesson-card h3')).toHaveText(["Lesson 4 — Countries, Nationalities and People", "Lesson 3 — What's in Your Bag?",'Lesson 2 — The Hogwarts Mystery: Questions & Articles','Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
   await page.getByText('Lessons',{exact:true}).click();
-  await expect(page.locator('.lesson-menu:not(.homework-menu) li strong')).toHaveText(["Lesson 4 — The Mystery of the Lost Bag", "Lesson 3 — What's in Your Bag?",'Lesson 2 — The Hogwarts Mystery: Questions & Articles','Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
+  await expect(page.locator('.lesson-menu:not(.homework-menu) li strong')).toHaveText(["Lesson 4 — Countries, Nationalities and People", "Lesson 3 — What's in Your Bag?",'Lesson 2 — The Hogwarts Mystery: Questions & Articles','Lesson 1 — Present Simple','Lesson 0 — To Be','Trial Lesson']);
   await page.getByText('Lessons',{exact:true}).click();
   await page.getByLabel('Выбери своё приключение').selectOption('trial');
   await page.getByRole('button', { name: 'Продолжить урок', exact: true }).click();

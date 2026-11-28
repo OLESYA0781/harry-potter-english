@@ -1,5 +1,5 @@
-import LostBagLesson from './lostBag/LostBagLesson';
-import { lostBagSummary } from './lostBag/model';
+import LessonFour from './countries/LessonFour';
+import { lessonFourSummary } from './countries/model';
 import BagLesson from './bags/BagLesson';
 import { bagSummary } from './bags/state';
 import { diagnose, initial } from '../data';
@@ -65,9 +65,9 @@ export const villageLesson: LessonDefinition = {
   Component: BagLesson, summarize: bagSummary,
 };
 export const lostBagLesson: LessonDefinition = {
-  id: 'lesson-4', title: 'Lesson 4 — The Mystery of the Lost Bag', subtitle: 'Warm-up — The Mystery of the Lost Bag',
+  id: 'lesson-4', title: 'Lesson 4 — Countries, Nationalities and People', subtitle: 'Countries, Nationalities and People',
   addedAt: '2026-11-28T00:00:00Z', description: '', initialState: structuredClone(initial),
-  Component: LostBagLesson, summarize: lostBagSummary,
+  Component: LessonFour, summarize: lessonFourSummary,
 };
 // Explicit display order shared by the main menu and lesson picker.
 // Keep Trial Lesson last; publication dates do not determine the teaching order.

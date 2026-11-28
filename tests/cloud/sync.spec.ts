@@ -1036,3 +1036,58 @@ test('Lesson 4 keeps independent questions, replies, notes and final drafts thro
     expect((await db.query('select user_id from public.lesson_progress')).rows).toEqual([{ user_id: user }]);
   } finally { await context.setOffline(false); await second.close(); }
 });
+
+test('Lesson 4 textbook responses use server acknowledgements and separate revisions across offline devices',async({page,context,browser})=>{
+ const location='/#/lessons/lesson-4',record='answers:@vika/lesson/lesson-4',base=record+'/~sync/answers/countries/v1/';
+ const warmup={'lost-bag/v1/dialog/active':'alice','lost-bag/v1/question/alice/name':'Keep my original question?','lost-bag/v1/reply/alice/name':true,'lost-bag/v1/note/emma/bag-colour':'my original note'};
+ await rpc({}, {id:'textbook-preserve',fields:{[record]:{version:1,data:{...initial,answers:warmup}},'answers:oldHomework':'keep homework','answers:@vika/lesson/lesson-3':{version:1,data:{...initial,answers:{oldDraft:'keep Lesson 3'}}}}});
+ await route(context);await login(page,location,'ddarya.rr@gmail.com');
+ const go=async(device:Page,title:string)=>{await device.getByRole('navigation',{name:'Lesson 4 blocks',exact:true}).getByRole('button',{name:new RegExp(title)}).click();};
+ await go(page,'Countries and Nationalities');await sync(page);
+ await expect(page.getByRole('button',{name:'Teacher mode',exact:true})).toHaveCount(0);
+ const before=(await serverRpc({},null,user,user)).fields[record];
+ const status=page.locator('.cloud-entry-copy [role=status]');
+ let release!:()=>void;mutationGate=new Promise(resolve=>{release=resolve;});
+ try{
+  await page.locator('[data-answer-id="p125/1a/australia"]').fill('Australian');
+  await expect.poll(()=>mutationGate===undefined).toBe(true);await expect(status).toHaveText('Saving...');
+  await page.locator('[data-answer-id="p125/1a/brazil"]').fill('Brazilian');await expect(status).toHaveText('Saving...');
+ }finally{release();}
+ await expect(status).toHaveText('Saved',{timeout:15000});await sync(page);
+ const second=await browser.newContext();await route(second);
+ try{
+  const other=await second.newPage();await login(other,location,'ddarya.rr@gmail.com');
+  await expect(other.locator('[data-answer-id="p125/1a/australia"]')).toHaveValue('Australian');
+  await expect(other.locator('[data-answer-id="p125/1a/brazil"]')).toHaveValue('Brazilian');
+  await context.setOffline(true);
+  await page.locator('[data-answer-id="p125/1a/colombia"]').fill('Colombian');
+  await page.getByLabel('Stress: country',{exact:true}).selectOption('colombia');await page.getByLabel('Stress: word',{exact:true}).selectOption('nationality');
+  await page.getByLabel('Stress: first letter',{exact:true}).selectOption('2');await page.getByLabel('Stress: last letter',{exact:true}).selectOption('4');
+  await expect(status).toHaveText('Offline');
+  const durable=await page.evaluate(()=>JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+  expect(Object.keys(durable.pending)).toContain(base+'p125/1a/colombia');expect(Object.keys(durable.pending)).not.toContain(record);
+  await go(other,'Reading —');
+  await other.getByRole('group',{name:'Page 19, Exercise 5C, statement 2',exact:true}).getByRole('button',{name:'False',exact:true}).click();
+  await other.getByLabel('Page 19, Exercise 5D, gap 1',{exact:true}).fill('old');
+  await go(other,'Common Adjectives');await other.locator('[data-answer-id="p127/1a/1"]').selectOption('E');
+  await go(other,'Grammar —');
+  await other.getByRole('group',{name:'Page 96, Exercise 1, alternative 2',exact:true}).getByRole('button',{name:'we’re',exact:true}).click();
+  await other.getByLabel('Page 96, Exercise 2, sentence 2',{exact:true}).fill('  We’re shop assistants.\n ');
+  await other.getByLabel('Page 96, Exercise 3, gap 2',{exact:true}).fill('What');await sync(other);
+  await page.reload().catch(()=>{});await context.setOffline(false);await page.goto(location);await sync(page);await sync(other);
+  for(const device of [page,other]){
+   await expect(device.getByLabel('Page 96, Exercise 2, sentence 2',{exact:true})).toHaveValue('  We’re shop assistants.\n ');
+   await expect(device.getByLabel('Page 96, Exercise 3, gap 2',{exact:true})).toHaveValue('What');
+  }
+  await go(other,'Countries and Nationalities');await expect(other.locator('[data-answer-id="p125/1a/colombia"]')).toHaveValue('Colombian');
+  await other.getByLabel('Stress: country',{exact:true}).selectOption('colombia');await other.getByLabel('Stress: word',{exact:true}).selectOption('nationality');
+  await expect(other.getByLabel('Stress: first letter',{exact:true})).toHaveValue('2');await expect(other.getByLabel('Stress: last letter',{exact:true})).toHaveValue('4');
+  await other.reload();await expect(other.locator('[data-answer-id="p125/1a/brazil"]')).toHaveValue('Brazilian');await sync(other);
+  const result=await serverRpc({},null,user,user);
+  expect(result.fields[record]).toEqual(before);
+  for(const [id,value] of [['p125/1a/australia','Australian'],['p125/1a/colombia','Colombian'],['p125/1b/stress/colombia/nationality/from',2],['p125/1b/stress/colombia/nationality/to',4],['p19/5c/2','False'],['p19/5d/1','old'],['p127/1a/1','E'],['p96/1/2','we’re'],['p96/3/2','What']] as const){expect(result.fields[base+id].value).toBe(value);expect(result.fields[base+id].revision).toBeGreaterThan(0);}
+  const restored=joinFields(Object.fromEntries(Object.entries(result.fields as Fields).map(([id,field])=>[id,field.value]))) as Record<string,any>;
+  expect(restored[record].data.answers).toMatchObject(warmup);expect(restored['answers:oldHomework']).toBe('keep homework');expect(restored['answers:@vika/lesson/lesson-3'].data.answers.oldDraft).toBe('keep Lesson 3');
+  expect((await db.query('select user_id from public.lesson_progress')).rows).toEqual([{user_id:user}]);
+ }finally{await context.setOffline(false);await second.close();}
+});

@@ -1,0 +1,56 @@
+import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
+const titles:Record<string,string>={warmup:'Warm-up — The Mystery of the Lost Bag',countries:'Vocabulary — Countries and Nationalities',hello:'Listening and Speaking — Hello',reading:'Reading — Where are they?',adjectives:'Vocabulary — Common Adjectives',grammar:'Grammar — To be: We, You, They',speaking:'Speaking — Giving Information'};
+async function go(page:Page,id:string){
+ const mobile=page.getByLabel('Choose Lesson 4 block',{exact:true});
+ if(await mobile.isVisible())await mobile.selectOption(id);else await page.getByRole('navigation',{name:'Lesson 4 blocks',exact:true}).getByRole('button',{name:new RegExp(titles[id].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))}).click();
+}
+for(const width of [320,390,820,1440])test(`original Lesson 4 tasks, labels and restoration at ${width}`,async({page})=>{
+ await page.setViewportSize({width,height:1000});const media:string[]=[];page.on('request',request=>{if(request.resourceType()==='media')media.push(request.url());});
+ await page.goto('/#/lessons/lesson-4');await expect(page.getByRole('heading',{name:'The Mystery of the Lost Bag',exact:true})).toBeVisible();await expect(page.locator('.lb-window')).toHaveCount(6);
+ await go(page,'countries');
+ await expect(page.locator('.ct-nationalities input')).toHaveCount(14);
+ for(const field of await page.locator('.ct-nationalities input').all())await expect(field).toHaveValue('');
+ await expect(page.locator('.ct-nationalities .ct-given')).toHaveText(['Argentinian','Polish','Chinese','French','German','Swiss']);
+ await page.locator('[data-answer-id="p125/1a/australia"]').fill('  My own word  ');
+ await page.locator('[data-answer-id="p125/1a/brazil"]').fill('Brazilian');
+ await expect(page.getByLabel('Required recording VB1.01')).toHaveCount(2);await expect(page.locator('audio')).toHaveCount(0);
+ await page.getByLabel('Stress: country',{exact:true}).selectOption('australia');await page.getByLabel('Stress: word',{exact:true}).selectOption('nationality');await expect(page.locator('.ct-stress-word')).toHaveText('My own word');
+ await page.getByLabel('Stress: first letter',{exact:true}).selectOption('2');await page.getByLabel('Stress: last letter',{exact:true}).selectOption('4');
+ await page.reload();await expect(page.locator('[data-answer-id="p125/1a/australia"]')).toHaveValue('  My own word  ');
+ await page.getByLabel('Stress: country',{exact:true}).selectOption('australia');await page.getByLabel('Stress: word',{exact:true}).selectOption('nationality');await expect(page.getByLabel('Stress: first letter',{exact:true})).toHaveValue('2');await expect(page.getByLabel('Stress: last letter',{exact:true})).toHaveValue('4');
+ await go(page,'hello');await expect(page.locator('.ct-photo-pair img')).toHaveCount(2);
+ await page.getByLabel('Page 8, Exercise 1A, conversation 1',{exact:true}).selectOption('B');
+ await page.getByLabel('Page 8, Exercise 1B, Sonia, country',{exact:true}).selectOption('China');
+ await page.getByLabel('Page 8, Exercise 2A, gap 1',{exact:true}).fill('my answer');
+ await page.getByLabel('Page 8, Exercise 3A, gap 2',{exact:true}).fill('I');
+ await page.getByLabel('Page 8, Exercise 3C, first name',{exact:true}).fill('Vika');
+ await page.getByRole('button',{name:'page 92 GRAMMAR BANK',exact:true}).click();
+ await expect(page.locator('#p92-1 input')).toHaveCount(7);await expect(page.locator('#p92-2 textarea')).toHaveCount(2);
+ await page.getByLabel('Page 92, Exercise 1, gap 3',{exact:true}).fill('Are');await page.getByLabel('Page 92, Exercise 2, conversation 2',{exact:true}).fill('  My rewritten conversation.\n ');
+ await expect(page.locator('#p8-3a')).toContainText('Shanaya');await expect(page.locator('#p8-3a')).toContainText('Ben');
+ await expect(page.getByLabel('Required recording 1.01')).toHaveCount(2);await expect(page.getByLabel('Required recording 1.02')).toHaveCount(1);
+ await go(page,'reading');await expect(page.locator('.ct-blog-pictures img')).toHaveCount(3);await expect(page.locator('.ct-blog')).toContainText('180 people');await expect(page.locator('.ct-blog')).toContainText('Francisca');await expect(page.locator('.ct-blog')).toContainText('Finn');
+ await expect(page.locator('.ct-blog strong')).toHaveText(['big','small','old','cold','tired','friendly']);
+ await expect(page.locator('#p19-5c li')).toHaveCount(6);await page.getByRole('group',{name:'Page 19, Exercise 5C, statement 2',exact:true}).getByRole('button',{name:'True',exact:true}).click();
+ await page.getByLabel('Page 19, Exercise 5D, gap 1',{exact:true}).fill('my word');
+ await page.getByRole('button',{name:'page 127 VOCABULARY BANK common adjectives (1)',exact:true}).click();
+ await expect(page.locator('.ct-adjective-pictures img')).toHaveCount(11);await expect(page.locator('.ct-adjective-matches li')).toHaveCount(11);
+ await page.getByRole('button',{name:'Picture A',exact:true}).click();await page.getByRole('button',{name:'Place picture for beautiful',exact:true}).click();
+ await expect(page.locator('[data-answer-id="p127/1a/1"]')).toHaveValue('A');
+ for(const img of await page.locator('.ct-adjective-pictures img').all()){await img.scrollIntoViewIfNeeded();await expect.poll(()=>img.evaluate(el=>(el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);}
+ await go(page,'grammar');await expect(page.locator('#p19-6a input')).toHaveCount(5);await expect(page.locator('#p96-1 .ct-choice')).toHaveCount(7);await expect(page.locator('#p96-2 textarea')).toHaveCount(7);await expect(page.locator('#p96-3 input')).toHaveCount(12);
+ await expect(page.locator('#p96-1')).toContainText('Ruby and Max');await expect(page.locator('#p96-3')).toContainText('Bridget');await expect(page.locator('#p96-3')).toContainText('Puerto Iguazú');
+ await page.getByRole('group',{name:'Page 96, Exercise 1, alternative 2',exact:true}).getByRole('button',{name:'we',exact:true}).click();
+ await page.getByLabel('Page 96, Exercise 2, sentence 2',{exact:true}).fill('My independent sentence.');
+ await page.getByLabel('Page 96, Exercise 3, gap 2',{exact:true}).fill('What');await page.reload();
+ await expect(page.getByRole('group',{name:'Page 96, Exercise 1, alternative 2',exact:true}).getByRole('button',{name:'we',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByLabel('Page 96, Exercise 2, sentence 2',{exact:true})).toHaveValue('My independent sentence.');
+ await expect(page.locator('.ct-main')).not.toContainText(/Correct!|Incorrect!|Try again!/);await expect(page.locator('.ct-teacher')).toHaveCount(0);
+ await page.getByRole('button',{name:'Teacher mode',exact:true}).click();await expect(page.locator('.ct-teacher')).toContainText('2 we’re');await page.getByRole('button',{name:'Exit teacher mode',exact:true}).click();await expect(page.locator('.ct-teacher')).toHaveCount(0);
+ await go(page,'speaking');await expect(page.locator('#p19-7')).toContainText('Student A: Go to page 140. Student B: Go to page 143.');await expect(page.locator('#p19-7 input,#p19-7 textarea')).toHaveCount(0);
+ await go(page,'reading');await expect(page.locator('[data-answer-id="p19/5d/1"]')).toHaveValue('my word');await expect(page.getByRole('group',{name:'Page 19, Exercise 5C, statement 2',exact:true}).getByRole('button',{name:'True',exact:true})).toHaveAttribute('aria-pressed','true');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect(media).toEqual([]);
+ await page.screenshot({path:`work/lesson4-source/reading-${width}.png`});
+ await go(page,'warmup');await expect(page.locator('.lb-window')).toHaveCount(6);
+});

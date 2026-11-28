@@ -969,3 +969,70 @@ test('a lost save response is retried automatically without losing a newer edit 
   const saved = await serverRpc({}, null, user, user);
   expect(saved.fields.name).toMatchObject({ value: 'Newer edit in flight', revision: 3 });
 });
+
+test('Lesson 4 keeps independent questions, replies, notes and final drafts through offline reload and two devices', async ({ page, context, browser }) => {
+  const location = '/#/lessons/lesson-4';
+  const base = 'answers:@vika/lesson/lesson-4/~sync/answers/lost-bag/v1/';
+  await rpc({}, { id: 'before-lost-bag', fields: {
+    'answers:@vika/lesson/lesson-3': { version: 1, data: { ...initial, answers: { previousLessonDraft: 'Keep previous work' } } },
+    'answers:previousHomework': 'Keep previous homework',
+  } });
+  await route(context); await login(page, location);
+  await page.getByRole('button', { name: 'Flat 1 — Alice', exact: true }).click();
+  const aBag = page.getByRole('textbox', { name: 'Alice, bag: your question', exact: true });
+  await aBag.fill('Do you have a bag?');
+  await page.locator('#lb-dialog .lb-question').nth(4).getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Alice, Bag colour', exact: true }).fill('black');
+  await page.getByRole('textbox', { name: 'Who is the owner of the bag?', exact: true }).fill('My first idea.');
+  await sync(page);
+  const second = await browser.newContext(); await route(second);
+  try {
+    const other = await second.newPage(); await login(other, location);
+    await expect(other.getByRole('textbox', { name: 'Alice, bag: your question', exact: true })).toHaveValue('Do you have a bag?');
+    await expect(other.locator('#lb-dialog .lb-question').nth(4).locator('.lb-reply')).toContainText('Yes, I have a bag.');
+    await expect(other.getByRole('textbox', { name: 'Alice, Bag colour', exact: true })).toHaveValue('black');
+    await expect(other.getByRole('textbox', { name: 'Alice, Umbrella colour', exact: true })).toHaveValue('');
+
+    await context.setOffline(true);
+    await page.getByRole('textbox', { name: 'Alice, age: your question', exact: true }).fill('How old are you?');
+    await page.locator('#lb-dialog .lb-question').nth(1).getByRole('button', { name: 'Ask', exact: true }).click();
+    await page.getByRole('textbox', { name: 'Alice, Umbrella colour', exact: true }).fill('red');
+    await page.getByRole('textbox', { name: 'Write 4–6 sentences about the owner of the bag.', exact: true }).fill('  My offline description.\nKeep every line.  ');
+    const durable = await page.evaluate(() => JSON.parse(localStorage.getItem('hogwarts-cloud-v1')!));
+    expect(Object.keys(durable.pending)).toContain(base + 'question/alice/age');
+    expect(Object.keys(durable.pending)).not.toContain('answers:@vika/lesson/lesson-4');
+    expect(Object.keys(durable.pending).every(key => key.startsWith(base))).toBe(true);
+
+    await other.getByRole('textbox', { name: 'Alice, keys: your question', exact: true }).fill('How many keys do you have?');
+    await other.locator('#lb-dialog .lb-question').nth(9).getByRole('button', { name: 'Ask', exact: true }).click();
+    await other.getByRole('textbox', { name: 'Alice, Glasses', exact: true }).fill('yes');
+    await other.getByRole('textbox', { name: 'What does this person do?', exact: true }).fill('My independent answer.');
+    await sync(other);
+    await page.reload().catch(() => {}); // No service worker: the durable queue survives the failed offline navigation.
+    await context.setOffline(false); await page.goto(location); await sync(page); await sync(other);
+    for (const device of [page, other]) {
+      await expect(device.getByRole('textbox', { name: 'Alice, age: your question', exact: true })).toHaveValue('How old are you?');
+      await expect(device.getByRole('textbox', { name: 'Alice, keys: your question', exact: true })).toHaveValue('How many keys do you have?');
+      await expect(device.locator('#lb-dialog .lb-question').nth(1).locator('.lb-reply')).toContainText("I'm twenty-four years old.");
+      await expect(device.locator('#lb-dialog .lb-question').nth(9).locator('.lb-reply')).toContainText('I have two keys.');
+      await expect(device.getByRole('textbox', { name: 'Alice, Umbrella colour', exact: true })).toHaveValue('red');
+      await expect(device.getByRole('textbox', { name: 'Alice, Glasses', exact: true })).toHaveValue('yes');
+      await expect(device.getByRole('textbox', { name: 'What does this person do?', exact: true })).toHaveValue('My independent answer.');
+      await expect(device.getByRole('textbox', { name: 'Write 4–6 sentences about the owner of the bag.', exact: true })).toHaveValue('  My offline description.\nKeep every line.  ');
+    }
+    await other.reload();
+    await expect(other.getByRole('heading', { name: 'Alice', exact: true })).toBeVisible();
+    const saved = await serverRpc({}, null, user, user);
+    expect(saved.fields[base + 'question/alice/age'].value).toBe('How old are you?');
+    expect(saved.fields[base + 'question/alice/keys'].value).toBe('How many keys do you have?');
+    expect(saved.fields[base + 'reply/alice/age'].value).toBe(true);
+    expect(saved.fields[base + 'note/alice/umbrella-colour'].value).toBe('red');
+    expect(saved.fields[base + 'note/alice/glasses'].value).toBe('yes');
+    expect(saved.fields[base + 'question/alice/age'].revision).toBeGreaterThan(0);
+    expect(saved.fields['answers:@vika/lesson/lesson-4']).toBeUndefined();
+    const rebuilt = joinFields(Object.fromEntries(Object.entries(saved.fields as Fields).map(([id, field]) => [id, field.value]))) as Record<string, any>;
+    expect(rebuilt['answers:@vika/lesson/lesson-3'].data.answers.previousLessonDraft).toBe('Keep previous work');
+    expect(rebuilt['answers:previousHomework']).toBe('Keep previous homework');
+    expect((await db.query('select user_id from public.lesson_progress')).rows).toEqual([{ user_id: user }]);
+  } finally { await context.setOffline(false); await second.close(); }
+});

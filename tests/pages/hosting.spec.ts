@@ -32,6 +32,7 @@ for (const [name, width, height] of [
     });
     for (const [id, heading] of [
       ['trial', 'Welcome to Hogwarts!'], ['lesson-0', 'TO BE — Am / Is / Are'],
+      ['lesson-4', 'The Mystery of the Lost Bag'],
       ['lesson-1', 'Warm-up — Back to Hogwarts!'], ['lesson-2', 'Warm-up — The Mystery House'],
     ]) {
       await page.goto(`./#/lessons/${id}`);
